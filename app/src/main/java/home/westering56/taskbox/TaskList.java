@@ -4,12 +4,25 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 public class TaskList extends AppCompatActivity {
+
+    private static final String[] dummyData = new String[]{"Lorem", "Ipsum", "dolor", "sit", "amet", "the", "quick brown", "fox", "jumped", "over", "the", "lazy", "Dog's", "back"};
+
+    private ArrayAdapter<String> taskData;
+    private ListView taskListView;
+
+    private RecyclerView taskListRecyclerView;
+    private RecyclerView.LayoutManager taskListLayoutManager;
+    private TaskAdapter taskAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +39,22 @@ public class TaskList extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        // Regular list version of the list
+        taskData = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dummyData);
+        taskListView = findViewById(R.id.taskListView);
+        taskListView.setAdapter(taskData);
+
+
+        // RecyclerView version of the list
+//        taskListLayoutManager = new LinearLayoutManager(this);
+//        taskAdapter = new TaskAdapter(dummyData);
+//        taskListRecyclerView = findViewById(R.id.taskListRecyclerView);
+//
+//        taskListRecyclerView.setHasFixedSize(true);
+//        taskListRecyclerView.setLayoutManager(taskListLayoutManager);
+//        taskListRecyclerView.setAdapter(taskAdapter);
+
     }
 
     @Override
