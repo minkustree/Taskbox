@@ -8,7 +8,7 @@
     tools:context=".TaskList"
     tools:showIn="@layout/activity_task_list">
 
-    <!--android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/taskListRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -17,9 +17,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@android:layout/simple_list_item_1" /-->
+        tools:listitem="@android:layout/simple_list_item_1" />
 
-    <ListView
+    <!--ListView
         android:id="@+id/taskListView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -28,5 +28,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@android:layout/simple_list_item_1" />
+        tools:listitem="@android:layout/simple_list_item_1" /-->
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,7 +16,7 @@ public class AddTaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_task);
 
         actionBar = getSupportActionBar();
-        actionBar.setTitle("New Task");
+        actionBar.setTitle("New home.westering56.taskbox.room.Task");
         actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel);
     }
 

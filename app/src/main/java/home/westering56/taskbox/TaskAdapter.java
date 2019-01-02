@@ -1,39 +1,60 @@
 package home.westering56.taskbox;
 
 
+import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import home.westering56.taskbox.room.Task;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskItemViewHolder> {
 
-    private String[] dataSet;
+    private List<Task> dataSet;
+    private LayoutInflater inflater;
 
-    public TaskAdapter(String[] dataSet) {
-        this.dataSet = dataSet;
+    public TaskAdapter(Context context) {
+        inflater = LayoutInflater.from(context);
     }
+
 
     @NonNull
     @Override
     public TaskItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        TextView v = (TextView)LayoutInflater.from(parent.getContext()).inflate(
-                android.R.layout.simple_list_item_1, parent, false);
+        TextView v = (TextView)inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
         TaskItemViewHolder vh = new TaskItemViewHolder(v);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(@NonNull TaskItemViewHolder holder, int position) {
-        holder.textView.setText(dataSet[position]);
+        if (dataSet != null) {
+            Task current = dataSet.get(position);
+            holder.textView.setText(current.summary);
+        } else {
+            // data not ready yet
+            holder.textView.setText("Loading");
+        }
     }
 
 
     @Override
     public int getItemCount() {
-        return dataSet.length;
+        if (dataSet != null) {
+            return dataSet.size();
+        } else {
+            return 0;
+        }
+    }
+
+    void setTasks(List<Task> tasks) {
+        dataSet = tasks;
+        notifyDataSetChanged();
     }
 
     // Provide a reference to the views for each data item

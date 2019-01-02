@@ -2,32 +2,42 @@ package home.westering56.taskbox;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import home.westering56.taskbox.room.Task;
+import home.westering56.taskbox.viewmodel.TaskViewModel;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.List;
+
 public class TaskList extends AppCompatActivity {
 
-    private static final String[] dummyData = new String[]{"Lorem", "Ipsum", "dolor", "sit", "amet", "the", "quick brown", "fox", "jumped", "over", "the", "lazy", "Dog's", "back"};
+    public static final String[] dummyData = new String[]{"Lorem", "Ipsum", "dolor", "sit", "amet", "the", "quick brown", "fox", "jumped", "over", "the", "lazy", "Dog's", "back"};
 
-    private ArrayAdapter<String> taskData;
-    private ListView taskListView;
+//    private ArrayAdapter<String> taskData;
+//    private ListView taskListView;
 
     private RecyclerView taskListRecyclerView;
     private RecyclerView.LayoutManager taskListLayoutManager;
-    private TaskAdapter taskAdapter;
+
+    private TaskViewModel taskViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        taskViewModel = new TaskViewModel(getApplication());
+
         setContentView(R.layout.activity_task_list);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -42,20 +52,28 @@ public class TaskList extends AppCompatActivity {
         });
 
         // Regular list version of the list
-        taskData = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dummyData);
-        taskListView = findViewById(R.id.taskListView);
-        taskListView.setAdapter(taskData);
-
+//        taskData = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dummyData);
+//        taskListView = findViewById(R.id.taskListView);
+//        taskListView.setAdapter(taskData);
 
         // RecyclerView version of the list
-//        taskListLayoutManager = new LinearLayoutManager(this);
-//        taskAdapter = new TaskAdapter(dummyData);
-//        taskListRecyclerView = findViewById(R.id.taskListRecyclerView);
-//
-//        taskListRecyclerView.setHasFixedSize(true);
-//        taskListRecyclerView.setLayoutManager(taskListLayoutManager);
-//        taskListRecyclerView.setAdapter(taskAdapter);
+        taskListRecyclerView = findViewById(R.id.taskListRecyclerView);
+        final TaskAdapter taskAdapter = new TaskAdapter(this);
+        taskListRecyclerView.setAdapter(taskAdapter);
 
+        taskListLayoutManager = new LinearLayoutManager(this);
+        taskListRecyclerView.setLayoutManager(taskListLayoutManager);
+
+        taskListRecyclerView.setHasFixedSize(true);
+
+        // Wire up data bindings
+        taskViewModel = ViewModelProviders.of(this).get(TaskViewModel.class);
+        taskViewModel.getTasks().observe(this, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(List<Task> tasks) {
+                taskAdapter.setTasks(tasks);
+            }
+        });
     }
 
     @Override
