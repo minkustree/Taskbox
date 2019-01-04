@@ -2,7 +2,6 @@ package home.westering56.taskbox;
 
 
 import android.content.Context;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -13,12 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import home.westering56.taskbox.room.Task;
 
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskItemViewHolder> {
+public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskItemViewHolder> {
 
     private List<Task> dataSet;
     private LayoutInflater inflater;
 
-    public TaskAdapter(Context context) {
+    public TaskRecyclerViewAdapter(Context context) {
         inflater = LayoutInflater.from(context);
     }
 
@@ -27,8 +26,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskItemViewHo
     @Override
     public TaskItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         TextView v = (TextView)inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-        TaskItemViewHolder vh = new TaskItemViewHolder(v);
-        return vh;
+        return new TaskItemViewHolder(v);
     }
 
     @Override
@@ -38,23 +36,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskItemViewHo
             holder.textView.setText(current.summary);
         } else {
             // data not ready yet
-            holder.textView.setText("Loading");
+            holder.textView.setText(R.string.task_item_view_holder_loading);
         }
     }
 
-
     @Override
     public int getItemCount() {
-        if (dataSet != null) {
-            return dataSet.size();
-        } else {
-            return 0;
-        }
+        return dataSet == null ? 0 : dataSet.size();
     }
 
     void setTasks(List<Task> tasks) {
         dataSet = tasks;
-        notifyDataSetChanged();
+        notifyDataSetChanged(); // TODO: This is the least efficient notify - can we do better?
     }
 
     // Provide a reference to the views for each data item

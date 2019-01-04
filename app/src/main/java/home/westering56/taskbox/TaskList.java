@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import home.westering56.taskbox.room.Task;
@@ -21,16 +24,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
+import static androidx.recyclerview.widget.ItemTouchHelper.END;
+import static androidx.recyclerview.widget.ItemTouchHelper.START;
+
 public class TaskList extends AppCompatActivity {
 
-    public static final String[] dummyData = new String[]{"Lorem", "Ipsum", "dolor", "sit", "amet", "the", "quick brown", "fox", "jumped", "over", "the", "lazy", "Dog's", "back"};
-
-//    private ArrayAdapter<String> taskData;
-//    private ListView taskListView;
-
     private RecyclerView taskListRecyclerView;
-    private RecyclerView.LayoutManager taskListLayoutManager;
-
     private TaskViewModel taskViewModel;
 
     @Override
@@ -51,29 +50,41 @@ public class TaskList extends AppCompatActivity {
             }
         });
 
-        // Regular list version of the list
-//        taskData = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dummyData);
-//        taskListView = findViewById(R.id.taskListView);
-//        taskListView.setAdapter(taskData);
 
         // RecyclerView version of the list
         taskListRecyclerView = findViewById(R.id.taskListRecyclerView);
-        final TaskAdapter taskAdapter = new TaskAdapter(this);
-        taskListRecyclerView.setAdapter(taskAdapter);
+        final TaskRecyclerViewAdapter taskRecyclerViewAdapter = new TaskRecyclerViewAdapter(this);
+        taskListRecyclerView.setAdapter(taskRecyclerViewAdapter);
 
-        taskListLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager taskListLayoutManager = new LinearLayoutManager(this);
         taskListRecyclerView.setLayoutManager(taskListLayoutManager);
 
         taskListRecyclerView.setHasFixedSize(true);
+        taskListRecyclerView.addItemDecoration(
+                new DividerItemDecoration(taskListRecyclerView.getContext(),
+                        taskListLayoutManager.getOrientation()));
 
         // Wire up data bindings
         taskViewModel = ViewModelProviders.of(this).get(TaskViewModel.class);
         taskViewModel.getTasks().observe(this, new Observer<List<Task>>() {
             @Override
             public void onChanged(List<Task> tasks) {
-                taskAdapter.setTasks(tasks);
+                taskRecyclerViewAdapter.setTasks(tasks);
             }
         });
+
+        // Wire up touch helper
+        ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, START | END) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            }
+        });
+        touchHelper.attachToRecyclerView(taskListRecyclerView);
     }
 
     @Override
