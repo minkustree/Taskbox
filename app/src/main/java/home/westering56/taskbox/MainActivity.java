@@ -2,9 +2,11 @@ package home.westering56.taskbox;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import home.westering56.taskbox.data.room.Task;
+
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +30,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ListView listView = findViewById(R.id.task_list_view);
-        listView.setAdapter(TaskData.getInstance(this.getApplicationContext()).getAdapter());
+        TaskData td = TaskData.getInstance(getApplicationContext());
+        listView.setAdapter(td.getAdapter());
+        td.addSampleData(getApplicationContext()); // TODO: Notify adapter data has changed
+
     }
 
     private void showDetailView() {
