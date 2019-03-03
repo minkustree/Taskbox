@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">Taskbox</string>
-    <string name="title_activity_task_list">TaskListActivity</string>
-    <string name="action_settings">Settings</string>
 </resources>
