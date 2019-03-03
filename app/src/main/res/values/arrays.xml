@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sampleTasks">
+        <item>Choose Life</item>
+        <item>Choose a job</item>
+        <item>Choose a career</item>
+        <item>Choose a family</item>
+        <item>Choose a fucking big television</item>
+        <item>Choose washing machines, cars, compact disc players and electrical tin openers</item>
+        <item>Choose good health, low cholesterol, and dental insurance</item>
+        <item>Choose fixed interest mortgage repayments</item>
+        <item>Choose a starter home</item>
+        <item>Choose your friends</item>
+        <item>Choose leisure wear and matching luggage</item>
+        <item>Choose a three-piece suite on hire purchase in a range of fucking fabrics</item>
+        <item>Choose DIY and wondering who the fuck you are on a Sunday morning</item>#
+        <item>Choose sitting on that couch watching mind-numbing, spirit-crushing game shows, stuffing fucking junk food into your mouth</item>
+        <item>Choose rotting away at the end of it all, pissing your last in a miserable home, nothing more than an embarrassment to the selfish, fucked up brats you spawned to replace yourself.</item>
+        <item>Choose your future</item>
+        <item>Choose life</item>
+    </string-array>
+</resources>
