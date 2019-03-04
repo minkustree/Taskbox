@@ -9,9 +9,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class TaskDetailActivity extends AppCompatActivity {
 
@@ -47,6 +50,17 @@ public class TaskDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 invalidateOptionsMenu();
+            }
+        });
+        // react to keyboard 'done' and 'Enter key' as if Save had been pressed
+        taskSummary.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
+                    onSaveClicked();
+                    return true;
+                }
+                return false;
             }
         });
 
