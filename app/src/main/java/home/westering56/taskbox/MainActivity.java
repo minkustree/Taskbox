@@ -5,14 +5,15 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import home.westering56.taskbox.data.room.Task;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String EXTRA_TASK_ID = "home.westering56.taskbox.TASK_ID";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +30,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ListView listView = findViewById(R.id.task_list_view);
         TaskData td = TaskData.getInstance(getApplicationContext());
-        listView.setAdapter(td.getAdapter());
-        td.addSampleData(getApplicationContext()); // TODO: Notify adapter data has changed
+        td.addSampleData(getApplicationContext());
 
+        ListView listView = findViewById(R.id.task_list_view);
+        listView.setAdapter(td.getAdapter());
+        listView.setOnItemClickListener(taskClickedHandler);
     }
 
+    private final AdapterView.OnItemClickListener taskClickedHandler = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            showDetailView(id);
+        }
+    };
+
+    private void showDetailView(long id) {
+        Intent intent = new Intent(this, TaskDetailActivity.class);
+        intent.putExtra(EXTRA_TASK_ID, id);
+        startActivity(intent);
+    }
     private void showDetailView() {
         Intent intent = new Intent(this, TaskDetailActivity.class);
         startActivity(intent);

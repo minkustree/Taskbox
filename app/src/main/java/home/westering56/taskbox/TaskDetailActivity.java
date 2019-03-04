@@ -3,7 +3,9 @@ package home.westering56.taskbox;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import home.westering56.taskbox.data.room.Task;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,11 +17,13 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private EditText taskSummary;
     private TaskData taskData;
+    private Task task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_detail);
+
 
         // Toolbar setup
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -47,6 +51,18 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
 
         taskData = TaskData.getInstance(getApplicationContext());
+
+        // New task or existing task?
+        Intent intent = getIntent();
+        long id = intent.getLongExtra(MainActivity.EXTRA_TASK_ID, -1);
+        if (id != -1) { task = taskData.getTask(id); }
+        if (task != null) {
+            // TODO: Set these fields asynchronously when the DB lookup completes
+            // existing task being updated
+            taskSummary.setText(task.summary);
+            taskSummary.setSelection(taskSummary.length());
+            // TODO: Consider how you want to handle 'save'
+        }
     }
 
     @Override
@@ -80,7 +96,12 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (summary == null) {
             setResult(RESULT_CANCELED);
         } else {
-            taskData.add(summary);
+            if (task != null) {
+                task.summary = taskSummary.getText().toString();
+                taskData.updateTask(task);
+            } else {
+                taskData.add(summary);
+            }
             setResult(RESULT_OK);
         }
         finish();

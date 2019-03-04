@@ -3,32 +3,21 @@ package home.westering56.taskbox;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
-import android.database.Cursor;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+
 import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 
-import androidx.room.Room;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
 
 public class TaskData {
 
-
     private static TaskData instance;
-    private ArrayAdapter<CharSequence> adapter;
-    private CursorAdapter ca;
-    private TaskDatabase taskDatabase;
-
+    private final CursorAdapter ca;
+    private final TaskDatabase taskDatabase;
 
     private TaskData(@NonNull Context appContext) {
-        CharSequence[] sampleData = appContext.getResources().getTextArray(R.array.sampleTasks);
-        adapter = new ArrayAdapter<>(appContext, android.R.layout.simple_list_item_1);
-        adapter.addAll(sampleData);
-
         taskDatabase = TaskDatabase.getDatabase(appContext);
         ca = new SimpleCursorAdapter(appContext,
                 android.R.layout.simple_list_item_1,
@@ -50,7 +39,6 @@ public class TaskData {
 
     public ListAdapter getAdapter() {
         return ca;
-        //return adapter;
     }
 
     public void addSampleData(Context appContext) {
@@ -64,7 +52,15 @@ public class TaskData {
     public void add(CharSequence taskSummary) {
         taskDatabase.taskDao().insert(new Task(taskSummary));
         ca.swapCursor(taskDatabase.taskDao().loadAll());
-        //adapter.add(taskSummary);
+    }
+
+    public Task getTask(long id) {
+        return taskDatabase.taskDao().get(id);
+    }
+
+    public void updateTask(Task task) {
+        taskDatabase.taskDao().update(task);
+        ca.swapCursor(taskDatabase.taskDao().loadAll());
     }
 }
 
