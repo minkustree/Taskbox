@@ -92,6 +92,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             case R.id.menu_item_save:
                 onSaveClicked();
                 return true;
+            case R.id.menu_item_delete:
+                onDeleteClicked();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -101,6 +103,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // enable save only if there's text to be saved
         menu.findItem(R.id.menu_item_save).setEnabled(taskSummary.length() > 0);
+        menu.findItem(R.id.menu_item_delete).setVisible(task != null);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -118,6 +121,14 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
             setResult(RESULT_OK);
         }
+        finish();
+    }
+
+    private void onDeleteClicked() {
+        if (task == null) { return; } // should not happen, delete should not be visible
+        setResult(RESULT_OK);
+        taskData.deleteTask(task);
+        task = null;
         finish();
     }
 }

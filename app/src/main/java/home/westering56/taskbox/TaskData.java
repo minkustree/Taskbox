@@ -62,5 +62,10 @@ public class TaskData {
         taskDatabase.taskDao().update(task);
         ca.swapCursor(taskDatabase.taskDao().loadAll());
     }
+
+    public void deleteTask(Task task) {
+        taskDatabase.taskDao().delete(task);
+        ca.swapCursor(taskDatabase.taskDao().loadAll());
+    }
 }
 
