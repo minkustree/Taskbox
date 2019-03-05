@@ -14,7 +14,7 @@ public abstract class TaskDatabase extends RoomDatabase {
     private static TaskDatabase instance;
     public static TaskDatabase getDatabase(@NonNull Context appContext) {
         if (instance == null) {
-            instance = Room.inMemoryDatabaseBuilder(appContext, TaskDatabase.class)
+            instance = Room.databaseBuilder(appContext, TaskDatabase.class, "tasks.db")
                     .allowMainThreadQueries()
                     .build();
         }
