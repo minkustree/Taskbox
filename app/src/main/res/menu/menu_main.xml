@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="home.westering56.taskbox.MainActivity">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:id="@+id/menu_action_add_sample"
+        android:title="@string/menu_action_add_sample_data" />
+    <item
+        android:id="@+id/menu_action_delete_all"
+        android:title="@string/menu_action_delete_all" />
 </menu>
