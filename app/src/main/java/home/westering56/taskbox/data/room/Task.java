@@ -1,5 +1,7 @@
 package home.westering56.taskbox.data.room;
 
+import java.time.Instant;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -20,4 +22,7 @@ public class Task {
     public int uid;
 
     public String summary;
+
+    @ColumnInfo(name = "snooze_until")
+    public Instant snoozeUntil;
 }
