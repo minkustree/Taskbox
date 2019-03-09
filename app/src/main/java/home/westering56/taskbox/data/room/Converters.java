@@ -4,15 +4,16 @@ import java.time.Instant;
 
 import androidx.room.TypeConverter;
 
+@SuppressWarnings("WeakerAccess")
 class Converters {
 
     @TypeConverter
-    static long toTimestamp(Instant instant) {
+    public static long toTimestamp(Instant instant) {
         return (instant == null) ? 0 : instant.toEpochMilli();
     }
 
     @TypeConverter
-    static Instant fromTimestamp(long epochMilli) {
+    public static Instant fromTimestamp(long epochMilli) {
         return (epochMilli == 0) ? null : Instant.ofEpochMilli(epochMilli);
     }
 
