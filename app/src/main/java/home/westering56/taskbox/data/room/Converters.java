@@ -4,15 +4,15 @@ import java.time.Instant;
 
 import androidx.room.TypeConverter;
 
-public class Converters {
+class Converters {
 
     @TypeConverter
-    public static long toTimestamp(Instant instant) {
+    static long toTimestamp(Instant instant) {
         return (instant == null) ? 0 : instant.toEpochMilli();
     }
 
     @TypeConverter
-    public static Instant fromTimestamp(long epochMilli) {
+    static Instant fromTimestamp(long epochMilli) {
         return (epochMilli == 0) ? null : Instant.ofEpochMilli(epochMilli);
     }
 
