@@ -9,26 +9,30 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 @Dao
-public interface TaskDao {
-//    @Query("SELECT * FROM task")
-//    List<Task> getAll();
+public abstract class TaskDao {
 
-    @Query("SELECT * FROM task")
-    Cursor loadAll();
+    @Query("SELECT * from task WHERE status = :status")
+    public abstract Cursor loadByStatus(int status);
 
-//    @Query("SELECT * FROM task")
-//    LiveData<List<Task>> asyncGetAll();
+    public Cursor loadAllActive() {
+        return loadByStatus(Task.STATUS_ACTIVE);
+    }
 
-    @Insert
-    void insert(Task task);
+    public Cursor loadAllDone() {
+        return loadByStatus(Task.STATUS_DONE);
+    }
 
     @Query("SELECT * FROM task WHERE _id = :id LIMIT 1")
-    Task get(long id);
+    public abstract Task get(long id);
+
+    @Insert
+    public abstract void insert(Task task);
+
 
     @Update
-    void update(Task task);
+    public abstract void update(Task task);
 
-    @Delete
-    void delete(Task task);
+    public @Delete
+    abstract void delete(Task task);
 
 }

@@ -39,7 +39,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         taskSummary = findViewById(R.id.task_detail_summary_text);
-        // menu entries change if there's text here or not
+
         taskSummary.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -75,7 +75,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             // existing task being updated
             taskSummary.setText(task.summary);
             taskSummary.setSelection(taskSummary.length());
-            // TODO: Consider how you want to handle 'save'
         }
     }
 
@@ -94,6 +93,13 @@ public class TaskDetailActivity extends AppCompatActivity {
                 return true;
             case R.id.menu_item_delete:
                 onDeleteClicked();
+                return true;
+            case R.id.menu_item_done:
+                onDoneClicked();
+                return true;
+            case R.id.menu_item_reactivate:
+                onReactivateClicked();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -103,7 +109,15 @@ public class TaskDetailActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // enable save only if there's text to be saved
         menu.findItem(R.id.menu_item_save).setEnabled(taskSummary.length() > 0);
-        menu.findItem(R.id.menu_item_delete).setVisible(task != null);
+        if (task != null) {
+            menu.findItem(R.id.menu_item_delete).setVisible(true);
+            menu.findItem(R.id.menu_item_done).setVisible(task.status == Task.STATUS_ACTIVE);
+            menu.findItem(R.id.menu_item_reactivate).setVisible(task.status == Task.STATUS_DONE);
+        } else {
+            menu.findItem(R.id.menu_item_delete).setVisible(false);
+            menu.findItem(R.id.menu_item_done).setVisible(false);
+            menu.findItem(R.id.menu_item_reactivate).setVisible(false);
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -125,10 +139,28 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     private void onDeleteClicked() {
-        if (task == null) { return; } // should not happen, delete should not be visible
+        assert task != null; // should not happen, delete should not be visible
         setResult(RESULT_OK);
         taskData.deleteTask(task);
         task = null;
+        finish();
+    }
+
+    private void onDoneClicked() {
+        assert task != null;
+        task.status = Task.STATUS_DONE;
+        task.summary = taskSummary.getText().toString();
+        taskData.updateTask(task);
+        setResult(RESULT_OK);
+        finish();
+    }
+
+    private void onReactivateClicked() {
+        assert task != null;
+        task.status = Task.STATUS_ACTIVE;
+        task.summary = taskSummary.getText().toString();
+        taskData.updateTask(task);
+        setResult(RESULT_OK);
         finish();
     }
 }

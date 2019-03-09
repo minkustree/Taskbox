@@ -5,4 +5,8 @@
     <string name="menu_item_delete">Delete</string>
     <string name="menu_action_add_sample_data">Add sample data</string>
     <string name="menu_action_delete_all">Delete all</string>
+    <string name="tab_item_active">Active</string>
+    <string name="tab_item_done">Done</string>
+    <string name="menu_item_done">Done</string>
+    <string name="menu_item_reactivate">Reactivate</string>
 </resources>

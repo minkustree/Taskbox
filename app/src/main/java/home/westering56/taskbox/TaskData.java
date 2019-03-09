@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import android.database.Cursor;
 import android.view.View;
-import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -16,28 +15,37 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
+import androidx.core.util.Supplier;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
 
 public class TaskData {
 
     private static TaskData instance;
-    private final CursorAdapter ca;
+
+    private final TaskCursorAdapter activeTaskAdapter;
+    private final TaskCursorAdapter doneTaskAdapter;
     private final TaskDatabase taskDatabase;
 
-    private TaskData(@NonNull Context appContext) {
-        taskDatabase = TaskDatabase.getDatabase(appContext);
-        ca = new SimpleCursorAdapter(appContext,
-                android.R.layout.simple_list_item_2,
-                taskDatabase.taskDao().loadAll(),
-                new String[] {"summary", "snooze_until"},
-                new int[] { android.R.id.text1, android.R.id.text2 },
-                0);
-        ((SimpleCursorAdapter) ca).setViewBinder(new SnoozeFormattingViewBinder());
+    static class TaskCursorAdapter extends SimpleCursorAdapter {
+        private final Supplier<Cursor> cursorSupplier;
+
+        TaskCursorAdapter(Context appContext, Supplier<Cursor> cursorSupplier) {
+            super(appContext, android.R.layout.simple_list_item_2, cursorSupplier.get(),
+                    new String[] {"summary", "snooze_until"},
+                    new int[] { android.R.id.text1, android.R.id.text2 },
+                    0);
+            this.cursorSupplier = cursorSupplier;
+            setViewBinder(new SnoozeFormattingViewBinder());
+        }
+
+        void sync() {
+            swapCursor(cursorSupplier.get());
+        }
     }
 
-    private class SnoozeFormattingViewBinder implements SimpleCursorAdapter.ViewBinder {
-        private DateTimeFormatter dtf = DateTimeFormatter
+    private static class SnoozeFormattingViewBinder implements SimpleCursorAdapter.ViewBinder {
+        private final DateTimeFormatter dtf = DateTimeFormatter
                 .ofLocalizedDateTime(FormatStyle.LONG)
                 .withZone(ZoneId.systemDefault());
 
@@ -60,6 +68,21 @@ public class TaskData {
         }
     }
 
+    private TaskData(@NonNull Context appContext) {
+        taskDatabase = TaskDatabase.getDatabase(appContext);
+        activeTaskAdapter = new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+            @Override
+            public Cursor get() {
+                return taskDatabase.taskDao().loadAllActive();
+            }
+        });
+        doneTaskAdapter = new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+            @Override
+            public Cursor get() {
+                return taskDatabase.taskDao().loadAllDone();
+            }
+        });
+    }
 
     public static TaskData getInstance(@NonNull Context appContext) {
         synchronized (TaskData.class) {
@@ -70,9 +93,11 @@ public class TaskData {
         }
     }
 
-
-    public ListAdapter getAdapter() {
-        return ca;
+    public ListAdapter getActiveTaskAdapter() {
+        return activeTaskAdapter;
+    }
+    public ListAdapter getDoneTaskAdapter() {
+        return doneTaskAdapter;
     }
 
     public void addSampleData(Context appContext) {
@@ -80,12 +105,14 @@ public class TaskData {
         for (String t : sampleTasks) {
             taskDatabase.taskDao().insert(new Task(t));
         }
-        ca.swapCursor(taskDatabase.taskDao().loadAll());
+        activeTaskAdapter.sync();
+        doneTaskAdapter.sync();
     }
 
     public void add(CharSequence taskSummary) {
         taskDatabase.taskDao().insert(new Task(taskSummary));
-        ca.swapCursor(taskDatabase.taskDao().loadAll());
+        activeTaskAdapter.sync();
+        doneTaskAdapter.sync();
     }
 
     public Task getTask(long id) {
@@ -95,17 +122,20 @@ public class TaskData {
     public void updateTask(Task task) {
         task.snoozeUntil = Instant.now();
         taskDatabase.taskDao().update(task);
-        ca.swapCursor(taskDatabase.taskDao().loadAll());
+        activeTaskAdapter.sync();
+        doneTaskAdapter.sync();
     }
 
     public void deleteTask(Task task) {
         taskDatabase.taskDao().delete(task);
-        ca.swapCursor(taskDatabase.taskDao().loadAll());
+        activeTaskAdapter.sync();
+        doneTaskAdapter.sync();
     }
 
     public void deleteAllTasks() {
         taskDatabase.clearAllTables();
-        ca.swapCursor(taskDatabase.taskDao().loadAll());
+        activeTaskAdapter.sync();
+        doneTaskAdapter.sync();
     }
 }
 

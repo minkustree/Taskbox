@@ -3,9 +3,13 @@ package home.westering56.taskbox;
 import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,13 +17,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "TaskboxMain";
     public static final String EXTRA_TASK_ID = "home.westering56.taskbox.TASK_ID";
+    private static final String STATE_SELECTED_TAB = "home.westering56.taskbox.SELECTED_TAB";
 
     private TaskData td;
+    private ListView listView;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -34,9 +43,48 @@ public class MainActivity extends AppCompatActivity {
 
         td = TaskData.getInstance(getApplicationContext());
 
-        ListView listView = findViewById(R.id.task_list_view);
-        listView.setAdapter(td.getAdapter());
+        listView = findViewById(R.id.task_list_view);
         listView.setOnItemClickListener(taskClickedHandler);
+
+        tabLayout = findViewById(R.id.task_tabs_layout);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "OnTabSelected " + tab.toString());
+                updateList();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+        updateList();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // We need to save the selected tab as it's not automatically preserved like other things
+        // Fixes selected tab being lost on rotation
+        outState.putInt(STATE_SELECTED_TAB, tabLayout.getSelectedTabPosition());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        TabLayout.Tab activeTab = tabLayout.getTabAt(savedInstanceState.getInt(STATE_SELECTED_TAB));
+        if (activeTab != null) { activeTab.select(); }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
+        if (tabLayout != null) { tabLayout.clearOnTabSelectedListeners(); }
+        super.onDestroy();
     }
 
     private final AdapterView.OnItemClickListener taskClickedHandler = new AdapterView.OnItemClickListener() {
@@ -46,14 +94,28 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private void updateList() {
+        Log.d(TAG, "updateList");
+        switch (tabLayout.getSelectedTabPosition()) {
+            case 0: // Active
+                listView.setAdapter(td.getActiveTaskAdapter());
+                break;
+            case 1: // Done
+                listView.setAdapter(td.getDoneTaskAdapter());
+                break;
+            default:
+                listView.setAdapter(td.getActiveTaskAdapter());
+        }
+    }
+
     private void showDetailView(long id) {
         Intent intent = new Intent(this, TaskDetailActivity.class);
         intent.putExtra(EXTRA_TASK_ID, id);
-        startActivity(intent);
+        startActivityForResult(intent, 0);
     }
     private void showDetailView() {
         Intent intent = new Intent(this, TaskDetailActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 0);
     }
 
     @Override

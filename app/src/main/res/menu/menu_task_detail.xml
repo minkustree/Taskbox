@@ -8,6 +8,16 @@
         android:title="@string/menu_item_delete"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/menu_item_done"
+        android:icon="@drawable/ic_done_black_24dp"
+        android:title="@string/menu_item_done"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_item_reactivate"
+        android:icon="@drawable/ic_redo_black_24dp"
+        android:title="@string/menu_item_reactivate"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_item_save"
         android:title="@string/menu_item_save"
         app:showAsAction="always" />
