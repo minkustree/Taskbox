@@ -2,19 +2,19 @@ package home.westering56.taskbox;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import android.util.Log;
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TaskboxMain";
@@ -67,15 +67,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
         // We need to save the selected tab as it's not automatically preserved like other things
         // Fixes selected tab being lost on rotation
+        Log.d(TAG, "onSaveInstanceState");
         outState.putInt(STATE_SELECTED_TAB, tabLayout.getSelectedTabPosition());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        Log.d(TAG, "onRestoreInstanceState");
+        restoreSelectedTab(savedInstanceState);
+    }
+
+    private void restoreSelectedTab(Bundle savedInstanceState) {
         TabLayout.Tab activeTab = tabLayout.getTabAt(savedInstanceState.getInt(STATE_SELECTED_TAB));
         if (activeTab != null) { activeTab.select(); }
     }

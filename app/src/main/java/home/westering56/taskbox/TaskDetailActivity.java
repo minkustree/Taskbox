@@ -1,10 +1,5 @@
 package home.westering56.taskbox;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import home.westering56.taskbox.data.room.Task;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -16,7 +11,25 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import home.westering56.taskbox.data.room.Task;
+
 public class TaskDetailActivity extends AppCompatActivity {
+
+    // Indicates the action the user took within the activity
+    @SuppressWarnings({"PointlessArithmeticExpression", "WeakerAccess"})
+    public static final int RESULT_TASK_CREATED     = RESULT_FIRST_USER + 0;
+    @SuppressWarnings("WeakerAccess") // Remove weaker access suppression when used externally
+    public static final int RESULT_TASK_UPDATED     = RESULT_FIRST_USER + 1;
+    @SuppressWarnings("WeakerAccess")
+    public static final int RESULT_TASK_DELETED     = RESULT_FIRST_USER + 2;
+    @SuppressWarnings("WeakerAccess")
+    public static final int RESULT_TASK_DONE        = RESULT_FIRST_USER + 3;
+    @SuppressWarnings("WeakerAccess")
+    public static final int RESULT_TASK_REACTIVATED = RESULT_FIRST_USER + 4;
+//    public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
 
     private EditText taskSummary;
     private TaskData taskData;
@@ -130,19 +143,20 @@ public class TaskDetailActivity extends AppCompatActivity {
             if (task != null) {
                 task.summary = taskSummary.getText().toString();
                 taskData.updateTask(task);
+                setResult(RESULT_TASK_UPDATED);
             } else {
                 taskData.add(summary);
+                setResult(RESULT_TASK_CREATED);
             }
-            setResult(RESULT_OK);
         }
         finish();
     }
 
     private void onDeleteClicked() {
         assert task != null; // should not happen, delete should not be visible
-        setResult(RESULT_OK);
         taskData.deleteTask(task);
         task = null;
+        setResult(RESULT_TASK_DELETED);
         finish();
     }
 
@@ -151,7 +165,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         task.status = Task.STATUS_DONE;
         task.summary = taskSummary.getText().toString();
         taskData.updateTask(task);
-        setResult(RESULT_OK);
+        setResult(RESULT_TASK_DONE);
         finish();
     }
 
@@ -160,7 +174,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         task.status = Task.STATUS_ACTIVE;
         task.summary = taskSummary.getText().toString();
         taskData.updateTask(task);
-        setResult(RESULT_OK);
+        setResult(RESULT_TASK_REACTIVATED);
         finish();
     }
 }
