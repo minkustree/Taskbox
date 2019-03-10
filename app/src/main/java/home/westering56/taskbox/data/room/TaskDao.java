@@ -29,11 +29,10 @@ public abstract class TaskDao {
     @Insert
     public abstract void insert(Task task);
 
-
     @Update
     public abstract void update(Task task);
 
-    public @Delete
-    abstract void delete(Task task);
+    @Delete
+    public abstract void delete(Task task);
 
 }
