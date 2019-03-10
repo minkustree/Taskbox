@@ -28,16 +28,20 @@ public class Task {
 
     public String summary;
 
+    @SuppressWarnings("WeakerAccess")
     @ColumnInfo(name = "snooze_until")
     public Instant snoozeUntil;
 
+    @SuppressWarnings("WeakerAccess")
     @ColumnInfo(name = "done_at")
     public Instant doneAt;
 
 
-    public boolean isSnoozed() {
-        return (snoozeUntil != null) && Instant.now().isBefore(snoozeUntil);
-    }
+// --Commented out by Inspection START (10/03/2019 8:08 PM):
+//    public boolean isSnoozed() {
+//        return (snoozeUntil != null) && Instant.now().isBefore(snoozeUntil);
+//    }
+// --Commented out by Inspection STOP (10/03/2019 8:08 PM)
 
     public boolean isActive() {
         return (doneAt == null) && ((snoozeUntil == null) || Instant.now().isAfter(snoozeUntil));
