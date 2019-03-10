@@ -33,13 +33,9 @@ public class TaskData {
     static class TaskCursorAdapter extends SimpleCursorAdapter {
         private final Supplier<Cursor> cursorSupplier;
 
-        TaskCursorAdapter(Context appContext, Supplier<Cursor> cursorSupplier) {
-            super(appContext, android.R.layout.simple_list_item_2, cursorSupplier.get(),
-                    new String[] {"summary", "snooze_until"},
-                    new int[] { android.R.id.text1, android.R.id.text2 },
-                    0);
+        TaskCursorAdapter(Context appContext, int layout, Supplier<Cursor> cursorSupplier, String[] from, int[] to) {
+            super(appContext, layout, cursorSupplier.get(), from, to, 0);
             this.cursorSupplier = cursorSupplier;
-            setViewBinder(new SnoozeFormattingViewBinder());
         }
 
         void sync() {
@@ -55,14 +51,36 @@ public class TaskData {
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
             if (columnIndex == cursor.getColumnIndexOrThrow("snooze_until")) {
-                final long snoozeUntilEpochMilli = cursor.getLong(columnIndex);
                 final String textValue;
-                if (snoozeUntilEpochMilli == 0) {
+                if (cursor.isNull(columnIndex)) {
                     // no snooze data yet, don't expose a value, but to overwrite what might
-                    // have been there before
+                    // have been displayed before
                     textValue = "";
                 } else {
-                    textValue = "Snoozed until " + dtf.format(Instant.ofEpochMilli(snoozeUntilEpochMilli));
+                    textValue = "Snoozed until " + dtf.format(Instant.ofEpochMilli(cursor.getLong(columnIndex)));
+                }
+                ((TextView) view).setText(textValue);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private static class DoneFormattingViewBinder implements SimpleCursorAdapter.ViewBinder {
+        private final DateTimeFormatter dtf = DateTimeFormatter
+                .ofLocalizedDateTime(FormatStyle.LONG)
+                .withZone(ZoneId.systemDefault());
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+            if (columnIndex == cursor.getColumnIndexOrThrow("done_at")) {
+                final String textValue;
+                if (cursor.isNull(columnIndex)) { // unexpected?
+                    // no snooze data yet, don't expose a value, but to overwrite what might
+                    // have been displayed before
+                    textValue = "";
+                } else {
+                    textValue = "Done at " + dtf.format(Instant.ofEpochMilli(cursor.getLong(columnIndex)));
                 }
                 ((TextView) view).setText(textValue);
                 return true;
@@ -73,26 +91,37 @@ public class TaskData {
 
     private TaskData(@NonNull Context appContext) {
         taskDatabase = TaskDatabase.getDatabase(appContext);
-        activeTaskAdapter = new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+
+        // Set up adapter for active tasks
+        activeTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_1, new Supplier<Cursor>() {
+
             @Override
             public Cursor get() {
                 return taskDatabase.taskDao().loadAllActive();
             }
-        });
+        }, new String[] {"summary"}, new int[] {android.R.id.text1});
         adapters.add(activeTaskAdapter);
-        doneTaskAdapter = new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+
+        // Set up adapter for done tasks
+        doneTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
+
             @Override
             public Cursor get() {
                 return taskDatabase.taskDao().loadAllDone();
             }
-        });
+        }, new String[] {"summary", "done_at"}, new int[] {android.R.id.text1, android.R.id.text2});
+        doneTaskAdapter.setViewBinder(new DoneFormattingViewBinder());
         adapters.add(doneTaskAdapter);
-        snoozedTaskAdapter= new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+
+        // Set up adapter for snoozed tasks
+        snoozedTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
+
             @Override
             public Cursor get() {
                 return taskDatabase.taskDao().loadAllSnoozed();
             }
-        });
+        }, new String[] {"summary", "snooze_until"}, new int[] {android.R.id.text1, android.R.id.text2});
+        snoozedTaskAdapter.setViewBinder(new SnoozeFormattingViewBinder());
         adapters.add(snoozedTaskAdapter);
     }
 
@@ -105,9 +134,7 @@ public class TaskData {
         }
     }
 
-    public ListAdapter getActiveTaskAdapter() {
-        return activeTaskAdapter;
-    }
+    public ListAdapter getActiveTaskAdapter() { return activeTaskAdapter; }
     public ListAdapter getDoneTaskAdapter() {
         return doneTaskAdapter;
     }
@@ -149,9 +176,10 @@ public class TaskData {
 
     /**
      * Refresh the contents of all adapters managed by this class. Call this after making any
-     * changes to the underlying data, e.g. via the DAO.
+     * changes to the underlying data, e.g. via the DAO or to be sure that the model has the most
+     * up to date information.
      */
-    private void syncAdapters() {
+    public void syncAdapters() {
         for (TaskCursorAdapter adapter : adapters) {
             adapter.sync();
         }

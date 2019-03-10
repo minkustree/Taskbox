@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
             default:
                 listView.setAdapter(td.getActiveTaskAdapter());
         }
+        td.syncAdapters();
     }
 
     private void showDetailView(long id) {
