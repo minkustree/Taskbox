@@ -27,15 +27,19 @@
                 android:id="@+id/tab_item_active"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tab_item_active"
-                android:tag="@+id/tab_item_active"/>
+                android:text="@string/tab_item_active" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/tab_item_snoozed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_item_snoozed" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_item_done"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tab_item_done"
-                android:tag="@+id/tab_item_done"/>
+                android:text="@string/tab_item_done" />
 
         </com.google.android.material.tabs.TabLayout>
 

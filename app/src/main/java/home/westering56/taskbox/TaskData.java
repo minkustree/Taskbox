@@ -1,9 +1,6 @@
 package home.westering56.taskbox;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-
-
 import android.database.Cursor;
 import android.view.View;
 import android.widget.ListAdapter;
@@ -14,7 +11,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.Supplier;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
@@ -25,7 +25,10 @@ public class TaskData {
 
     private final TaskCursorAdapter activeTaskAdapter;
     private final TaskCursorAdapter doneTaskAdapter;
+    private final TaskCursorAdapter snoozedTaskAdapter;
     private final TaskDatabase taskDatabase;
+
+    private final List<TaskCursorAdapter> adapters = new ArrayList<>();
 
     static class TaskCursorAdapter extends SimpleCursorAdapter {
         private final Supplier<Cursor> cursorSupplier;
@@ -76,12 +79,21 @@ public class TaskData {
                 return taskDatabase.taskDao().loadAllActive();
             }
         });
+        adapters.add(activeTaskAdapter);
         doneTaskAdapter = new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
             @Override
             public Cursor get() {
                 return taskDatabase.taskDao().loadAllDone();
             }
         });
+        adapters.add(doneTaskAdapter);
+        snoozedTaskAdapter= new TaskCursorAdapter(appContext, new Supplier<Cursor>() {
+            @Override
+            public Cursor get() {
+                return taskDatabase.taskDao().loadAllSnoozed();
+            }
+        });
+        adapters.add(snoozedTaskAdapter);
     }
 
     public static TaskData getInstance(@NonNull Context appContext) {
@@ -99,20 +111,21 @@ public class TaskData {
     public ListAdapter getDoneTaskAdapter() {
         return doneTaskAdapter;
     }
+    public ListAdapter getSnoozedTaskAdapter() {
+        return snoozedTaskAdapter;
+    }
 
     public void addSampleData(Context appContext) {
         String[] sampleTasks = appContext.getResources().getStringArray(R.array.sampleTasks);
         for (String t : sampleTasks) {
             taskDatabase.taskDao().insert(new Task(t));
         }
-        activeTaskAdapter.sync();
-        doneTaskAdapter.sync();
+        syncAdapters();
     }
 
     public void add(CharSequence taskSummary) {
         taskDatabase.taskDao().insert(new Task(taskSummary));
-        activeTaskAdapter.sync();
-        doneTaskAdapter.sync();
+        syncAdapters();
     }
 
     public Task getTask(long id) {
@@ -120,22 +133,28 @@ public class TaskData {
     }
 
     public void updateTask(Task task) {
-        task.snoozeUntil = Instant.now();
         taskDatabase.taskDao().update(task);
-        activeTaskAdapter.sync();
-        doneTaskAdapter.sync();
+        syncAdapters();
     }
 
     public void deleteTask(Task task) {
         taskDatabase.taskDao().delete(task);
-        activeTaskAdapter.sync();
-        doneTaskAdapter.sync();
+        syncAdapters();
     }
 
     public void deleteAllTasks() {
         taskDatabase.clearAllTables();
-        activeTaskAdapter.sync();
-        doneTaskAdapter.sync();
+        syncAdapters();
+    }
+
+    /**
+     * Refresh the contents of all adapters managed by this class. Call this after making any
+     * changes to the underlying data, e.g. via the DAO.
+     */
+    private void syncAdapters() {
+        for (TaskCursorAdapter adapter : adapters) {
+            adapter.sync();
+        }
     }
 }
 

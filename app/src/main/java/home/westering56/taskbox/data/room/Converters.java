@@ -7,14 +7,17 @@ import androidx.room.TypeConverter;
 @SuppressWarnings("WeakerAccess")
 class Converters {
 
+    // Distinguish between no timestamp set (null) and timestamp set to epoch (0)
+    // as I find it easier to reason about DB queries for 'IS NULL' rather than '= 0'
+
     @TypeConverter
-    public static long toTimestamp(Instant instant) {
-        return (instant == null) ? 0 : instant.toEpochMilli();
+    public static Long toEpochMilli(Instant instant) {
+        return (instant == null) ? null : instant.toEpochMilli();
     }
 
     @TypeConverter
-    public static Instant fromTimestamp(long epochMilli) {
-        return (epochMilli == 0) ? null : Instant.ofEpochMilli(epochMilli);
+    public static Instant ofEpochMilli(Long epochMilli) {
+        return (epochMilli == null) ? null : Instant.ofEpochMilli(epochMilli);
     }
 
 }

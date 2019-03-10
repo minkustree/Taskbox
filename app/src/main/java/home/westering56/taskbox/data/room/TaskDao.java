@@ -2,6 +2,8 @@ package home.westering56.taskbox.data.room;
 
 import android.database.Cursor;
 
+import java.time.Instant;
+
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -12,16 +14,19 @@ import androidx.room.Update;
 public abstract class TaskDao {
 
     // TODO: There's probably a better timestamp to use for ordering things, but this does for now
-    @Query("SELECT * from task WHERE status = :status ORDER BY snooze_until DESC")
-    public abstract Cursor loadByStatus(int status);
 
-    public Cursor loadAllActive() {
-        return loadByStatus(Task.STATUS_ACTIVE);
-    }
+    public Cursor loadAllActive() { return loadAllActiveAt(Instant.now()); }
 
-    public Cursor loadAllDone() {
-        return loadByStatus(Task.STATUS_DONE);
-    }
+    @Query("SELECT * from task WHERE done_at IS NULL AND (snooze_until IS NULL OR :instant > snooze_until) ORDER BY snooze_until DESC")
+    public abstract Cursor loadAllActiveAt(Instant instant);
+
+    @Query("SELECT * from task WHERE done_at IS NOT NULL ORDER BY done_at DESC")
+    public abstract Cursor loadAllDone();
+
+    public Cursor loadAllSnoozed() { return loadAllSnoozedAt(Instant.now()); }
+
+    @Query("SELECT * from task WHERE done_at IS NULL AND snooze_until > :instant ORDER BY snooze_until DESC")
+    public abstract Cursor loadAllSnoozedAt(Instant instant);
 
     @Query("SELECT * FROM task WHERE _id = :id LIMIT 1")
     public abstract Task get(long id);

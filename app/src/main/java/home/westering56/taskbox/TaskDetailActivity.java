@@ -11,6 +11,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -29,7 +32,8 @@ public class TaskDetailActivity extends AppCompatActivity {
     public static final int RESULT_TASK_DONE        = RESULT_FIRST_USER + 3;
     @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_REACTIVATED = RESULT_FIRST_USER + 4;
-//    public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
+    @SuppressWarnings("WeakerAccess")
+    public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
 
     private EditText taskSummary;
     private TaskData taskData;
@@ -113,6 +117,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             case R.id.menu_item_reactivate:
                 onReactivateClicked();
                 return true;
+            case R.id.menu_item_snooze:
+                onSnoozeClicked();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -122,10 +128,11 @@ public class TaskDetailActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // enable save only if there's text to be saved
         menu.findItem(R.id.menu_item_save).setEnabled(taskSummary.length() > 0);
+        // snooze is always visible
         if (task != null) {
             menu.findItem(R.id.menu_item_delete).setVisible(true);
-            menu.findItem(R.id.menu_item_done).setVisible(task.status == Task.STATUS_ACTIVE);
-            menu.findItem(R.id.menu_item_reactivate).setVisible(task.status == Task.STATUS_DONE);
+            menu.findItem(R.id.menu_item_done).setVisible(task.isActive());
+            menu.findItem(R.id.menu_item_reactivate).setVisible(task.isDone());
         } else {
             menu.findItem(R.id.menu_item_delete).setVisible(false);
             menu.findItem(R.id.menu_item_done).setVisible(false);
@@ -137,11 +144,11 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private void onSaveClicked() {
         CharSequence summary = taskSummary.getText();
-        if (summary == null) {
+        if (taskSummary.length() == 0) {
             setResult(RESULT_CANCELED);
         } else {
             if (task != null) {
-                task.summary = taskSummary.getText().toString();
+                ensureTask();
                 taskData.updateTask(task);
                 setResult(RESULT_TASK_UPDATED);
             } else {
@@ -153,7 +160,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     private void onDeleteClicked() {
-        assert task != null; // should not happen, delete should not be visible
+        ensureTask();
         taskData.deleteTask(task);
         task = null;
         setResult(RESULT_TASK_DELETED);
@@ -161,20 +168,47 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     private void onDoneClicked() {
-        assert task != null;
-        task.status = Task.STATUS_DONE;
-        task.summary = taskSummary.getText().toString();
+        ensureTask(false);
+        task.actionDone();
         taskData.updateTask(task);
         setResult(RESULT_TASK_DONE);
         finish();
     }
 
     private void onReactivateClicked() {
-        assert task != null;
-        task.status = Task.STATUS_ACTIVE;
-        task.summary = taskSummary.getText().toString();
+        ensureTask();
+        task.actionReactivate();
         taskData.updateTask(task);
         setResult(RESULT_TASK_REACTIVATED);
         finish();
+    }
+
+    private void onSnoozeClicked() {
+        ensureTask(); // update task, creating with summary if it doesn't exist
+        // set state to 'snoozed'
+        // set snooze time to a minute for testing.
+        // TODO: UI for selecting a good snooze time
+        task.actionSnooze(Instant.now().plus(Duration.ofMinutes(1)));
+        taskData.updateTask(task);
+        setResult(RESULT_TASK_SNOOZED);
+        finish();
+    }
+
+    private void ensureTask() {
+        ensureTask(true);
+    }
+
+    /**
+     * Ensures the local task object exists and reflects the current summary text
+     */
+    private void ensureTask(boolean updateSummary) {
+        if (task == null) {
+            task = new Task();
+        }
+        if (updateSummary) {
+            // TODO: Bail out of saving if current text is empty - should not make the change
+            task.summary = taskSummary.getText().toString();
+        }
+        assert task != null;
     }
 }

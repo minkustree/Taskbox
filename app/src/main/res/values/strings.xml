@@ -9,4 +9,6 @@
     <string name="tab_item_done">Done</string>
     <string name="menu_item_done">Done</string>
     <string name="menu_item_reactivate">Reactivate</string>
+    <string name="tab_item_snoozed">Snoozed</string>
+    <string name="menu_item_snooze">Snooze</string>
 </resources>

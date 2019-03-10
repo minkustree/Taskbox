@@ -106,7 +106,10 @@ public class MainActivity extends AppCompatActivity {
             case 0: // Active
                 listView.setAdapter(td.getActiveTaskAdapter());
                 break;
-            case 1: // Done
+            case 1: // Snoozed
+                listView.setAdapter(td.getSnoozedTaskAdapter());
+                break;
+            case 2: // Done
                 listView.setAdapter(td.getDoneTaskAdapter());
                 break;
             default:
