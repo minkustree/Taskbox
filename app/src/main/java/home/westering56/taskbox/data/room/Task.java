@@ -15,6 +15,7 @@ public class Task {
     public Task(String summary) {
         this.summary = summary;
         this.status = STATUS_ACTIVE;
+        this.snoozeUntil = Instant.now();
     }
 
     public Task(CharSequence summary) {

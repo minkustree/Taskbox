@@ -11,7 +11,8 @@ import androidx.room.Update;
 @Dao
 public abstract class TaskDao {
 
-    @Query("SELECT * from task WHERE status = :status")
+    // TODO: There's probably a better timestamp to use for ordering things, but this does for now
+    @Query("SELECT * from task WHERE status = :status ORDER BY snooze_until DESC")
     public abstract Cursor loadByStatus(int status);
 
     public Cursor loadAllActive() {
