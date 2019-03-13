@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,12 +12,14 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
 import home.westering56.taskbox.data.room.Task;
 
 public class TaskDetailActivity extends AppCompatActivity {
@@ -35,6 +38,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
 
+    private static final String TAG = "TaskDetail";
     private EditText taskSummary;
     private TaskData taskData;
     private Task task;
@@ -184,11 +188,20 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     private void onSnoozeClicked() {
-        ensureTask(); // update task, creating with summary if it doesn't exist
-        // set state to 'snoozed'
-        // set snooze time to a minute for testing.
-        // TODO: UI for selecting a good snooze time
-        task.actionSnooze(Instant.now().plus(Duration.ofMinutes(1)));
+        // Display a fragment to select a snooze time
+        DialogFragment newFragment = SnoozeDialogFragment.newInstance(new SnoozeDialogFragment.SnoozeOptionListener() {
+            @Override
+            public void onSnoozeOptionSelected(String title, LocalDateTime snoozeUntil) {
+                Log.d(TAG, "Snooze option (" + title + ", " + snoozeUntil.toString() + ")");
+                completeSnoozeClicked(snoozeUntil);
+            }
+        });
+        newFragment.show(getSupportFragmentManager(), "snooze_dialog");
+    }
+
+    private void completeSnoozeClicked(LocalDateTime snoozeUntil) {
+        ensureTask();
+        task.actionSnooze(ZonedDateTime.of(snoozeUntil, ZoneId.systemDefault()).toInstant());
         taskData.updateTask(task);
         setResult(RESULT_TASK_SNOOZED);
         finish();
