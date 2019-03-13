@@ -132,12 +132,14 @@ public class TaskDetailActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // enable save only if there's text to be saved
         menu.findItem(R.id.menu_item_save).setEnabled(taskSummary.length() > 0);
-        // snooze is always visible
+        // TODO: Always have snooze be visible, but have it create a snoozed task if it's a new one
         if (task != null) {
+            menu.findItem(R.id.menu_item_snooze).setVisible(true);
             menu.findItem(R.id.menu_item_delete).setVisible(true);
-            menu.findItem(R.id.menu_item_done).setVisible(task.isActive());
+            menu.findItem(R.id.menu_item_done).setVisible(task.isDone());
             menu.findItem(R.id.menu_item_reactivate).setVisible(task.isDone());
         } else {
+            menu.findItem(R.id.menu_item_snooze).setVisible(false);
             menu.findItem(R.id.menu_item_delete).setVisible(false);
             menu.findItem(R.id.menu_item_done).setVisible(false);
             menu.findItem(R.id.menu_item_reactivate).setVisible(false);
