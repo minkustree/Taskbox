@@ -136,7 +136,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (task != null) {
             menu.findItem(R.id.menu_item_snooze).setVisible(true);
             menu.findItem(R.id.menu_item_delete).setVisible(true);
-            menu.findItem(R.id.menu_item_done).setVisible(task.isDone());
+            menu.findItem(R.id.menu_item_done).setVisible(!task.isDone());
             menu.findItem(R.id.menu_item_reactivate).setVisible(task.isDone());
         } else {
             menu.findItem(R.id.menu_item_snooze).setVisible(false);
