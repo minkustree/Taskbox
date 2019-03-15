@@ -44,9 +44,6 @@ public class TaskData {
     }
 
     private static class SnoozeFormattingViewBinder implements SimpleCursorAdapter.ViewBinder {
-        private final DateTimeFormatter dtf = DateTimeFormatter
-                .ofLocalizedDateTime(FormatStyle.LONG)
-                .withZone(ZoneId.systemDefault());
 
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
@@ -57,7 +54,9 @@ public class TaskData {
                     // have been displayed before
                     textValue = "";
                 } else {
-                    textValue = "Snoozed until " + dtf.format(Instant.ofEpochMilli(cursor.getLong(columnIndex)));
+                    textValue = "Snoozed until " + SnoozeTimeFormatter.format(view.getContext(),
+                            Instant.ofEpochMilli(cursor.getLong(columnIndex)).atZone(
+                                    ZoneId.systemDefault()));
                 }
                 ((TextView) view).setText(textValue);
                 return true;

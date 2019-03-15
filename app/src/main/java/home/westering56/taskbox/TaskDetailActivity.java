@@ -24,20 +24,15 @@ import home.westering56.taskbox.data.room.Task;
 public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialogFragment.SnoozeOptionListener {
 
     // Indicates the action the user took within the activity
-    @SuppressWarnings({"PointlessArithmeticExpression", "WeakerAccess"})
+    @SuppressWarnings({"PointlessArithmeticExpression"})
     public static final int RESULT_TASK_CREATED     = RESULT_FIRST_USER + 0;
-    @SuppressWarnings("WeakerAccess") // Remove weaker access suppression when used externally
     public static final int RESULT_TASK_UPDATED     = RESULT_FIRST_USER + 1;
-    @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_DELETED     = RESULT_FIRST_USER + 2;
-    @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_DONE        = RESULT_FIRST_USER + 3;
-    @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_REACTIVATED = RESULT_FIRST_USER + 4;
-    @SuppressWarnings("WeakerAccess")
     public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
+    public static final String RESULT_EXTRA_SNOOZE_UNTIL = "snoozeUntil";
 
-    private static final String TAG = "TaskDetail";
     private EditText taskSummary;
     private TaskData taskData;
     private Task task;
@@ -199,7 +194,9 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         ensureTask();
         task.actionSnooze(ZonedDateTime.of(snoozeUntil, ZoneId.systemDefault()).toInstant());
         taskData.updateTask(task);
-        setResult(RESULT_TASK_SNOOZED);
+        Intent result = new Intent();
+        result.putExtra(RESULT_EXTRA_SNOOZE_UNTIL, snoozeUntil);
+        setResult(RESULT_TASK_SNOOZED, result);
         finish();
     }
 

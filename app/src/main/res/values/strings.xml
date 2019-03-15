@@ -11,4 +11,6 @@
     <string name="menu_item_reactivate">Reactivate</string>
     <string name="tab_item_snoozed">Snoozed</string>
     <string name="menu_item_snooze">Snooze</string>
+    <string name="snooze_time_format_today">Today</string>
+    <string name="snooze_time_format_tomorrow">Tomorrow</string>
 </resources>

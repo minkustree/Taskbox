@@ -10,19 +10,28 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
+import java.time.LocalDateTime;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TaskboxMain";
     public static final String EXTRA_TASK_ID = "home.westering56.taskbox.TASK_ID";
     private static final String STATE_SELECTED_TAB = "home.westering56.taskbox.SELECTED_TAB";
 
+    private static final int REQUEST_NEW_TASK   = 1;
+    private static final int REQUEST_EDIT_TASK  = 2;
+
     private TaskData td;
     private ListView listView;
+    private CoordinatorLayout rootView;
     private TabLayout tabLayout;
 
     @Override
@@ -30,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
+        rootView = findViewById(R.id.root); // needed for Snackbar to attach to
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -121,11 +131,49 @@ public class MainActivity extends AppCompatActivity {
     private void showDetailView(long id) {
         Intent intent = new Intent(this, TaskDetailActivity.class);
         intent.putExtra(EXTRA_TASK_ID, id);
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, REQUEST_EDIT_TASK);
     }
     private void showDetailView() {
         Intent intent = new Intent(this, TaskDetailActivity.class);
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, REQUEST_NEW_TASK);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        CharSequence label = null;
+        switch (requestCode) {
+            case REQUEST_NEW_TASK: // fall through
+            case REQUEST_EDIT_TASK:
+                switch (resultCode) {
+                    case RESULT_CANCELED:
+                        label = "Cancelled"; break;
+                    case TaskDetailActivity.RESULT_TASK_CREATED: // fall through
+                    case TaskDetailActivity.RESULT_TASK_UPDATED:
+                        label = "Task saved"; break;
+                    case TaskDetailActivity.RESULT_TASK_DONE:
+                        label = "Marked as done"; break;
+                    case TaskDetailActivity.RESULT_TASK_REACTIVATED:
+                        label = "Marked as active"; break;
+                    case TaskDetailActivity.RESULT_TASK_DELETED:
+                        label = "Deleted"; break;
+                    case TaskDetailActivity.RESULT_TASK_SNOOZED:
+                        label = "Snoozed";
+                        // wow, this is some C-like errors handling just to be null-safe...
+                        if (data == null) break;
+                        Bundle extras = data.getExtras();
+                        if (extras == null) break;
+                        LocalDateTime until = (LocalDateTime)extras.get(TaskDetailActivity.RESULT_EXTRA_SNOOZE_UNTIL);
+                        if (until == null) break;
+                        label = "Snoozed until " + SnoozeTimeFormatter.format(getApplicationContext(), until);
+                        break;
+                }
+                if (label != null) {
+                    Snackbar.make(rootView, label, Snackbar.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
