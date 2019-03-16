@@ -17,12 +17,12 @@
         android:layout_marginEnd="16dp"
         android:ems="10"
         android:hint="@string/task_detail_hint_text"
-        android:importantForAutofill="no"
-        android:inputType="text"
         android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="text|textCapSentences"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
         <requestFocus />
     </EditText>
