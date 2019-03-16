@@ -28,6 +28,14 @@ public abstract class TaskDao {
     @Query("SELECT * from task WHERE done_at IS NULL AND snooze_until > :instant ORDER BY snooze_until ASC")
     public abstract Cursor loadAllSnoozedAt(Instant instant);
 
+    @Query("SELECT snooze_until from task WHERE done_at IS NULL AND snooze_until > :instant ORDER BY snooze_until ASC LIMIT 1")
+    public abstract Instant getNextTaskToWakeupAfter(Instant instant);
+
+    /** @return the {@link java.time.Instant} that the next snoozed task is due to wake, or null
+     *  if there are no snoozed tasks still to wake.
+     */
+    public Instant getNextWakeupDue() { return getNextTaskToWakeupAfter(Instant.now()); }
+
     @Query("SELECT * FROM task WHERE _id = :id LIMIT 1")
     public abstract Task get(long id);
 

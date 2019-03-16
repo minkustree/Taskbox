@@ -1,7 +1,11 @@
 package home.westering56.taskbox;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
@@ -15,13 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Supplier;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
 
 public class TaskData {
+    private static final String TAG = "TaskData";
 
     private static TaskData instance;
+
+    private final Context appContext;
 
     private final TaskCursorAdapter activeTaskAdapter;
     private final TaskCursorAdapter doneTaskAdapter;
@@ -89,6 +97,7 @@ public class TaskData {
     }
 
     private TaskData(@NonNull Context appContext) {
+        this.appContext = appContext;
         taskDatabase = TaskDatabase.getDatabase(appContext);
 
         // Set up adapter for active tasks
@@ -181,6 +190,24 @@ public class TaskData {
     public void syncAdapters() {
         for (TaskCursorAdapter adapter : adapters) {
             adapter.sync();
+        }
+        scheduleNextUpdateFor(taskDatabase.taskDao().getNextWakeupDue());
+    }
+
+    /**
+     * Schedule a wakeup to check for newly active, previously snoozed tasks.
+     * Usually scheduled for the time that the next snoozed task is due to become active.
+     * @param nextWakeInstant when to wake up and check for newly active tasks
+     */
+    private void scheduleNextUpdateFor(@Nullable Instant nextWakeInstant) {
+        if (nextWakeInstant != null) {
+            Log.d(TAG, "Scheduling next update check for " + nextWakeInstant.toString());
+            AlarmManager am = (AlarmManager) appContext.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(appContext, WokenTaskReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, 0);
+            am.set(AlarmManager.RTC_WAKEUP, nextWakeInstant.toEpochMilli(), pendingIntent);
+        } else {
+            Log.d(TAG, "No snoozed tasks, no update check scheduled");
         }
     }
 }

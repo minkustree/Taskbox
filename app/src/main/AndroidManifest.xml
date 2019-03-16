@@ -26,6 +26,8 @@
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible"/>
+        <!-- No intent filters, as not used outside of the app, => exported defaults to false-->
+        <receiver android:name=".WokenTaskReceiver" />
 
     </application>
 
