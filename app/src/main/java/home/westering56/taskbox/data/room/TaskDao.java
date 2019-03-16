@@ -25,7 +25,7 @@ public abstract class TaskDao {
 
     public Cursor loadAllSnoozed() { return loadAllSnoozedAt(Instant.now()); }
 
-    @Query("SELECT * from task WHERE done_at IS NULL AND snooze_until > :instant ORDER BY snooze_until DESC")
+    @Query("SELECT * from task WHERE done_at IS NULL AND snooze_until > :instant ORDER BY snooze_until ASC")
     public abstract Cursor loadAllSnoozedAt(Instant instant);
 
     @Query("SELECT * FROM task WHERE _id = :id LIMIT 1")
