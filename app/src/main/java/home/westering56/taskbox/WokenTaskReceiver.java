@@ -15,7 +15,9 @@ public class WokenTaskReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive, syncing adapters");
-        TaskData.getInstance(context).syncAdapters();
+        TaskData td = TaskData.getInstance(context);
+        td.syncAdapters();
+        td.scheduleNextUpdate(context);
         // TODO: Pop a notification that will end up showing the newly un-snoozed.
     }
 
