@@ -82,12 +82,6 @@ public class SnoozeDialogFragment extends DialogFragment {
             return temporal.with(ChronoField.HOUR_OF_DAY, 13).with(TopOfTheHourAdjuster);
         }
     };
-    private static final TemporalAdjuster OneMinuteAdjuster = new TemporalAdjuster() {
-        @Override
-        public Temporal adjustInto(Temporal temporal) {
-            return temporal.plus(1, ChronoUnit.MINUTES);
-        }
-    };
 
     private SnoozeOptionListener mSnoozeOptionListener;
 
@@ -118,7 +112,11 @@ public class SnoozeDialogFragment extends DialogFragment {
         }});
         snoozeData.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "In a minute");
-            put(SNOOZE_OPTION_INSTANT, OneMinuteAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plus(1, ChronoUnit.SECONDS));
+        }});
+        snoozeData.add(new HashMap<String, Object>() {{
+            put(SNOOZE_OPTION_TITLE, "In 30 seconds");
+            put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plus(30, ChronoUnit.SECONDS));
         }});
     }
 

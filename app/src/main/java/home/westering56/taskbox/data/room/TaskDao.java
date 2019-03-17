@@ -3,6 +3,7 @@ package home.westering56.taskbox.data.room;
 import android.database.Cursor;
 
 import java.time.Instant;
+import java.util.List;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -48,4 +49,6 @@ public abstract class TaskDao {
     @Delete
     public abstract void delete(Task task);
 
+    @Query("SELECT * FROM task WHERE done_at IS NULL AND snooze_until > :fromExclusive AND snooze_until <= :toInclusive ORDER BY snooze_until ASC")
+    public abstract List<Task> getNewlyActiveTasks(Instant fromExclusive, Instant toInclusive);
 }

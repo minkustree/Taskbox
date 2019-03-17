@@ -200,11 +200,23 @@ public class TaskData {
             final Context appContext = context.getApplicationContext();
             AlarmManager alarmManager = appContext.getSystemService(AlarmManager.class);
             Intent intent = new Intent(appContext, WokenTaskReceiver.class);
+            // used to determine what became active between now and wakeup, for notification use
+            intent.putExtra(WokenTaskReceiver.EXTRA_LAST_SEEN, Instant.now());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, nextWakeInstant.toEpochMilli(), pendingIntent);
         } else {
             Log.d(TAG, "No snoozed tasks, no update check scheduled");
         }
     }
+
+    /**
+     * Fetch the tasks that have become active between the two specified instants
+     * @param lastSeen exclusive
+     * @param now inclusive
+     */
+    public List<Task> getNewlyActiveTasks(Instant lastSeen, Instant now) {
+        return taskDatabase.taskDao().getNewlyActiveTasks(lastSeen, now);
+    }
+
 }
 
