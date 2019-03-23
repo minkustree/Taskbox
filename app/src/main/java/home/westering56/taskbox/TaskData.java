@@ -96,7 +96,7 @@ public class TaskData {
     private TaskData(@NonNull Context appContext) {
         taskDatabase = TaskDatabase.getDatabase(appContext);
 
-        // Set up adapter for active tasks
+        // Set up snoozeDataAdapter for active tasks
         activeTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_1, new Supplier<Cursor>() {
 
             @Override
@@ -106,7 +106,7 @@ public class TaskData {
         }, new String[] {"summary"}, new int[] {android.R.id.text1});
         adapters.add(activeTaskAdapter);
 
-        // Set up adapter for done tasks
+        // Set up snoozeDataAdapter for done tasks
         doneTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
 
             @Override
@@ -117,7 +117,7 @@ public class TaskData {
         doneTaskAdapter.setViewBinder(new DoneFormattingViewBinder());
         adapters.add(doneTaskAdapter);
 
-        // Set up adapter for snoozed tasks
+        // Set up snoozeDataAdapter for snoozed tasks
         snoozedTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
 
             @Override
