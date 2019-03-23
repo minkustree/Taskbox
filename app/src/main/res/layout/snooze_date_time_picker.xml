@@ -1,19 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/snooze_custom_date_selector"
-        style="@style/Widget.AppCompat.Spinner"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/listPreferredItemHeight"
         android:focusable="false"
-        tools:text="Thur, 30 Apr" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
+        tools:text="Thur, 30 Apr"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        android:paddingStart="?listPreferredItemPaddingStart"
+        android:paddingEnd="0dp"
+        />
+    <!-- Setting padding here to indent the date text by the same amount as the list item text below
+    This is because I can't yet figure out how to have a nice padding around each drop down item
+    without over-padding the standard text view entry in the spinner. -->
 
     <Spinner
         android:id="@+id/snooze_custom_time_selector"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="?attr/listPreferredItemHeight"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        tools:listitem="@android:layout/simple_spinner_item" />
 </LinearLayout>

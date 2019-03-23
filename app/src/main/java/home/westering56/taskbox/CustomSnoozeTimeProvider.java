@@ -29,6 +29,7 @@ public class CustomSnoozeTimeProvider {
 
     private static final String SNOOZE_TIME_NAME = "time_name";
     private static final String SNOOZE_TIME_ADJUSTER = "time_adjuster";
+    private static final String SNOOZE_TIME_EXAMPLE = "time_example";
 
     public static CustomSnoozeTimeProvider getInstance() {
         synchronized (CustomSnoozeTimeProvider.class) {
@@ -44,21 +45,26 @@ public class CustomSnoozeTimeProvider {
 
     private ArrayList<Map<String, Object>> initSnoozeTimes() {
         ArrayList<Map<String, Object>> times = new ArrayList<>();
+        final LocalTime now = LocalTime.now();
         times.add(new HashMap<String, Object>() {{
             put(SNOOZE_TIME_NAME, "Morning");
             put(SNOOZE_TIME_ADJUSTER, MorningAdjuster);
+            put(SNOOZE_TIME_EXAMPLE, SnoozeTimeFormatter.formatTime(now.with(MorningAdjuster)));
         }});
         times.add(new HashMap<String, Object>() {{
             put(SNOOZE_TIME_NAME, "Afternoon");
             put(SNOOZE_TIME_ADJUSTER, AfternoonAdjuster);
+            put(SNOOZE_TIME_EXAMPLE, SnoozeTimeFormatter.formatTime(now.with(AfternoonAdjuster)));
         }});
         times.add(new HashMap<String, Object>() {{
             put(SNOOZE_TIME_NAME, "Evening");
             put(SNOOZE_TIME_ADJUSTER, EveningAdjuster);
+            put(SNOOZE_TIME_EXAMPLE, SnoozeTimeFormatter.formatTime(now.with(EveningAdjuster)));
         }});
         times.add(new HashMap<String, Object>() {{
             put(SNOOZE_TIME_NAME, "Custom");
             put(SNOOZE_TIME_ADJUSTER, CustomAdjuster); // sentinel no-op value for custom adjuster
+            put(SNOOZE_TIME_EXAMPLE, "");
         }});
         return times;
     }
@@ -66,9 +72,9 @@ public class CustomSnoozeTimeProvider {
     public SpinnerAdapter newAdapter(@NonNull Context context) {
         return new SimpleAdapter(context,
                 mSnoozeTimes,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[] { SNOOZE_TIME_NAME },
-                new int[] { android.R.id.text1 });
+                R.layout.snooze_time_spinner_dropdown_item,
+                new String[]{SNOOZE_TIME_NAME, SNOOZE_TIME_EXAMPLE},
+                new int[]{R.id.snooze_time_spinner_item_title, R.id.snooze_time_spinner_item_details});
     }
 
     public static LocalTime getLocalTimeAtPosition(AdapterView<?> parent, int position) {
