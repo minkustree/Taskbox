@@ -59,10 +59,9 @@ public class SnoozeDialogFragment extends DialogFragment {
     }
 
     private void showCustomSnoozeTimeDialog() {
-        CustomSnoozeTimeDialogFragment f = new CustomSnoozeTimeDialogFragment();
-        f.setSnoozeOptionListener(mSnoozeOptionListener);
+        CustomSnoozeTimeDialogFragment customSnoozeTimeDialogFragment = CustomSnoozeTimeDialogFragment.newInstance(mSnoozeOptionListener);
         // TODO: Consider whether user should be able to go back to this dialog or not
         assert getFragmentManager() != null;
-        f.show(getFragmentManager(), "snooze_custom");
+        customSnoozeTimeDialogFragment.show(getFragmentManager(), "snooze_custom");
     }
 }

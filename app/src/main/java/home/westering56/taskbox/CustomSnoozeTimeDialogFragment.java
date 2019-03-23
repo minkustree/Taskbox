@@ -1,8 +1,8 @@
 package home.westering56.taskbox;
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,26 +12,35 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import home.westering56.taskbox.fragments.DatePickerFragment;
+import home.westering56.taskbox.fragments.TimePickerFragment;
 
 
 @SuppressWarnings("WeakerAccess")
-public class CustomSnoozeTimeDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-    private static final String TAG = "CustomSnoozeDTDlg";
+public class CustomSnoozeTimeDialogFragment extends DialogFragment
+        implements DatePickerFragment.CancellableOnDateSetListener, TimePickerDialog.OnTimeSetListener {
+    private static final String TAG = "CustomSnoozeTimeDlg";
+
+    public static CustomSnoozeTimeDialogFragment newInstance(@NonNull SnoozeDialogFragment.SnoozeOptionListener listener) {
+        CustomSnoozeTimeDialogFragment fragment = new CustomSnoozeTimeDialogFragment();
+        fragment.setSnoozeOptionListener(listener);
+        return fragment;
+    }
 
     static class SnoozeCustomModel {
         LocalDate mDate = null;
-        // TODO: Replace with morning, afternoon, and evening picker
-        // TODO: Add 'custom' to the above
-        LocalTime mTime = LocalTime.of(9, 0);
+        LocalTime mTime = null;
 
         LocalDateTime toLocalDateTime() {
             // TODO: Guard against mDate and/or mTime being null
@@ -39,41 +48,19 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-        DatePickerDialog.OnDateSetListener mDateSetListener;
-
-        void setOnDateSetListener(@Nullable DatePickerDialog.OnDateSetListener listener) {
-            mDateSetListener = listener;
-        }
-
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-            final DatePickerDialog d = new DatePickerDialog(requireActivity());
-            d.setOnDateSetListener(mDateSetListener);
-            return d;
-        }
-
-        @Override
-        public void onDetach() {
-            mDateSetListener = null;
-            super.onDetach();
-        }
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-            if (mDateSetListener == null) {
-                Log.e(TAG, "No mDateSetListener set for handling onDateSet");
-            } else {
-                mDateSetListener.onDateSet(view, year, month, dayOfMonth);
-            }
-        }
-    }
-
     private SnoozeCustomModel mModel;
     private SnoozeDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
     private TextView mDateText;
+
+    private void setSnoozeOptionListener(@Nullable SnoozeDialogFragment.SnoozeOptionListener listener) {
+        mSnoozeOptionListener = listener;
+    }
+
+    @Override
+    public void onDestroy() {
+        mSnoozeOptionListener = null;
+        super.onDestroy();
+    }
 
     @NonNull
     @Override
@@ -91,10 +78,7 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "date picker clicked");
-                DatePickerFragment newFragment = new DatePickerFragment();
-                newFragment.setOnDateSetListener(CustomSnoozeTimeDialogFragment.this);
-                assert getFragmentManager() != null;
-                newFragment.show(getFragmentManager(), "datePicker");
+                showDatePickerFragment();
             }
         });
 
@@ -111,6 +95,7 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
                 // no-op
             }
         });
+
         builder .setView(view)
                 .setTitle(R.string.snooze_pick_date_time_title)
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -129,16 +114,24 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
     public void onResume() {
         super.onResume();
         updateUiFields();
+        // Show the date picker when the dialog starts. If the user doesn't commit to a date,
+        // #onDatePickerCancel() will cancel this dialog, as without a date there's no point
+        // continuing with any other questions.
+        if (mModel.mDate == null) {
+            showDatePickerFragment();
+        }
     }
 
-    public void setSnoozeOptionListener(@Nullable SnoozeDialogFragment.SnoozeOptionListener listener) {
-        mSnoozeOptionListener = listener;
+    private void updateUiFields() {
+        if (mModel.mDate != null) {
+            mDateText.setText(SnoozeTimeFormatter.formatDate(getContext(), mModel.mDate));
+        }
     }
 
-    @Override
-    public void onDestroy() {
-        mSnoozeOptionListener = null;
-        super.onDestroy();
+    private void showDatePickerFragment() {
+        DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(this);
+        assert getFragmentManager() != null;
+        datePickerFragment.show(getFragmentManager(), "snooze_date_picker");
     }
 
     @Override
@@ -150,15 +143,39 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
         updateUiFields();
     }
 
-    public void onTimeItemSelected(AdapterView<?> parent, int position) {
-        mModel.mTime = CustomSnoozeTimeProvider.getLocalTimeAtPosition(parent, position);
-        updateUiFields(); // not strictly necessary, but is a consistent pattern for future use
+    @Override
+    public void onDatePickerCancel() {
+        if (mModel.mDate == null) {
+            // date picker was cancelled, no date was set, so there's no point in continuing.
+            // cancel this dialog and return. User can open us again once they're ready to
+            // commit to a date.
+            Objects.requireNonNull(getDialog()).cancel();
+        }
     }
 
-    private void updateUiFields() {
-        if (mModel.mDate != null) {
-            mDateText.setText(SnoozeTimeFormatter.formatDate(getContext(), mModel.mDate));
+    private void showTimePickerFragment() {
+        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this);
+        assert getFragmentManager() != null;
+        timePickerFragment.show(getFragmentManager(), "snooze_time_picker");
+    }
+
+    public void onTimeItemSelected(AdapterView<?> parent, int position) {
+        if (CustomSnoozeTimeProvider.isCustomPosition(parent, position)) {
+            Log.d(TAG, "Custom time selected. Launching time picker fragment");
+            showTimePickerFragment();
+        } else {
+            mModel.mTime = CustomSnoozeTimeProvider.getLocalTimeAtPosition(parent, position);
+            Log.d(TAG, "Named time of day selected. Setting internal time to " + mModel.mTime);
+            updateUiFields(); // not strictly necessary, but is a consistent pattern for future use
         }
+    }
+
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        Log.d(TAG, String.format("Setting custom time to %s:%s", hourOfDay, minute));
+        mModel.mTime = LocalTime.of(hourOfDay, minute);
+        // TODO: Have the custom entry show this new custom time, e.g. "Custom (3:14 PM)"
+        updateUiFields();  // not strictly necessary, but is a consistent pattern for future use
     }
 
 }

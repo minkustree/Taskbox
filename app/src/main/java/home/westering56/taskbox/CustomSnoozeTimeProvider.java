@@ -15,6 +15,7 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 
 import static home.westering56.taskbox.Adjusters.AfternoonAdjuster;
+import static home.westering56.taskbox.Adjusters.CustomAdjuster;
 import static home.westering56.taskbox.Adjusters.EveningAdjuster;
 import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 
@@ -24,7 +25,7 @@ import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 public class CustomSnoozeTimeProvider {
     private static CustomSnoozeTimeProvider sProvider;
 
-    private final List<Map<String, Object>> snoozeTimes;
+    private final List<Map<String, Object>> mSnoozeTimes;
 
     private static final String SNOOZE_TIME_NAME = "time_name";
     private static final String SNOOZE_TIME_ADJUSTER = "time_adjuster";
@@ -38,7 +39,7 @@ public class CustomSnoozeTimeProvider {
         return sProvider;
     }
     private CustomSnoozeTimeProvider() {
-        snoozeTimes = initSnoozeTimes();
+        mSnoozeTimes = initSnoozeTimes();
     }
 
     private ArrayList<Map<String, Object>> initSnoozeTimes() {
@@ -55,16 +56,16 @@ public class CustomSnoozeTimeProvider {
             put(SNOOZE_TIME_NAME, "Evening");
             put(SNOOZE_TIME_ADJUSTER, EveningAdjuster);
         }});
-//        times.add(new HashMap<String, Object>() {{
-//            put(SNOOZE_TIME_NAME, "Custom");
-//            put(SNOOZE_TIME_ADJUSTER, null);
-//        }});
+        times.add(new HashMap<String, Object>() {{
+            put(SNOOZE_TIME_NAME, "Custom");
+            put(SNOOZE_TIME_ADJUSTER, CustomAdjuster); // sentinel no-op value for custom adjuster
+        }});
         return times;
     }
 
     public SpinnerAdapter newAdapter(@NonNull Context context) {
         return new SimpleAdapter(context,
-                snoozeTimes,
+                mSnoozeTimes,
                 android.R.layout.simple_spinner_dropdown_item,
                 new String[] { SNOOZE_TIME_NAME },
                 new int[] { android.R.id.text1 });
@@ -76,5 +77,17 @@ public class CustomSnoozeTimeProvider {
         Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(position);
         TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
         return LocalTime.now().with(adjuster);
+    }
+
+    /**
+     * Return true if the specified position represents a 'custom' time, to be further set by
+     * the user.
+     */
+    public static boolean isCustomPosition(AdapterView<?> parent, int position) {
+        //noinspection unchecked
+        Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(position);
+        TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
+        // TemporalAdjuster doesn't override equals(), so testing for instance equivalence will do
+        return adjuster == CustomAdjuster;
     }
 }

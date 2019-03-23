@@ -54,4 +54,10 @@ public class Adjusters {
             return temporal.with(ChronoField.HOUR_OF_DAY, 13).with(TopOfTheHourAdjuster);
         }
     };
+    public static final TemporalAdjuster CustomAdjuster = new TemporalAdjuster() {
+        @Override
+        public Temporal adjustInto(Temporal temporal) {
+            return temporal;
+        }
+    };
 }
