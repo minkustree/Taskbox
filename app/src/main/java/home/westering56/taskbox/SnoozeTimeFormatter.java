@@ -19,7 +19,7 @@ class SnoozeTimeFormatter {
         return formatDate(context, LocalDate.from(target)) + ", " + formatTime(LocalTime.from(target));
     }
 
-    private static CharSequence formatDate(final Context context, final LocalDate target) {
+    public static CharSequence formatDate(final Context context, final LocalDate target) {
         LocalDate today = LocalDate.now();
         if (target.equals(today)) {
             return context.getString(R.string.snooze_time_format_today);
@@ -32,7 +32,7 @@ class SnoozeTimeFormatter {
         }
     }
 
-    private static CharSequence formatTime(final LocalTime target) {
+    public static CharSequence formatTime(final LocalTime target) {
         return target.format(sTimeFormatter);
     }
 }

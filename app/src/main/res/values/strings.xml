@@ -13,4 +13,6 @@
     <string name="menu_item_snooze">Snooze</string>
     <string name="snooze_time_format_today">Today</string>
     <string name="snooze_time_format_tomorrow">Tomorrow</string>
+    <string name="snooze_pick_date_time_title">Select date and time</string>
+    <string name="snooze_dialog_custom">Custom</string>
 </resources>

@@ -194,7 +194,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     }
 
     @Override
-    public void onSnoozeOptionSelected(String title, LocalDateTime snoozeUntil) {
+    public void onSnoozeOptionSelected(LocalDateTime snoozeUntil) {
         ensureTask();
         task.actionSnooze(ZonedDateTime.of(snoozeUntil, ZoneId.systemDefault()).toInstant());
         taskData.updateTask(task);

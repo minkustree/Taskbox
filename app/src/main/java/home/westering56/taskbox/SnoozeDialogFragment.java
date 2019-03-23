@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.SimpleAdapter;
 
@@ -30,7 +31,7 @@ public class SnoozeDialogFragment extends DialogFragment {
 
 
     public interface SnoozeOptionListener {
-        void onSnoozeOptionSelected(String title, LocalDateTime snoozeUntil);
+        void onSnoozeOptionSelected(LocalDateTime snoozeUntil);
     }
 
     private final List<Map<String, Object>> snoozeData;
@@ -112,7 +113,7 @@ public class SnoozeDialogFragment extends DialogFragment {
         }});
         snoozeData.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "In a minute");
-            put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plus(1, ChronoUnit.SECONDS));
+            put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plus(1, ChronoUnit.MINUTES));
         }});
         snoozeData.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "In 30 seconds");
@@ -152,10 +153,24 @@ public class SnoozeDialogFragment extends DialogFragment {
                 Map<String, Object> item = (Map<String, Object>)adapter.getItem(position);
                 if (mSnoozeOptionListener != null) {
                     mSnoozeOptionListener.onSnoozeOptionSelected(
-                            (String) item.get(SNOOZE_OPTION_TITLE),
                             (LocalDateTime) item.get(SNOOZE_OPTION_INSTANT));
                 }
             }
         });
+        final Button custom = view.findViewById(R.id.snooze_dialog_button_custom);
+        custom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCustomSnoozeTimeDialog();
+            }
+        });
+    }
+
+    private void showCustomSnoozeTimeDialog() {
+        CustomSnoozeTimeDialogFragment f = new CustomSnoozeTimeDialogFragment();
+        f.setSnoozeOptionListener(mSnoozeOptionListener);
+        // TODO: Consider whether user should be able to go back to this dialog or not
+        assert getFragmentManager() != null;
+        f.show(getFragmentManager(), "snooze_custom");
     }
 }

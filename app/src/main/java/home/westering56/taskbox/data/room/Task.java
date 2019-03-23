@@ -43,9 +43,11 @@ public class Task {
 //    }
 // --Commented out by Inspection STOP (10/03/2019 8:08 PM)
 
-    public boolean isActive() {
-        return (doneAt == null) && ((snoozeUntil == null) || Instant.now().isAfter(snoozeUntil));
-    }
+// --Commented out by Inspection START (23/03/2019 11:33 AM):
+//    public boolean isActive() {
+//        return (doneAt == null) && ((snoozeUntil == null) || Instant.now().isAfter(snoozeUntil));
+//    }
+// --Commented out by Inspection STOP (23/03/2019 11:33 AM)
 
     public boolean isDone() {
         return doneAt != null;

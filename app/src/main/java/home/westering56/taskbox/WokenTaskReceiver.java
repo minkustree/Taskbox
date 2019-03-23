@@ -44,6 +44,7 @@ public class WokenTaskReceiver extends BroadcastReceiver {
     }
 
     private void notifyNewlyActiveTasks(Context context, List<Task> newlyActiveTasks) {
+        Log.d(TAG, "Posting notifications for new tasks. New tasks: "+ newlyActiveTasks.size());
         ensureNotificationChannel(context);
         int id = 0;
         for (Task task : newlyActiveTasks) {
