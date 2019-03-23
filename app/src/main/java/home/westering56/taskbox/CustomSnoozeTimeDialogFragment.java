@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.DatePicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.time.LocalDate;
@@ -72,7 +74,6 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
     private SnoozeCustomModel mModel;
     private SnoozeDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
     private TextView mDateText;
-    private TextView mTimeText;
 
     @NonNull
     @Override
@@ -84,7 +85,8 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         // It's OK to pass in 'null' as root here, as layout params are replaced by alert dialog
         View view = inflater.inflate(R.layout.snooze_date_time_picker, null, false);
-        mDateText = view.findViewById(R.id.snooze_custom_date_picker);
+
+        mDateText = view.findViewById(R.id.snooze_custom_date_selector);
         mDateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,7 +97,20 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
                 newFragment.show(getFragmentManager(), "datePicker");
             }
         });
-        mTimeText = view.findViewById(R.id.snooze_custom_time_picker);
+
+        Spinner timeSelector = view.findViewById(R.id.snooze_custom_time_selector);
+        timeSelector.setAdapter(CustomSnoozeTimeProvider.getInstance().newAdapter(requireContext()));
+        timeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onTimeItemSelected(parent, position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // no-op
+            }
+        });
         builder .setView(view)
                 .setTitle(R.string.snooze_pick_date_time_title)
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -109,8 +124,6 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
                 });
         return builder.create();
     }
-
-
 
     @Override
     public void onResume() {
@@ -137,12 +150,14 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment implements Da
         updateUiFields();
     }
 
+    public void onTimeItemSelected(AdapterView<?> parent, int position) {
+        mModel.mTime = CustomSnoozeTimeProvider.getLocalTimeAtPosition(parent, position);
+        updateUiFields(); // not strictly necessary, but is a consistent pattern for future use
+    }
+
     private void updateUiFields() {
         if (mModel.mDate != null) {
             mDateText.setText(SnoozeTimeFormatter.formatDate(getContext(), mModel.mDate));
-        }
-        if (mModel.mTime != null) {
-            mTimeText.setText(SnoozeTimeFormatter.formatTime(mModel.mTime));
         }
     }
 

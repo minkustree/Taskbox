@@ -5,18 +5,15 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/snooze_custom_date_picker"
+        android:id="@+id/snooze_custom_date_selector"
+        style="@style/Widget.AppCompat.Spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusable="false"
-        style="@style/Widget.AppCompat.EditText"
         tools:text="Thur, 30 Apr" />
 
-
-    <TextView
-        android:id="@+id/snooze_custom_time_picker"
+    <Spinner
+        android:id="@+id/snooze_custom_time_selector"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.EditText"
-        tools:text="9:00 AM"/>
+        android:layout_height="wrap_content" />
 </LinearLayout>

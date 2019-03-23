@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.SimpleAdapter;
 
 import java.time.LocalDateTime;
 
@@ -39,16 +38,14 @@ public class SnoozeDialogFragment extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onViewCreated");
 
-        final SnoozeOptionProvider optionProvider = SnoozeOptionProvider.getInstance();
-        final SimpleAdapter adapter = optionProvider.newAdapter(requireContext());
         final GridView content = view.findViewById(R.id.snooze_dialog_content);
-        content.setAdapter(adapter);
+        content.setAdapter(SnoozeOptionProvider.getInstance().newAdapter(requireContext()));
         content.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mSnoozeOptionListener != null) {
                     mSnoozeOptionListener.onSnoozeOptionSelected(
-                            optionProvider.getOptionDateTime(adapter, position));
+                            SnoozeOptionProvider.getDateTimeAtPosition(parent, position));
                 }
             }
         });

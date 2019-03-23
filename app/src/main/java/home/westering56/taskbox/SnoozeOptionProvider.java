@@ -2,6 +2,7 @@ package home.westering56.taskbox;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -26,10 +27,10 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 public class SnoozeOptionProvider {
     private static SnoozeOptionProvider sProvider;
 
-    private final List<Map<String, Object>> snoozeData;
+    private final List<Map<String, Object>> snoozeOptions;
 
-    private static final String SNOOZE_OPTION_TITLE = "title";
-    private static final String SNOOZE_OPTION_INSTANT = "instant";
+    private static final String SNOOZE_OPTION_TITLE = "option_title";
+    private static final String SNOOZE_OPTION_INSTANT = "option_instant";
 
     public static SnoozeOptionProvider getInstance() {
         synchronized (SnoozeOptionProvider.class) {
@@ -39,8 +40,9 @@ public class SnoozeOptionProvider {
         }
         return sProvider;
     }
+
     private SnoozeOptionProvider() {
-        snoozeData = initSnoozeOptions();
+        snoozeOptions = initSnoozeOptions();
     }
 
     private ArrayList<Map<String, Object>> initSnoozeOptions() {
@@ -76,18 +78,19 @@ public class SnoozeOptionProvider {
         return options;
     }
 
+
     public SimpleAdapter newAdapter(@NonNull Context context) {
         final SimpleAdapter adapter = new SimpleAdapter(
                 context,
-                snoozeData,
+                snoozeOptions,
                 R.layout.snooze_option_item,
-                new String[] {SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT},
-                new int[] {R.id.snooze_option_item_title, R.id.snooze_option_item_detail});
+                new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT},
+                new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail});
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if (data instanceof Temporal) {
-                    adapter.setViewText((TextView)view, SnoozeTimeFormatter.format(view.getContext(), (Temporal)data).toString());
+                    adapter.setViewText((TextView) view, SnoozeTimeFormatter.format(view.getContext(), (Temporal) data).toString());
                     return true;
                 }
                 return false;
@@ -96,10 +99,10 @@ public class SnoozeOptionProvider {
         return adapter;
     }
 
-    public LocalDateTime getOptionDateTime(@NonNull SimpleAdapter adapter, int position) {
+    public static LocalDateTime getDateTimeAtPosition(@NonNull AdapterView<?> parent, int position) {
         //noinspection unchecked
-        Map<String, Object> item = (Map<String, Object>)adapter.getItem(position);
+        Map<String, Object> item = (Map<String, Object>) parent.getItemAtPosition(position);
         return (LocalDateTime) item.get(SNOOZE_OPTION_INSTANT);
-
     }
+
 }
