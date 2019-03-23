@@ -2,6 +2,7 @@ package home.westering56.taskbox.fragments;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.widget.TimePicker;
@@ -13,10 +14,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
-    private TimePickerDialog.OnTimeSetListener mOnTimeSetListener;
+    private CancellableOnTimeSetListener mOnTimeSetListener;
+    /**
+     * Extends OnTimeSetListener to include a 'cancelled' callback
+     */
+    public interface CancellableOnTimeSetListener extends TimePickerDialog.OnTimeSetListener {
+        void onTimePickerCancel();
+    }
 
     @NonNull
-    public static TimePickerFragment newInstance(@NonNull TimePickerDialog.OnTimeSetListener listener) {
+    public static TimePickerFragment newInstance(@NonNull CancellableOnTimeSetListener listener) {
         TimePickerFragment fragment = new TimePickerFragment();
         fragment.setOnTimeSetListener(listener);
         return fragment;
@@ -32,7 +39,7 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
                 DateFormat.is24HourFormat(requireContext()));
     }
 
-    private void setOnTimeSetListener(@Nullable TimePickerDialog.OnTimeSetListener listener) {
+    private void setOnTimeSetListener(@Nullable CancellableOnTimeSetListener listener) {
         mOnTimeSetListener = listener;
     }
 
@@ -40,6 +47,11 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
     public void onDetach() {
         mOnTimeSetListener = null;
         super.onDetach();
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        mOnTimeSetListener.onTimePickerCancel();
     }
 
     @Override

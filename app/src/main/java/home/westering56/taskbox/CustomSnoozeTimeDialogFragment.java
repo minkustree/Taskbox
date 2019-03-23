@@ -2,7 +2,6 @@ package home.westering56.taskbox;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,7 +28,8 @@ import home.westering56.taskbox.fragments.TimePickerFragment;
 
 @SuppressWarnings("WeakerAccess")
 public class CustomSnoozeTimeDialogFragment extends DialogFragment
-        implements DatePickerFragment.CancellableOnDateSetListener, TimePickerDialog.OnTimeSetListener {
+        implements DatePickerFragment.CancellableOnDateSetListener,
+        TimePickerFragment.CancellableOnTimeSetListener {
     private static final String TAG = "CustomSnoozeTimeDlg";
 
     public static CustomSnoozeTimeDialogFragment newInstance(@NonNull SnoozeDialogFragment.SnoozeOptionListener listener) {
@@ -51,6 +51,8 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
     private SnoozeCustomModel mModel;
     private SnoozeDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
     private TextView mDateText;
+    private Spinner mTimeSelector;
+    private int mLastTimeSelectedPosition;
 
     private void setSnoozeOptionListener(@Nullable SnoozeDialogFragment.SnoozeOptionListener listener) {
         mSnoozeOptionListener = listener;
@@ -82,9 +84,9 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
             }
         });
 
-        Spinner timeSelector = view.findViewById(R.id.snooze_custom_time_selector);
-        timeSelector.setAdapter(CustomSnoozeTimeProvider.getInstance().newAdapter(requireContext()));
-        timeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mTimeSelector = view.findViewById(R.id.snooze_custom_time_selector);
+        mTimeSelector.setAdapter(CustomSnoozeTimeProvider.getInstance().getDefaultAdapter(requireContext()));
+        mTimeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 onTimeItemSelected(parent, position);
@@ -95,6 +97,7 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
                 // no-op
             }
         });
+        mLastTimeSelectedPosition = 0;
 
         builder .setView(view)
                 .setTitle(R.string.snooze_pick_date_time_title)
@@ -165,7 +168,10 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
             showTimePickerFragment();
         } else {
             mModel.mTime = CustomSnoozeTimeProvider.getLocalTimeAtPosition(parent, position);
-            Log.d(TAG, "Named time of day selected. Setting internal time to " + mModel.mTime);
+            Log.d(TAG, "Named time of day selected. Set internal time to " + mModel.mTime);
+            // User chose something other than custom, so reset the custom time field
+            CustomSnoozeTimeProvider.getInstance().clearCustomTimeExample();
+            saveLastSelectedPosition(position);
             updateUiFields(); // not strictly necessary, but is a consistent pattern for future use
         }
     }
@@ -173,9 +179,26 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         Log.d(TAG, String.format("Setting custom time to %s:%s", hourOfDay, minute));
-        mModel.mTime = LocalTime.of(hourOfDay, minute);
-        // TODO: Have the custom entry show this new custom time, e.g. "Custom (3:14 PM)"
+        final LocalTime customTime = LocalTime.of(hourOfDay, minute);
+        mModel.mTime = customTime;
+        // Have the custom spinner entry update to show this new custom time, e.g. "Custom (3:14 PM)"
+        CustomSnoozeTimeProvider snoozeTimeProvider = CustomSnoozeTimeProvider.getInstance();
+        snoozeTimeProvider.updateCustomTimeExample(customTime);
+        saveLastSelectedPosition(snoozeTimeProvider.getCustomPosition());
         updateUiFields();  // not strictly necessary, but is a consistent pattern for future use
     }
 
+    @Override
+    public void onTimePickerCancel() {
+        Log.d(TAG, "Time picking cancelled. Reverting to previous selection");
+        restoreLastSelectedPosition();
+    }
+
+    private void saveLastSelectedPosition(int position) {
+        mLastTimeSelectedPosition = position;
+    }
+
+    private void restoreLastSelectedPosition() {
+        mTimeSelector.setSelection(mLastTimeSelectedPosition);
+    }
 }

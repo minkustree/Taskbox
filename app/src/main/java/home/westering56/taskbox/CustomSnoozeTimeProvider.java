@@ -26,6 +26,8 @@ public class CustomSnoozeTimeProvider {
     private static CustomSnoozeTimeProvider sProvider;
 
     private final List<Map<String, Object>> mSnoozeTimes;
+    private HashMap<String, Object> mCustom;
+    private SimpleAdapter mAdapter;
 
     private static final String SNOOZE_TIME_NAME = "time_name";
     private static final String SNOOZE_TIME_ADJUSTER = "time_adjuster";
@@ -61,24 +63,31 @@ public class CustomSnoozeTimeProvider {
             put(SNOOZE_TIME_ADJUSTER, EveningAdjuster);
             put(SNOOZE_TIME_EXAMPLE, SnoozeTimeFormatter.formatTime(now.with(EveningAdjuster)));
         }});
-        times.add(new HashMap<String, Object>() {{
+        mCustom = new HashMap<String, Object>() {{
             put(SNOOZE_TIME_NAME, "Custom");
             put(SNOOZE_TIME_ADJUSTER, CustomAdjuster); // sentinel no-op value for custom adjuster
             put(SNOOZE_TIME_EXAMPLE, "");
-        }});
+        }};
+        times.add(mCustom);
         return times;
     }
 
-    public SpinnerAdapter newAdapter(@NonNull Context context) {
-        return new SimpleAdapter(context,
-                mSnoozeTimes,
-                R.layout.snooze_time_spinner_dropdown_item,
-                new String[]{SNOOZE_TIME_NAME, SNOOZE_TIME_EXAMPLE},
-                new int[]{R.id.snooze_time_spinner_item_title, R.id.snooze_time_spinner_item_details});
+    public SpinnerAdapter getDefaultAdapter(@NonNull Context context) {
+        synchronized (this) {
+            if (mAdapter == null) {
+                mAdapter = new SimpleAdapter(context.getApplicationContext(),
+                        mSnoozeTimes,
+                        R.layout.snooze_time_spinner_dropdown_item,
+                        new String[]{SNOOZE_TIME_NAME, SNOOZE_TIME_EXAMPLE},
+                        new int[]{
+                                R.id.snooze_time_spinner_item_title,
+                                R.id.snooze_time_spinner_item_details});
+            }
+        }
+        return mAdapter;
     }
 
     public static LocalTime getLocalTimeAtPosition(AdapterView<?> parent, int position) {
-        // TODO: If this is a 'custom' entry, pop up a time picker and return result somehow
         //noinspection unchecked
         Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(position);
         TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
@@ -95,5 +104,19 @@ public class CustomSnoozeTimeProvider {
         TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
         // TemporalAdjuster doesn't override equals(), so testing for instance equivalence will do
         return adjuster == CustomAdjuster;
+    }
+
+    public void updateCustomTimeExample(@NonNull LocalTime lastCustomTime) {
+        mCustom.put(SNOOZE_TIME_EXAMPLE, SnoozeTimeFormatter.formatTime(lastCustomTime));
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public void clearCustomTimeExample() {
+        mCustom.put(SNOOZE_TIME_EXAMPLE, "");
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public int getCustomPosition() {
+        return mSnoozeTimes.indexOf(mCustom);
     }
 }
