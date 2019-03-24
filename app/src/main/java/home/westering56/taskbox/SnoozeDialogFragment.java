@@ -29,8 +29,7 @@ public class SnoozeDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public void setSnoozeOptionListener(SnoozeOptionListener listener) {
+    private void setSnoozeOptionListener(SnoozeOptionListener listener) {
         mSnoozeOptionListener = listener;
     }
 
@@ -39,7 +38,7 @@ public class SnoozeDialogFragment extends DialogFragment {
         Log.d(TAG, "onViewCreated");
 
         final GridView content = view.findViewById(R.id.snooze_dialog_content);
-        content.setAdapter(SnoozeOptionProvider.getInstance().newAdapter(requireContext()));
+        content.setAdapter(SnoozeOptionProvider.newAdapter(requireContext()));
         content.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

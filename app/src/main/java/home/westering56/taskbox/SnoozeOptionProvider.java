@@ -25,20 +25,19 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
  * Provides relevant snooze option choices.
  */
 public class SnoozeOptionProvider {
-    private static SnoozeOptionProvider sProvider;
-
-    private final List<Map<String, Object>> snoozeOptions;
-
     private static final String SNOOZE_OPTION_TITLE = "option_title";
     private static final String SNOOZE_OPTION_INSTANT = "option_instant";
 
-    public static SnoozeOptionProvider getInstance() {
-        synchronized (SnoozeOptionProvider.class) {
-            if (sProvider == null) {
-                sProvider = new SnoozeOptionProvider();
-            }
-        }
-        return sProvider;
+    private final List<Map<String, Object>> snoozeOptions;
+    private SimpleAdapter mAdapter;
+
+    /**
+     * Obtains a new adapter with current snooze time data. Snooze time values to choose from
+     * are calculated when this is called, so get a new one each time you need an up-to-date set
+     * of snooze time options.
+     */
+    public static SimpleAdapter newAdapter(@NonNull Context context) {
+        return new SnoozeOptionProvider().getAdapter(context);
     }
 
     private SnoozeOptionProvider() {
@@ -78,25 +77,29 @@ public class SnoozeOptionProvider {
         return options;
     }
 
-
-    public SimpleAdapter newAdapter(@NonNull Context context) {
-        final SimpleAdapter adapter = new SimpleAdapter(
-                context,
-                snoozeOptions,
-                R.layout.snooze_option_item,
-                new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT},
-                new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail});
-        adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Object data, String textRepresentation) {
-                if (data instanceof Temporal) {
-                    adapter.setViewText((TextView) view, SnoozeTimeFormatter.format(view.getContext(), (Temporal) data).toString());
-                    return true;
-                }
-                return false;
+    private SimpleAdapter getAdapter(@NonNull Context context) {
+        synchronized (this) {
+            if (mAdapter == null) {
+                mAdapter = new SimpleAdapter(
+                        context,
+                        snoozeOptions,
+                        R.layout.snooze_option_item,
+                        new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT},
+                        new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail});
+                mAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                    @Override
+                    public boolean setViewValue(View view, Object data, String textRepresentation) {
+                        if (data instanceof Temporal) {
+                            ((TextView)view).setText(
+                                    SnoozeTimeFormatter.format(view.getContext(), (Temporal) data));
+                            return true;
+                        }
+                        return false;
+                    }
+                });
             }
-        });
-        return adapter;
+        }
+        return mAdapter;
     }
 
     public static LocalDateTime getDateTimeAtPosition(@NonNull AdapterView<?> parent, int position) {
