@@ -27,6 +27,7 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 public class SnoozeOptionProvider {
     private static final String SNOOZE_OPTION_TITLE = "option_title";
     private static final String SNOOZE_OPTION_INSTANT = "option_instant";
+    private static final String SNOOZE_OPTION_ICON = "option_icon";
 
     private final List<Map<String, Object>> snoozeOptions;
     private SimpleAdapter mAdapter;
@@ -49,30 +50,32 @@ public class SnoozeOptionProvider {
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "Tomorrow Morning");
             put(SNOOZE_OPTION_INSTANT, TomorrowMorningAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_morning_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Afternoon");
             put(SNOOZE_OPTION_INSTANT, AfternoonAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_restaurant_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Evening");
             put(SNOOZE_OPTION_INSTANT, EveningAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_hot_tub_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "Next Week");
             put(SNOOZE_OPTION_INSTANT, StartOfWeekAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_next_week_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Weekend");
             put(SNOOZE_OPTION_INSTANT, WeekendAdjuster.adjustInto(LocalDateTime.now()));
-        }});
-        options.add(new HashMap<String, Object>() {{
-            put(SNOOZE_OPTION_TITLE, "In a minute");
-            put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plusMinutes(1));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_weekend_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "In 30 seconds");
             put(SNOOZE_OPTION_INSTANT, LocalDateTime.now().plusSeconds(30));
+            put(SNOOZE_OPTION_ICON, R.drawable.ic_schedule_black_24dp);
         }});
         return options;
     }
@@ -84,8 +87,8 @@ public class SnoozeOptionProvider {
                         context,
                         snoozeOptions,
                         R.layout.snooze_option_item,
-                        new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT},
-                        new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail});
+                        new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT, SNOOZE_OPTION_ICON},
+                        new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail, R.id.snooze_option_item_ic});
                 mAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                     @Override
                     public boolean setViewValue(View view, Object data, String textRepresentation) {
