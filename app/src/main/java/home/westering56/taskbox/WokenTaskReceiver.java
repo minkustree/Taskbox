@@ -2,6 +2,7 @@ package home.westering56.taskbox;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +12,10 @@ import android.util.Log;
 import java.time.Instant;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.TaskStackBuilder;
 import home.westering56.taskbox.data.room.Task;
 
 public class WokenTaskReceiver extends BroadcastReceiver {
@@ -61,9 +64,24 @@ public class WokenTaskReceiver extends BroadcastReceiver {
                 .setContentTitle(task.summary)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(getPendingIntentForTask(context, task))
+                .setAutoCancel(true)
                 .setGroup("home.westering56.taskbox.NOTIFICATION_GROUP_KEY");
 
         NotificationManagerCompat.from(context).notify(notificationId, builder.build());
+    }
+
+    private PendingIntent getPendingIntentForTask(@NonNull Context context, @NonNull final Task task) {
+        Intent taskDetailIntent = new Intent(context, TaskDetailActivity.class);
+        Log.d(TAG, "Creating pending intent for task '" + task.summary + "' with ID " + task.uid);
+        taskDetailIntent.putExtra(MainActivity.EXTRA_TASK_ID, Long.valueOf(task.uid));
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addNextIntentWithParentStack(taskDetailIntent);
+        // don't re-use pending intents, as each pending intent points to a different task, and
+        // re-using them would have them all point to the latest task
+        // Include a different request code for each task, otherwise they all get the same pending
+        // intent and the task ID extra doesn't go through properly.
+        return stackBuilder.getPendingIntent(task.uid, 0);
     }
 
 }

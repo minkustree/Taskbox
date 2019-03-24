@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import androidx.fragment.app.DialogFragment;
 import home.westering56.taskbox.data.room.Task;
 
 public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialogFragment.SnoozeOptionListener {
+    private static final String TAG = "TaskDetail";
 
     // Indicates the action the user took within the activity
     @SuppressWarnings({"PointlessArithmeticExpression"})
@@ -85,6 +87,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         Intent intent = getIntent();
         long id = intent.getLongExtra(MainActivity.EXTRA_TASK_ID, -1);
         if (id != -1) { task = taskData.getTask(id); }
+        Log.d(TAG, "Task ID was " + id + ", found task " + task);
         if (task != null) {
             // TODO: Set these fields asynchronously when the DB lookup completes
             // existing task being updated
