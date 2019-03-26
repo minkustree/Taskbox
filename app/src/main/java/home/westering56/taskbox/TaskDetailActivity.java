@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     public static final String RESULT_EXTRA_SNOOZE_UNTIL = "snoozeUntil";
 
     private EditText taskSummary;
+    private TextView mSnoozeTimeBanner;
     private TaskData taskData;
     private Task task;
 
@@ -94,6 +96,9 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
             taskSummary.setText(task.summary);
             taskSummary.setSelection(taskSummary.length());
         }
+
+        mSnoozeTimeBanner = findViewById(R.id.task_detail_snooze_time);
+        updateSnoozeTimeBanner();
     }
 
     @Override
@@ -224,5 +229,14 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
             task.summary = taskSummary.getText().toString();
         }
         assert task != null;
+    }
+
+    private void updateSnoozeTimeBanner() {
+        if (task == null || !task.isSnoozed()) {
+            mSnoozeTimeBanner.setVisibility(View.GONE);
+        } else {
+            CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(this, task.snoozeUntil);
+            mSnoozeTimeBanner.setText(getString(R.string.task_detail_snoozed_until, snoozeTime));
+        }
     }
 }

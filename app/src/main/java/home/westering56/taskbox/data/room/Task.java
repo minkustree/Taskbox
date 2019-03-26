@@ -36,12 +36,9 @@ public class Task {
     @ColumnInfo(name = "done_at")
     public Instant doneAt;
 
-
-// --Commented out by Inspection START (10/03/2019 8:08 PM):
-//    public boolean isSnoozed() {
-//        return (snoozeUntil != null) && Instant.now().isBefore(snoozeUntil);
-//    }
-// --Commented out by Inspection STOP (10/03/2019 8:08 PM)
+    public boolean isSnoozed() {
+        return (snoozeUntil != null) && Instant.now().isBefore(snoozeUntil);
+    }
 
 // --Commented out by Inspection START (23/03/2019 11:33 AM):
 //    public boolean isActive() {

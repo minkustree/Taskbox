@@ -2,13 +2,18 @@ package home.westering56.taskbox;
 
 import android.content.Context;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+
+import androidx.annotation.NonNull;
 
 class SnoozeTimeFormatter {
     private static final DateTimeFormatter sDateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
@@ -17,6 +22,11 @@ class SnoozeTimeFormatter {
 
     public static CharSequence format(final Context context, Temporal target) {
         return formatDate(context, LocalDate.from(target)) + ", " + formatTime(LocalTime.from(target));
+    }
+
+    /** Converts the instant to a local date time in the default time zone, and then formats it */
+    public static CharSequence formatInstant(@NonNull final Context context, Instant instant) {
+        return format(context, LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
     }
 
     public static CharSequence formatDate(final Context context, final LocalDate target) {
