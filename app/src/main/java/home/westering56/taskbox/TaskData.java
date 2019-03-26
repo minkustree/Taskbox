@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Supplier;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
@@ -28,10 +29,46 @@ public class TaskData {
 
     private static TaskData instance;
 
+    private static class UndoBuffer {
+        private @Nullable Task mOldTask;
+        private @Nullable Task mNewTask;
+
+        UndoBuffer() {
+            clear();
+        }
+
+        void storeDelete(@NonNull Task oldTask) {
+            mOldTask = oldTask;
+            mNewTask = null;
+        }
+
+        void storeUpdate(@NonNull Task oldTask, @NonNull Task newTask) {
+            mOldTask = oldTask;
+            mNewTask = newTask;
+        }
+
+        boolean isDelete() {
+            return mNewTask == null && mOldTask != null;
+        }
+
+        boolean isUpdate() {
+            return mNewTask != null && mOldTask != null;
+        }
+
+        boolean isEmpty() {
+            return  mNewTask == null && mOldTask == null;
+        }
+
+        void clear() {
+            mOldTask = mNewTask = null;
+        }
+    }
+
     private final TaskCursorAdapter activeTaskAdapter;
     private final TaskCursorAdapter doneTaskAdapter;
     private final TaskCursorAdapter snoozedTaskAdapter;
     private final TaskDatabase taskDatabase;
+    private final UndoBuffer mUndoBuffer;
 
     private final List<TaskCursorAdapter> adapters = new ArrayList<>();
 
@@ -59,9 +96,8 @@ public class TaskData {
                     // have been displayed before
                     textValue = "";
                 } else {
-                    textValue = "Snoozed until " + SnoozeTimeFormatter.format(view.getContext(),
-                            Instant.ofEpochMilli(cursor.getLong(columnIndex)).atZone(
-                                    ZoneId.systemDefault()));
+                    textValue = "Snoozed until " + SnoozeTimeFormatter.formatInstant(view.getContext(),
+                            Instant.ofEpochMilli(cursor.getLong(columnIndex)));
                 }
                 ((TextView) view).setText(textValue);
                 return true;
@@ -94,6 +130,7 @@ public class TaskData {
     }
 
     private TaskData(@NonNull Context appContext) {
+        mUndoBuffer = new UndoBuffer();
         taskDatabase = TaskDatabase.getDatabase(appContext);
 
         // Set up snoozeDataAdapter for active tasks
@@ -155,6 +192,7 @@ public class TaskData {
     }
 
     public void add(CharSequence taskSummary) {
+        mUndoBuffer.clear(); // can't undo this
         taskDatabase.taskDao().insert(new Task(taskSummary));
         syncAdapters();
     }
@@ -164,19 +202,44 @@ public class TaskData {
     }
 
     public void updateTask(Task task) {
+        Task oldTask = taskDatabase.taskDao().get(task.uid);
+        mUndoBuffer.storeUpdate(oldTask, task);
         taskDatabase.taskDao().update(task);
         syncAdapters();
     }
 
     public void deleteTask(Task task) {
+        mUndoBuffer.storeDelete(task);
         taskDatabase.taskDao().delete(task);
         syncAdapters();
     }
 
     public void deleteAllTasks() {
+        mUndoBuffer.clear(); // cannot undo delete all
         taskDatabase.clearAllTables();
         syncAdapters();
     }
+
+    public void undoLast() {
+        if (mUndoBuffer.isEmpty()) {
+            Log.w(TAG, "Undo requested, but nothing in undo buffer");
+            return;
+        }
+        if (mUndoBuffer.isDelete()) {
+            // undo a delete
+            Log.d(TAG, "Undoing delete");
+            taskDatabase.taskDao().insert(mUndoBuffer.mOldTask); // fall through
+        }
+        if (mUndoBuffer.isUpdate()) {
+            // undo a modification
+            Log.d(TAG, "Undoing update");
+            taskDatabase.taskDao().update(mUndoBuffer.mOldTask); // fall through
+        }
+        // Either we undid it, or it was an odd state. Either way, clear the buffer
+        mUndoBuffer.clear();
+        syncAdapters();
+    }
+
 
     /**
      * Refresh the contents of all adapters managed by this class. Call this after making any

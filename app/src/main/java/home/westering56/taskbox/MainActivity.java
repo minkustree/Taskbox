@@ -141,13 +141,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         CharSequence label = null;
+        View.OnClickListener action = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Undo button clicked");
+                TaskData.getInstance(v.getContext()).undoLast();
+            }
+        };
         switch (requestCode) {
             case REQUEST_NEW_TASK: // fall through
             case REQUEST_EDIT_TASK:
                 switch (resultCode) {
                     case RESULT_CANCELED:
                         label = "Cancelled"; break;
-                    case TaskDetailActivity.RESULT_TASK_CREATED: // fall through
+                    case TaskDetailActivity.RESULT_TASK_CREATED:
+                        action = null;
+                        // fall through
                     case TaskDetailActivity.RESULT_TASK_UPDATED:
                         label = "Task saved"; break;
                     case TaskDetailActivity.RESULT_TASK_DONE:
@@ -164,11 +173,14 @@ public class MainActivity extends AppCompatActivity {
                         if (extras == null) break;
                         LocalDateTime until = (LocalDateTime)extras.get(TaskDetailActivity.RESULT_EXTRA_SNOOZE_UNTIL);
                         if (until == null) break;
-                        label = "Snoozed until " + SnoozeTimeFormatter.format(getApplicationContext(), until);
+                        label = getString(R.string.task_detail_snoozed_until,
+                                SnoozeTimeFormatter.format(getApplicationContext(), until));
                         break;
                 }
                 if (label != null) {
-                    Snackbar.make(rootView, label, Snackbar.LENGTH_LONG).show();
+                    Snackbar snackbar = Snackbar.make(rootView, label, Snackbar.LENGTH_LONG);
+                    if (action != null) { snackbar.setAction("Undo", action); }
+                    snackbar.show();
                 }
                 break;
             default:
