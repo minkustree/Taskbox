@@ -22,6 +22,7 @@ public class WokenTaskReceiver extends BroadcastReceiver {
     private static final String TAG = "SnoozeManagerBR";
     public static final String EXTRA_LAST_SEEN = "last_seen";
 
+    private static final int NF_ID_SUMMARY = 314;
     /**
      * Called when we're asked to check if any snoozed item has active.
      * Typically these are scheduled to happen for when the next task is scheduled to be un-snoozed.
@@ -46,7 +47,7 @@ public class WokenTaskReceiver extends BroadcastReceiver {
         NotificationManagerCompat.from(context).createNotificationChannel(channel);
     }
 
-    private void notifyNewlyActiveTasks(Context context, List<Task> newlyActiveTasks) {
+    private void notifyNewlyActiveTasks(@NonNull Context context, @NonNull List<Task> newlyActiveTasks) {
         Log.d(TAG, "Posting notifications for new tasks. New tasks: "+ newlyActiveTasks.size());
         ensureNotificationChannel(context);
         int id = 0;
@@ -56,19 +57,36 @@ public class WokenTaskReceiver extends BroadcastReceiver {
             notifyTask(context, id, task);
             id += 1; // different ID for each notification in the group
         }
+        updateSummaryNotification(context);
     }
 
-    private void notifyTask(Context context, int notificationId, Task task) {
+    private void notifyTask(@NonNull Context context, int notificationId, @NonNull Task task) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_1")
                 .setSmallIcon(R.drawable.ic_notify_small_icon)
-                .setContentTitle(task.summary)
+                .setAutoCancel(true)
+                .setColor(context.getApplicationContext().getResources().getColor(R.color.colorPrimary, null))
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentTitle(task.summary)
                 .setContentIntent(getPendingIntentForTask(context, task))
-                .setAutoCancel(true)
                 .setGroup("home.westering56.taskbox.NOTIFICATION_GROUP_KEY");
 
         NotificationManagerCompat.from(context).notify(notificationId, builder.build());
+    }
+
+    private void updateSummaryNotification(@NonNull Context context) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_1")
+                .setSmallIcon(R.drawable.ic_notify_small_icon)
+                .setAutoCancel(true)
+                .setColor(context.getApplicationContext().getResources().getColor(R.color.colorPrimary, null))
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(getPendingIntentForMainActivity(context))
+                .setGroup("home.westering56.taskbox.NOTIFICATION_GROUP_KEY")
+                .setGroupSummary(true)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN);
+
+        NotificationManagerCompat.from(context).notify(NF_ID_SUMMARY, builder.build());
     }
 
     private PendingIntent getPendingIntentForTask(@NonNull Context context, @NonNull final Task task) {
@@ -82,6 +100,12 @@ public class WokenTaskReceiver extends BroadcastReceiver {
         // Include a different request code for each task, otherwise they all get the same pending
         // intent and the task ID extra doesn't go through properly.
         return stackBuilder.getPendingIntent(task.uid, 0);
+    }
+
+    private PendingIntent getPendingIntentForMainActivity(@NonNull Context context) {
+        Log.d(TAG, "Creating pending intent for main activity");
+        Intent intent = new Intent(context, MainActivity.class);
+        return PendingIntent.getActivity(context, 0, intent, 0);
     }
 
 }

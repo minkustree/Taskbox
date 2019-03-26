@@ -202,7 +202,11 @@ public class TaskData {
             Intent intent = new Intent(appContext, WokenTaskReceiver.class);
             // used to determine what became active between now and wakeup, for notification use
             intent.putExtra(WokenTaskReceiver.EXTRA_LAST_SEEN, Instant.now());
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, 0);
+            // If we already have an intent pending, use it - its original 'last seen' time will be
+            // earlier than now. However, cancel the intent once it's been sent, so we don't get
+            // yesterday's 'last seen' times if the intent has already fired and done its job.
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    appContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
             alarmManager.set(AlarmManager.RTC_WAKEUP, nextWakeInstant.toEpochMilli(), pendingIntent);
         } else {
             Log.d(TAG, "No snoozed tasks, no update check scheduled");
@@ -215,6 +219,7 @@ public class TaskData {
      * @param now inclusive
      */
     public List<Task> getNewlyActiveTasks(Instant lastSeen, Instant now) {
+        Log.d(TAG, "Fetching tasks that un-snoozed between " + lastSeen + " and " + now);
         return taskDatabase.taskDao().getNewlyActiveTasks(lastSeen, now);
     }
 
