@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,15 +30,18 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_NEW_TASK   = 1;
     private static final int REQUEST_EDIT_TASK  = 2;
 
-    private TaskData td;
+    private TaskData mTaskData;
     private ListView listView;
     private CoordinatorLayout rootView;
     private TabLayout tabLayout;
+    private UndoClickListener mUndoClickListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
+        mUndoClickListener = new UndoClickListener();
+
         setContentView(R.layout.activity_main);
         rootView = findViewById(R.id.root); // needed for Snackbar to attach to
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -51,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        td = TaskData.getInstance(getApplicationContext());
+        mTaskData = TaskData.getInstance(getApplicationContext());
 
         listView = findViewById(R.id.task_list_view);
         listView.setOnItemClickListener(taskClickedHandler);
@@ -114,18 +118,18 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "updateList");
         switch (tabLayout.getSelectedTabPosition()) {
             case 0: // Active
-                listView.setAdapter(td.getActiveTaskAdapter());
+                listView.setAdapter(mTaskData.getActiveTaskAdapter());
                 break;
             case 1: // Snoozed
-                listView.setAdapter(td.getSnoozedTaskAdapter());
+                listView.setAdapter(mTaskData.getSnoozedTaskAdapter());
                 break;
             case 2: // Done
-                listView.setAdapter(td.getDoneTaskAdapter());
+                listView.setAdapter(mTaskData.getDoneTaskAdapter());
                 break;
             default:
-                listView.setAdapter(td.getActiveTaskAdapter());
+                listView.setAdapter(mTaskData.getActiveTaskAdapter());
         }
-        td.syncAdapters();
+        mTaskData.syncAdapters();
     }
 
     private void showDetailView(long id) {
@@ -138,16 +142,40 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_NEW_TASK);
     }
 
+    /**
+     * Called whenever an undo action button is pressed, e.g. from a Snackbar when returning from
+     * {@link TaskDetailActivity} after making changes.
+     *
+     * Default implementation simply calls {@link TaskData#undoLast()}.
+     */
+    class UndoClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "Undo action clicked");
+            mTaskData.undoLast();
+        }
+    }
+
+    /**
+     * Extract the snooze time from the supplied {@link Intent}'s extras {@link Bundle}.
+     * Looks for a {@link java.time.LocalDateTime} under the key
+     * {@link TaskDetailActivity#RESULT_EXTRA_SNOOZE_UNTIL}
+     */
+    @NonNull
+    private static LocalDateTime snoozeTimeFromIntentExtras(final Intent data) {
+        /*
+         * Extracted into its own method to hide a lot of this ugly null checking and casting
+         */
+        return (LocalDateTime) Objects.requireNonNull(Objects.requireNonNull(Objects.requireNonNull(
+                    data)
+                    .getExtras())
+                    .get(TaskDetailActivity.RESULT_EXTRA_SNOOZE_UNTIL));
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         CharSequence label = null;
-        View.OnClickListener action = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Undo button clicked");
-                TaskData.getInstance(v.getContext()).undoLast();
-            }
-        };
+        View.OnClickListener action = mUndoClickListener; // undo, unless it's a 'created' result
         switch (requestCode) {
             case REQUEST_NEW_TASK: // fall through
             case REQUEST_EDIT_TASK:
@@ -155,8 +183,7 @@ public class MainActivity extends AppCompatActivity {
                     case RESULT_CANCELED:
                         label = "Cancelled"; break;
                     case TaskDetailActivity.RESULT_TASK_CREATED:
-                        action = null;
-                        // fall through
+                        action = null; // No undo action. Fall through
                     case TaskDetailActivity.RESULT_TASK_UPDATED:
                         label = "Task saved"; break;
                     case TaskDetailActivity.RESULT_TASK_DONE:
@@ -166,20 +193,14 @@ public class MainActivity extends AppCompatActivity {
                     case TaskDetailActivity.RESULT_TASK_DELETED:
                         label = "Deleted"; break;
                     case TaskDetailActivity.RESULT_TASK_SNOOZED:
-                        label = "Snoozed";
-                        // wow, this is some C-like errors handling just to be null-safe...
-                        if (data == null) break;
-                        Bundle extras = data.getExtras();
-                        if (extras == null) break;
-                        LocalDateTime until = (LocalDateTime)extras.get(TaskDetailActivity.RESULT_EXTRA_SNOOZE_UNTIL);
-                        if (until == null) break;
+                        LocalDateTime until = snoozeTimeFromIntentExtras(data);
                         label = getString(R.string.task_detail_snoozed_until,
                                 SnoozeTimeFormatter.format(getApplicationContext(), until));
                         break;
                 }
                 if (label != null) {
                     Snackbar snackbar = Snackbar.make(rootView, label, Snackbar.LENGTH_LONG);
-                    if (action != null) { snackbar.setAction("Undo", action); }
+                    if (action != null) { snackbar.setAction(R.string.action_undo, action); }
                     snackbar.show();
                 }
                 break;
@@ -202,10 +223,10 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.menu_action_add_sample:
-                td.addSampleData(getApplicationContext());
+                mTaskData.addSampleData(getApplicationContext());
                 return true;
             case R.id.menu_action_delete_all:
-                td.deleteAllTasks();
+                mTaskData.deleteAllTasks();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

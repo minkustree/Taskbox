@@ -16,4 +16,5 @@
     <string name="snooze_pick_date_time_title">Select date and time</string>
     <string name="snooze_dialog_custom">Custom</string>
     <string name="task_detail_snoozed_until">Snoozed until %1$s</string>
+    <string name="action_undo">Undo</string>
 </resources>
