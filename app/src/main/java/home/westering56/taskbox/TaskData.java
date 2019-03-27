@@ -1,10 +1,9 @@
 package home.westering56.taskbox;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
@@ -15,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -27,7 +25,7 @@ import home.westering56.taskbox.data.room.TaskDatabase;
 public class TaskData {
     private static final String TAG = "TaskData";
 
-    private static TaskData instance;
+    private static TaskData sInstance;
 
     private static class UndoBuffer {
         private @Nullable Task mOldTask;
@@ -64,24 +62,46 @@ public class TaskData {
         }
     }
 
+    private final DataSetObservable mDataSetObservable = new DataSetObservable();
     private final TaskCursorAdapter activeTaskAdapter;
     private final TaskCursorAdapter doneTaskAdapter;
     private final TaskCursorAdapter snoozedTaskAdapter;
     private final TaskDatabase taskDatabase;
     private final UndoBuffer mUndoBuffer;
 
-    private final List<TaskCursorAdapter> adapters = new ArrayList<>();
+    @SuppressWarnings("WeakerAccess")
+    public void registerDataSetObserver(DataSetObserver observer) {
+        mDataSetObservable.registerObserver(observer);
+    }
+
+//    public void unregisterDataSetObserver(DataSetObserver observer) {
+//        mDataSetObservable.unregisterObserver(observer);
+//    }
+
+    /**
+     * Call when the underlying data set has changed, to call each registered {@link DataSetObserver}.
+     * Called automatically when destructive operations happen.
+     */
+    private void notifyDataSetChanged() {
+        mDataSetObservable.notifyChanged();
+    }
 
     static class TaskCursorAdapter extends SimpleCursorAdapter {
-        private final Supplier<Cursor> cursorSupplier;
+        private final Supplier<Cursor> mCursorSupplier;
+        private final DataSetObserver mTaskDataObserver = new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                swapCursor(mCursorSupplier.get());
+            }
+        };
 
         TaskCursorAdapter(Context appContext, int layout, Supplier<Cursor> cursorSupplier, String[] from, int[] to) {
             super(appContext, layout, cursorSupplier.get(), from, to, 0);
-            this.cursorSupplier = cursorSupplier;
+            this.mCursorSupplier = cursorSupplier;
         }
 
-        void sync() {
-            swapCursor(cursorSupplier.get());
+        DataSetObserver getTaskDataObserver() {
+            return mTaskDataObserver;
         }
     }
 
@@ -141,7 +161,7 @@ public class TaskData {
                 return taskDatabase.taskDao().loadAllActive();
             }
         }, new String[] {"summary"}, new int[] {android.R.id.text1});
-        adapters.add(activeTaskAdapter);
+        registerDataSetObserver(activeTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for done tasks
         doneTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
@@ -152,7 +172,7 @@ public class TaskData {
             }
         }, new String[] {"summary", "done_at"}, new int[] {android.R.id.text1, android.R.id.text2});
         doneTaskAdapter.setViewBinder(new DoneFormattingViewBinder());
-        adapters.add(doneTaskAdapter);
+        registerDataSetObserver(doneTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for snoozed tasks
         snoozedTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
@@ -163,15 +183,18 @@ public class TaskData {
             }
         }, new String[] {"summary", "snooze_until"}, new int[] {android.R.id.text1, android.R.id.text2});
         snoozedTaskAdapter.setViewBinder(new SnoozeFormattingViewBinder());
-        adapters.add(snoozedTaskAdapter);
+        registerDataSetObserver(snoozedTaskAdapter.getTaskDataObserver());
+
+        // Schedule next notification wakeup each time the data set changes
+        registerDataSetObserver(SnoozeNotificationManager.getInstance(appContext).getTaskDataObserver());
     }
 
     public static TaskData getInstance(@NonNull Context context) {
         synchronized (TaskData.class) {
-            if (instance == null) {
-                instance = new TaskData(context.getApplicationContext());
+            if (sInstance == null) {
+                sInstance = new TaskData(context.getApplicationContext());
             }
-            return instance;
+            return sInstance;
         }
     }
 
@@ -188,13 +211,13 @@ public class TaskData {
         for (String t : sampleTasks) {
             taskDatabase.taskDao().insert(new Task(t));
         }
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
     public void add(CharSequence taskSummary) {
         mUndoBuffer.clear(); // can't undo this
         taskDatabase.taskDao().insert(new Task(taskSummary));
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
     public Task getTask(long id) {
@@ -205,19 +228,19 @@ public class TaskData {
         Task oldTask = taskDatabase.taskDao().get(task.uid);
         mUndoBuffer.storeUpdate(oldTask, task);
         taskDatabase.taskDao().update(task);
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
     public void deleteTask(Task task) {
         mUndoBuffer.storeDelete(task);
         taskDatabase.taskDao().delete(task);
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
     public void deleteAllTasks() {
         mUndoBuffer.clear(); // cannot undo delete all
         taskDatabase.clearAllTables();
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
     public void undoLast() {
@@ -237,53 +260,23 @@ public class TaskData {
         }
         // Either we undid it, or it was an odd state. Either way, clear the buffer
         mUndoBuffer.clear();
-        syncAdapters();
+        notifyDataSetChanged();
     }
 
-
     /**
-     * Refresh the contents of all adapters managed by this class. Call this after making any
-     * changes to the underlying data, e.g. via the DAO or to be sure that the model has the most
-     * up to date information.
+     * The @{@link Instant} at which the next snoozed task is scheduled to wake.
      */
-    public void syncAdapters() {
-        for (TaskCursorAdapter adapter : adapters) {
-            adapter.sync();
-        }
+    public Instant getNextWakeupInstant() {
+        return taskDatabase.taskDao().getNextWakeupDue();
     }
 
     /**
-     * Schedule a wakeup to check for newly active, previously snoozed tasks.
-     * Usually scheduled for the time that the next snoozed task is due to become active.
-     */
-    public void scheduleNextUpdate(@NonNull Context context) {
-        Instant nextWakeInstant = taskDatabase.taskDao().getNextWakeupDue();
-        if (nextWakeInstant != null) {
-            Log.d(TAG, "Scheduling next update check for " + nextWakeInstant.toString());
-            final Context appContext = context.getApplicationContext();
-            AlarmManager alarmManager = appContext.getSystemService(AlarmManager.class);
-            Intent intent = new Intent(appContext, WokenTaskReceiver.class);
-            // used to determine what became active between now and wakeup, for notification use
-            intent.putExtra(WokenTaskReceiver.EXTRA_LAST_SEEN, Instant.now());
-            // If we already have an intent pending, use it - its original 'last seen' time will be
-            // earlier than now. However, cancel the intent once it's been sent, so we don't get
-            // yesterday's 'last seen' times if the intent has already fired and done its job.
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    appContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, nextWakeInstant.toEpochMilli(), pendingIntent);
-        } else {
-            Log.d(TAG, "No snoozed tasks, no update check scheduled");
-        }
-    }
-
-    /**
-     * Fetch the tasks that have become active between the two specified instants
-     * @param lastSeen exclusive
+     * Fetch the tasks that have become active during the time between the two specified instants.
      * @param now inclusive
      */
-    public List<Task> getNewlyActiveTasks(Instant lastSeen, Instant now) {
-        Log.d(TAG, "Fetching tasks that un-snoozed between " + lastSeen + " and " + now);
-        return taskDatabase.taskDao().getNewlyActiveTasks(lastSeen, now);
+    public List<Task> getNewlyActiveTasks(Instant lastChecked, Instant now) {
+        Log.d(TAG, "Fetching tasks that un-snoozed between " + lastChecked + " and " + now);
+        return taskDatabase.taskDao().getNewlyActiveTasks(lastChecked, now);
     }
 
 }

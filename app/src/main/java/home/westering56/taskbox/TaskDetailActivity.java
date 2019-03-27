@@ -164,7 +164,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
                 setResult(RESULT_TASK_CREATED);
             }
         }
-        taskData.scheduleNextUpdate(getApplicationContext());
         finish();
     }
 
@@ -173,7 +172,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         taskData.deleteTask(task);
         task = null;
         setResult(RESULT_TASK_DELETED);
-        taskData.scheduleNextUpdate(getApplicationContext());
         finish();
     }
 
@@ -182,7 +180,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         task.actionDone();
         taskData.updateTask(task);
         setResult(RESULT_TASK_DONE);
-        taskData.scheduleNextUpdate(getApplicationContext());
         finish();
     }
 
@@ -191,7 +188,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         task.actionReactivate();
         taskData.updateTask(task);
         setResult(RESULT_TASK_REACTIVATED);
-        taskData.scheduleNextUpdate(getApplicationContext());
         finish();
     }
 
@@ -209,7 +205,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         Intent result = new Intent();
         result.putExtra(RESULT_EXTRA_SNOOZE_UNTIL, snoozeUntil);
         setResult(RESULT_TASK_SNOOZED, result);
-        taskData.scheduleNextUpdate(getApplicationContext());
         finish();
     }
 

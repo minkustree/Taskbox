@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
             default:
                 listView.setAdapter(mTaskData.getActiveTaskAdapter());
         }
-        mTaskData.syncAdapters();
     }
 
     private void showDetailView(long id) {

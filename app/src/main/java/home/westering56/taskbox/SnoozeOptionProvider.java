@@ -24,6 +24,7 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 /**
  * Provides relevant snooze option choices.
  */
+@SuppressWarnings("WeakerAccess")
 public class SnoozeOptionProvider {
     private static final String SNOOZE_OPTION_TITLE = "option_title";
     private static final String SNOOZE_OPTION_INSTANT = "option_instant";
