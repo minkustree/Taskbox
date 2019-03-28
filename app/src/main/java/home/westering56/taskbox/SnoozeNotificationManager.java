@@ -64,6 +64,7 @@ public class SnoozeNotificationManager {
         if (nextWakeInstant != null) {
             Log.d(TAG, "Scheduling next notification check for " + nextWakeInstant.toString());
             Intent intent = new Intent(mAppContext, WokenTaskReceiver.class);
+            intent.setAction(WokenTaskReceiver.ACTION_NOTIFY_NEW_ACTIVE_TASKS);
             // used to determine what became active between now and wakeup, for notification use
             intent.putExtra(WokenTaskReceiver.EXTRA_LAST_SEEN, Instant.now());
             // If we already have an intent pending, use it - its original 'last seen' time will be
