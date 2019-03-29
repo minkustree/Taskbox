@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -35,6 +36,47 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     public static final int RESULT_TASK_REACTIVATED = RESULT_FIRST_USER + 4;
     public static final int RESULT_TASK_SNOOZED     = RESULT_FIRST_USER + 5;
     public static final String RESULT_EXTRA_SNOOZE_UNTIL = "snoozeUntil";
+
+    /**
+     * Stores the result of the operation performed by this activity so other activities can
+     * display appropriate UI, even if they didn't call this as startActivityForResult
+     */
+    private static TaskDetailActionResult sActionResult;
+    /**
+     * Used to store result data for MainActivity to pick up via static methods
+     */
+    static class TaskDetailActionResult {
+        private final int mResultCode;
+        @Nullable private final Intent mData;
+
+        TaskDetailActionResult(int resultCode, @Nullable Intent data) {
+            this.mResultCode = resultCode;
+            this.mData = data;
+        }
+
+        int getResultCode() {
+            return mResultCode;
+        }
+
+        @Nullable
+        Intent getData() {
+            return mData;
+        }
+    }
+
+    public static TaskDetailActionResult getActionResultAndClear() {
+        synchronized (TaskDetailActivity.class) {
+            TaskDetailActionResult result = sActionResult;
+            sActionResult = null;
+            return result;
+        }
+    }
+
+    private static void setActionResult(TaskDetailActionResult actionResult) {
+        synchronized (TaskDetailActivity.class) {
+            sActionResult = actionResult;
+        }
+    }
 
     private EditText taskSummary;
     private TextView mSnoozeTimeBanner;
@@ -102,6 +144,12 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        getActionResultAndClear();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_task_detail, menu);
@@ -153,25 +201,34 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     private void onSaveClicked() {
         CharSequence summary = taskSummary.getText();
         if (taskSummary.length() == 0) {
-            setResult(RESULT_CANCELED);
+            setResultAndLastAction(RESULT_CANCELED);
         } else {
             if (task != null) {
                 ensureTask();
                 taskData.updateTask(task);
-                setResult(RESULT_TASK_UPDATED);
+                setResultAndLastAction(RESULT_TASK_UPDATED);
             } else {
                 taskData.add(summary);
-                setResult(RESULT_TASK_CREATED);
+                setResultAndLastAction(RESULT_TASK_CREATED);
             }
         }
         finish();
+    }
+
+    private void setResultAndLastAction(int resultCode) {
+        setResultAndLastAction(resultCode, null);
+    }
+
+    private void setResultAndLastAction(int resultCode, @Nullable Intent intent) {
+        setResult(resultCode, intent);
+        setActionResult(new TaskDetailActionResult(resultCode, intent));
     }
 
     private void onDeleteClicked() {
         ensureTask();
         taskData.deleteTask(task);
         task = null;
-        setResult(RESULT_TASK_DELETED);
+        setResultAndLastAction(RESULT_TASK_DELETED);
         finish();
     }
 
@@ -179,7 +236,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         ensureTask(false);
         task.actionDone();
         taskData.updateTask(task);
-        setResult(RESULT_TASK_DONE);
+        setResultAndLastAction(RESULT_TASK_DONE);
         finish();
     }
 
@@ -187,7 +244,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         ensureTask();
         task.actionReactivate();
         taskData.updateTask(task);
-        setResult(RESULT_TASK_REACTIVATED);
+        setResultAndLastAction(RESULT_TASK_REACTIVATED);
         finish();
     }
 
@@ -204,7 +261,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         taskData.updateTask(task);
         Intent result = new Intent();
         result.putExtra(RESULT_EXTRA_SNOOZE_UNTIL, snoozeUntil);
-        setResult(RESULT_TASK_SNOOZED, result);
+        setResultAndLastAction(RESULT_TASK_SNOOZED, result);
         finish();
     }
 

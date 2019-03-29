@@ -101,6 +101,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        TaskDetailActivity.TaskDetailActionResult actionResult = TaskDetailActivity.getActionResultAndClear();
+        if (actionResult != null) {
+            Log.d(TAG, "Found last action, requesting snackbar display");
+            showSnackbarForDetailsResult(actionResult.getResultCode(), actionResult.getData());
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
         if (tabLayout != null) { tabLayout.clearOnTabSelectedListeners(); }
@@ -173,38 +183,41 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if ((requestCode == REQUEST_NEW_TASK || requestCode == REQUEST_EDIT_TASK) &&
+                resultCode == RESULT_CANCELED) {
+            // cancel can happen in lots of ways. Handle it here, rather than in 'on resume'
+            showSnackbarForDetailsResult(resultCode, data);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void showSnackbarForDetailsResult(int resultCode, @Nullable Intent data) {
         CharSequence label = null;
         View.OnClickListener action = mUndoClickListener; // undo, unless it's a 'created' result
-        switch (requestCode) {
-            case REQUEST_NEW_TASK: // fall through
-            case REQUEST_EDIT_TASK:
-                switch (resultCode) {
-                    case RESULT_CANCELED:
-                        label = "Cancelled"; break;
-                    case TaskDetailActivity.RESULT_TASK_CREATED:
-                        action = null; // No undo action. Fall through
-                    case TaskDetailActivity.RESULT_TASK_UPDATED:
-                        label = "Task saved"; break;
-                    case TaskDetailActivity.RESULT_TASK_DONE:
-                        label = "Marked as done"; break;
-                    case TaskDetailActivity.RESULT_TASK_REACTIVATED:
-                        label = "Marked as active"; break;
-                    case TaskDetailActivity.RESULT_TASK_DELETED:
-                        label = "Deleted"; break;
-                    case TaskDetailActivity.RESULT_TASK_SNOOZED:
-                        LocalDateTime until = snoozeTimeFromIntentExtras(data);
-                        label = getString(R.string.task_detail_snoozed_until,
-                                SnoozeTimeFormatter.format(getApplicationContext(), until));
-                        break;
-                }
-                if (label != null) {
-                    Snackbar snackbar = Snackbar.make(rootView, label, Snackbar.LENGTH_LONG);
-                    if (action != null) { snackbar.setAction(R.string.action_undo, action); }
-                    snackbar.show();
-                }
+        switch (resultCode) {
+            case RESULT_CANCELED:
+                label = "Cancelled"; break;
+            case TaskDetailActivity.RESULT_TASK_CREATED:
+                action = null; // No undo action. Fall through
+            case TaskDetailActivity.RESULT_TASK_UPDATED:
+                label = "Task saved"; break;
+            case TaskDetailActivity.RESULT_TASK_DONE:
+                label = "Marked as done"; break;
+            case TaskDetailActivity.RESULT_TASK_REACTIVATED:
+                label = "Marked as active"; break;
+            case TaskDetailActivity.RESULT_TASK_DELETED:
+                label = "Deleted"; break;
+            case TaskDetailActivity.RESULT_TASK_SNOOZED:
+                LocalDateTime until = snoozeTimeFromIntentExtras(data);
+                label = getString(R.string.task_detail_snoozed_until,
+                        SnoozeTimeFormatter.format(getApplicationContext(), until));
                 break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
+        }
+        if (label != null) {
+            Snackbar snackbar = Snackbar.make(rootView, label, Snackbar.LENGTH_LONG);
+            if (action != null) { snackbar.setAction(R.string.action_undo, action); }
+            snackbar.show();
         }
     }
 
