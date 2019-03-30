@@ -82,7 +82,7 @@ public class TaskData {
      * Call when the underlying data set has changed, to call each registered {@link DataSetObserver}.
      * Called automatically when destructive operations happen.
      */
-    private void notifyDataSetChanged() {
+    public void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
     }
 
@@ -186,7 +186,7 @@ public class TaskData {
         registerDataSetObserver(snoozedTaskAdapter.getTaskDataObserver());
 
         // Schedule next notification wakeup each time the data set changes
-        registerDataSetObserver(SnoozeNotificationManager.getInstance(appContext).getTaskDataObserver());
+        registerDataSetObserver(SnoozeNotificationManager.newTaskDataObserver(appContext));
     }
 
     public static TaskData getInstance(@NonNull Context context) {

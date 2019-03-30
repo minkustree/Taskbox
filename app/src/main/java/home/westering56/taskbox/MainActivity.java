@@ -240,6 +240,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_action_delete_all:
                 mTaskData.deleteAllTasks();
                 return true;
+            case R.id.menu_action_test_notification:
+                SnoozeNotificationManager.testNotification(getApplicationContext());
             default:
                 return super.onOptionsItemSelected(item);
         }
