@@ -258,7 +258,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
 
     private void onSnoozeClicked() {
         // Display a fragment to select a snooze time
-        DialogFragment newFragment = SnoozeDialogFragment.newInstance(this);
+        int taskId = task == null ? -1 : task.uid;
+        DialogFragment newFragment = SnoozeDialogFragment.newInstance(this, taskId);
         newFragment.show(getSupportFragmentManager(), "snooze_dialog");
     }
 

@@ -21,28 +21,27 @@ import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 
 /**
  * Provides relevant snooze option choices.
+ * <p>
+ * This class expects to be re-created by an activity or fragment when configurations change. It
+ * therefore persists no state in memory that can't be recreated.
  */
 public class CustomSnoozeTimeProvider {
-    private static CustomSnoozeTimeProvider sProvider;
 
     private final List<Map<String, Object>> mSnoozeTimes;
+    private final SimpleAdapter mAdapter;
+
     private HashMap<String, Object> mCustom;
-    private SimpleAdapter mAdapter;
 
     private static final String SNOOZE_TIME_NAME = "time_name";
     private static final String SNOOZE_TIME_ADJUSTER = "time_adjuster";
     private static final String SNOOZE_TIME_EXAMPLE = "time_example";
 
-    public static CustomSnoozeTimeProvider getInstance() {
-        synchronized (CustomSnoozeTimeProvider.class) {
-            if (sProvider == null) {
-                sProvider = new CustomSnoozeTimeProvider();
-            }
-        }
-        return sProvider;
-    }
-    private CustomSnoozeTimeProvider() {
+    public CustomSnoozeTimeProvider(@NonNull Context context) {
         mSnoozeTimes = initSnoozeTimes();
+        mAdapter = new SimpleAdapter(context.getApplicationContext(),
+                mSnoozeTimes, R.layout.snooze_time_spinner_dropdown_item,
+                new String[]{SNOOZE_TIME_NAME, SNOOZE_TIME_EXAMPLE},
+                new int[]{R.id.snooze_time_spinner_item_title, R.id.snooze_time_spinner_item_details});
     }
 
     private ArrayList<Map<String, Object>> initSnoozeTimes() {
@@ -72,25 +71,14 @@ public class CustomSnoozeTimeProvider {
         return times;
     }
 
-    public SpinnerAdapter getDefaultAdapter(@NonNull Context context) {
-        synchronized (this) {
-            if (mAdapter == null) {
-                mAdapter = new SimpleAdapter(context.getApplicationContext(),
-                        mSnoozeTimes,
-                        R.layout.snooze_time_spinner_dropdown_item,
-                        new String[]{SNOOZE_TIME_NAME, SNOOZE_TIME_EXAMPLE},
-                        new int[]{
-                                R.id.snooze_time_spinner_item_title,
-                                R.id.snooze_time_spinner_item_details});
-            }
-        }
+    public SpinnerAdapter getAdapter() {
         return mAdapter;
     }
 
     public static LocalTime getLocalTimeAtPosition(AdapterView<?> parent, int position) {
         //noinspection unchecked
-        Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(position);
-        TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
+        Map<String, Object> item = (Map<String, Object>) parent.getItemAtPosition(position);
+        TemporalAdjuster adjuster = (TemporalAdjuster) item.get(SNOOZE_TIME_ADJUSTER);
         return LocalTime.now().with(adjuster);
     }
 
@@ -100,8 +88,8 @@ public class CustomSnoozeTimeProvider {
      */
     public static boolean isCustomPosition(AdapterView<?> parent, int position) {
         //noinspection unchecked
-        Map<String, Object> item = (Map<String, Object>)parent.getItemAtPosition(position);
-        TemporalAdjuster adjuster = (TemporalAdjuster)item.get(SNOOZE_TIME_ADJUSTER);
+        Map<String, Object> item = (Map<String, Object>) parent.getItemAtPosition(position);
+        TemporalAdjuster adjuster = (TemporalAdjuster) item.get(SNOOZE_TIME_ADJUSTER);
         // TemporalAdjuster doesn't override equals(), so testing for instance equivalence will do
         return adjuster == CustomAdjuster;
     }
@@ -118,5 +106,18 @@ public class CustomSnoozeTimeProvider {
 
     public int getCustomPosition() {
         return mSnoozeTimes.indexOf(mCustom);
+    }
+
+    public int getPositionForTime(LocalTime time) {
+        for (int i = 0; i < mSnoozeTimes.size(); i++) {
+            TemporalAdjuster adjuster = (TemporalAdjuster) mSnoozeTimes.get(i).get(SNOOZE_TIME_ADJUSTER);
+            // This works for custom too, as CustomAdjuster performs no adjustment!
+            // Only works if custom is the last item in the list, though.
+            if (time.with(adjuster).equals(time)) {
+                return i;
+            }
+        }
+        // We should not have arrived here - custom entry should have been found and returned above.
+        return getCustomPosition();
     }
 }
