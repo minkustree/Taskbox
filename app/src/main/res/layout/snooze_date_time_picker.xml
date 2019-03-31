@@ -18,7 +18,7 @@
         android:paddingRight="12dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
         tools:text="Thur, 30 Apr" />
-    <!-- padding is 8dp from the spinneritem style and 4 dp from somewhere else ???-->
+    <!-- padding is 8dp from the SpinnerItem style and 4 dp from somewhere else ???-->
 
     <!-- Setting padding here to indent the date text by the same amount as the list item text below
     This is because I can't yet figure out how to have a nice padding around each drop down item
@@ -31,7 +31,6 @@
         android:layout_height="?attr/listPreferredItemHeight"
         android:layout_marginStart="?dialogPreferredPadding"
         android:layout_marginEnd="?dialogPreferredPadding"
-
         tools:listitem="@layout/snooze_time_spinner_dropdown_item" />
 
     <Spinner
@@ -41,6 +40,5 @@
         android:layout_height="?attr/listPreferredItemHeight"
         android:layout_marginStart="?dialogPreferredPadding"
         android:layout_marginEnd="?dialogPreferredPadding"
-        android:entries="@array/repeat_selector_values"
-        tools:listitem="@android:layout/simple_spinner_item" />
+        android:entries="@array/repeat_selector_values" />
 </LinearLayout>
