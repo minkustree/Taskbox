@@ -4,8 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.util.Supplier;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.data.room.TaskDatabase;
@@ -122,6 +125,16 @@ public class TaskData {
                 ((TextView) view).setText(textValue);
                 return true;
             }
+            if (columnIndex == cursor.getColumnIndexOrThrow("rrule")) {
+                if (!cursor.isNull(columnIndex)) {
+                    Drawable icon = AppCompatResources.getDrawable(view.getContext(), R.drawable.ic_autorenew_black_24dp);
+                    view.setVisibility(View.VISIBLE);
+                    ((ImageView) view).setImageDrawable(icon);
+                } else {
+                    view.setVisibility(View.INVISIBLE);
+                }
+                return true;
+            }
             return false;
         }
     }
@@ -175,13 +188,14 @@ public class TaskData {
         registerDataSetObserver(doneTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for snoozed tasks
-        snoozedTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
+        snoozedTaskAdapter = new TaskCursorAdapter(appContext, R.layout.task_list_item, new Supplier<Cursor>() {
 
             @Override
             public Cursor get() {
                 return taskDatabase.taskDao().loadAllSnoozed();
             }
-        }, new String[] {"summary", "snooze_until"}, new int[] {android.R.id.text1, android.R.id.text2});
+        }, new String[] {"summary", "snooze_until", "rrule"},
+                new int[] {android.R.id.text1, android.R.id.text2, R.id.task_list_item_repeat_icon});
         snoozedTaskAdapter.setViewBinder(new SnoozeFormattingViewBinder());
         registerDataSetObserver(snoozedTaskAdapter.getTaskDataObserver());
 
