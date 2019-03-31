@@ -110,14 +110,14 @@ public class TaskData {
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
             if (columnIndex == cursor.getColumnIndexOrThrow("snooze_until")) {
-                final String textValue;
+                final CharSequence textValue;
                 if (cursor.isNull(columnIndex)) {
                     // no snooze data yet, don't expose a value, but to overwrite what might
                     // have been displayed before
                     textValue = "";
                 } else {
-                    textValue = "Snoozed until " + SnoozeTimeFormatter.formatInstant(view.getContext(),
-                            Instant.ofEpochMilli(cursor.getLong(columnIndex)));
+                    Instant until = Instant.ofEpochMilli(cursor.getLong(columnIndex));
+                    textValue = SnoozeTimeFormatter.formatAdapterLine(view.getContext(), until);
                 }
                 ((TextView) view).setText(textValue);
                 return true;

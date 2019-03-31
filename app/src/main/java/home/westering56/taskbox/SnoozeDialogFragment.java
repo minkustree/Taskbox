@@ -7,6 +7,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+
 import java.time.LocalDateTime;
 
 import androidx.annotation.ContentView;
@@ -21,6 +23,7 @@ public class SnoozeDialogFragment extends DialogFragment {
 
     public interface SnoozeOptionListener {
         void onSnoozeOptionSelected(LocalDateTime snoozeUntil);
+        void onSnoozeOptionSelected(LocalDateTime snoozeUntil, RecurrenceRule rule);
     }
 
     public static SnoozeDialogFragment newInstance(SnoozeOptionListener snoozeOptionListener) {

@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 
 import androidx.annotation.NonNull;
+import home.westering56.taskbox.data.room.Task;
 
 class SnoozeTimeFormatter {
     private static final DateTimeFormatter sDateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
@@ -25,7 +26,7 @@ class SnoozeTimeFormatter {
     }
 
     /** Converts the instant to a local date time in the default time zone, and then formats it */
-    public static CharSequence formatInstant(@NonNull final Context context, Instant instant) {
+    private static CharSequence formatInstant(@NonNull final Context context, Instant instant) {
         return format(context, LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
     }
 
@@ -44,5 +45,20 @@ class SnoozeTimeFormatter {
 
     public static CharSequence formatTime(final LocalTime target) {
         return target.format(sTimeFormatter);
+    }
+
+
+    public static CharSequence formatStatusLine(@NonNull Context context, @NonNull Task task) {
+        CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(context, task.snoozeUntil);
+        String buffer = context.getString(R.string.task_detail_snoozed_until, snoozeTime);
+        if (task.isRepeating()) {
+            buffer += "\nRepeats according rule: " + task.rrule;
+        }
+        return buffer;
+    }
+
+    public static CharSequence formatAdapterLine(@NonNull Context context, Instant snoozeUntil) {
+        CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(context, snoozeUntil);
+        return context.getString(R.string.task_detail_snoozed_until, snoozeTime);
     }
 }

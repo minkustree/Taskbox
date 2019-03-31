@@ -40,5 +40,5 @@
         android:layout_height="?attr/listPreferredItemHeight"
         android:layout_marginStart="?dialogPreferredPadding"
         android:layout_marginEnd="?dialogPreferredPadding"
-        android:entries="@array/repeat_selector_values" />
+        tools:entries="@array/repeat_selector_values" />
 </LinearLayout>

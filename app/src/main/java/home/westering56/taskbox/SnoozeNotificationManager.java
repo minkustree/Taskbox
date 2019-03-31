@@ -113,12 +113,13 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
         if (intent.hasExtra(EXTRA_TASK_ID)) {
             int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
             Task task = taskData.getTask(taskId);
-            task.actionDone();
+            task.done();
             taskData.updateTask(task);
 
             if (intent.hasExtra(EXTRA_NOTIFICATION_ID)) {
                 int notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1);
                 Log.d(TAG, "Building replacement 'done/undo?' notification with notification ID" + notificationId);
+                // TODO: Consider having this done screen be different for a 'done' repeating task?
 
                 RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_done);
                 remoteViews.setOnClickPendingIntent(R.id.notification_done_button, getPendingIntentForUndo(context, taskId, notificationId));

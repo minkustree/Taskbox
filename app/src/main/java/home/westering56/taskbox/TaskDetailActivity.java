@@ -13,6 +13,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -234,15 +237,20 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
 
     private void onDoneClicked() {
         ensureTask(false);
-        task.actionDone();
+        task.done();
         taskData.updateTask(task);
-        setResultAndLastAction(RESULT_TASK_DONE);
+        if (task.isSnoozed()) { // repeating task done -> now snoozed until next time
+            // TODO: Consider a different result code?
+            setResultAndLastAction(RESULT_TASK_SNOOZED, buildSnoozedResultIntent(task.snoozeUntil));
+        } else {
+            setResultAndLastAction(RESULT_TASK_DONE);
+        }
         finish();
     }
 
     private void onReactivateClicked() {
         ensureTask();
-        task.actionReactivate();
+        task.reactivate();
         taskData.updateTask(task);
         setResultAndLastAction(RESULT_TASK_REACTIVATED);
         finish();
@@ -256,13 +264,31 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
 
     @Override
     public void onSnoozeOptionSelected(LocalDateTime snoozeUntil) {
+        onSnoozeOptionSelected(snoozeUntil, null);
+    }
+
+    @Override
+    public void onSnoozeOptionSelected(LocalDateTime snoozeUntil, RecurrenceRule rule) {
         ensureTask();
-        task.actionSnooze(ZonedDateTime.of(snoozeUntil, ZoneId.systemDefault()).toInstant());
+        Instant snoozeUntilInstant = ZonedDateTime.of(snoozeUntil, ZoneId.systemDefault()).toInstant();
+        if (rule == null) {
+            task.snooze(snoozeUntilInstant);
+        } else {
+            task.snoozeAndRepeat(snoozeUntilInstant, rule);
+        }
         taskData.updateTask(task);
-        Intent result = new Intent();
-        result.putExtra(RESULT_EXTRA_SNOOZE_UNTIL, snoozeUntil);
-        setResultAndLastAction(RESULT_TASK_SNOOZED, result);
+        setResultAndLastAction(RESULT_TASK_SNOOZED, buildSnoozedResultIntent(snoozeUntil));
         finish();
+    }
+
+    private static Intent buildSnoozedResultIntent(Instant until) {
+        return buildSnoozedResultIntent( LocalDateTime.ofInstant(until, ZoneId.systemDefault()) );
+    }
+
+    private static Intent buildSnoozedResultIntent(LocalDateTime until) {
+        Intent result = new Intent();
+        result.putExtra(RESULT_EXTRA_SNOOZE_UNTIL, until);
+        return result;
     }
 
     private void ensureTask() {
@@ -287,8 +313,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
         if (task == null || !task.isSnoozed()) {
             mSnoozeTimeBanner.setVisibility(View.GONE);
         } else {
-            CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(this, task.snoozeUntil);
-            mSnoozeTimeBanner.setText(getString(R.string.task_detail_snoozed_until, snoozeTime));
+            CharSequence line = SnoozeTimeFormatter.formatStatusLine(this, task);
+            mSnoozeTimeBanner.setText(line);
         }
     }
 }

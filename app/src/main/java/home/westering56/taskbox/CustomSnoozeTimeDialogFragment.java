@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
 import home.westering56.taskbox.fragments.DatePickerFragment;
 import home.westering56.taskbox.fragments.TimePickerFragment;
 
@@ -41,6 +44,7 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
     static class SnoozeCustomModel {
         LocalDate mDate = null;
         LocalTime mTime = null;
+        RecurrenceRule mRule = null;
 
         LocalDateTime toLocalDateTime() {
             // TODO: Guard against mDate and/or mTime being null
@@ -99,6 +103,22 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
         });
         mLastTimeSelectedPosition = 0;
 
+        Spinner mRepeatSelector = view.findViewById(R.id.snooze_custom_repeat_selector);
+        mRepeatSelector.setAdapter(RepeatedTaskAdapterFactory.buildAdapter(requireContext()));
+        // assume "No repeat" is at first position, and custom is at last position
+        mRepeatSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mModel.mRule = ((RepetitionOption)parent.getItemAtPosition(position)).getRule();
+                Log.d(TAG, "Selected repeat pattern: " + mModel.mRule);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         builder .setView(view)
                 .setTitle(R.string.snooze_pick_date_time_title)
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -106,7 +126,11 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
                     public void onClick(DialogInterface dialog, int which) {
                         Log.d(TAG, "Save button clicked");
                         if (mSnoozeOptionListener != null) {
-                            mSnoozeOptionListener.onSnoozeOptionSelected(mModel.toLocalDateTime());
+                            if (mModel.mRule == null) {
+                                mSnoozeOptionListener.onSnoozeOptionSelected(mModel.toLocalDateTime());
+                            } else {
+                                mSnoozeOptionListener.onSnoozeOptionSelected(mModel.toLocalDateTime(), mModel.mRule);
+                            }
                         }
                     }
                 });
