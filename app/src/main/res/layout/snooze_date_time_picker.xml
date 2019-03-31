@@ -5,19 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- TODO: Set padding values dynamically from theme -->
     <TextView
         android:id="@+id/snooze_custom_date_selector"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
         android:layout_height="?attr/listPreferredItemHeight"
-        android:focusable="false"
-        android:textAppearance="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
-        tools:text="Thur, 30 Apr"
         android:layout_marginStart="?dialogPreferredPadding"
         android:layout_marginEnd="?dialogPreferredPadding"
-        android:paddingStart="?listPreferredItemPaddingStart"
-        android:paddingEnd="0dp"
-        />
+        android:focusable="false"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
+        tools:text="Thur, 30 Apr" />
+    <!-- padding is 8dp from the spinneritem style and 4 dp from somewhere else ???-->
+
     <!-- Setting padding here to indent the date text by the same amount as the list item text below
     This is because I can't yet figure out how to have a nice padding around each drop down item
     without over-padding the standard text view entry in the spinner. -->
@@ -29,5 +31,16 @@
         android:layout_height="?attr/listPreferredItemHeight"
         android:layout_marginStart="?dialogPreferredPadding"
         android:layout_marginEnd="?dialogPreferredPadding"
+
+        tools:listitem="@layout/snooze_time_spinner_dropdown_item" />
+
+    <Spinner
+        android:id="@+id/snooze_custom_repeat_selector"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/listPreferredItemHeight"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        android:entries="@array/repeat_selector_values"
         tools:listitem="@android:layout/simple_spinner_item" />
 </LinearLayout>
