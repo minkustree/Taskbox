@@ -21,21 +21,25 @@ import home.westering56.taskbox.SnoozeOptionProvider;
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
 @ContentView(R.layout.snooze_dialog)
-public class SnoozeDialogFragment extends DialogFragment {
+public class SnoozeOptionsDialogFragment extends DialogFragment {
     private static final String TAG = "SnoozeDialog";
     private SnoozeOptionListener mSnoozeOptionListener;
     private int mTaskId;
 
     public interface SnoozeOptionListener {
-        void onSnoozeOptionSelected(LocalDateTime snoozeUntil);
+        /**
+         * @param snoozeUntil the chosen time until which the task will snooze
+         * @param rule {@link RecurrenceRule} that describes how this task repeats after snoozing,
+         *                                   or null if the task does not repeat
+         */
         void onSnoozeOptionSelected(LocalDateTime snoozeUntil, RecurrenceRule rule);
     }
 
     /**
      * @param taskId @{@link home.westering56.taskbox.data.room.Task#uid} of the task we're snoozing, or -1 if no task is stored yet.
      */
-    public static SnoozeDialogFragment newInstance(SnoozeOptionListener snoozeOptionListener, int taskId) {
-        SnoozeDialogFragment fragment = new SnoozeDialogFragment();
+    public static SnoozeOptionsDialogFragment newInstance(SnoozeOptionListener snoozeOptionListener, int taskId) {
+        SnoozeOptionsDialogFragment fragment = new SnoozeOptionsDialogFragment();
         fragment.setSnoozeOptionListener(snoozeOptionListener);
         Bundle args = new Bundle();
         args.putInt(EXTRA_TASK_ID, taskId);
@@ -63,7 +67,7 @@ public class SnoozeDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mSnoozeOptionListener != null) {
                     mSnoozeOptionListener.onSnoozeOptionSelected(
-                            SnoozeOptionProvider.getDateTimeAtPosition(parent, position));
+                            SnoozeOptionProvider.getDateTimeAtPosition(parent, position), null);
                 }
             }
         });
@@ -77,9 +81,9 @@ public class SnoozeDialogFragment extends DialogFragment {
     }
 
     private void showCustomSnoozeTimeDialog() {
-        CustomSnoozeTimeDialogFragment customSnoozeTimeDialogFragment = CustomSnoozeTimeDialogFragment.newInstance(mSnoozeOptionListener, mTaskId);
+        CustomSnoozeOptionsDialogFragment customSnoozeOptionsDialogFragment = CustomSnoozeOptionsDialogFragment.newInstance(mSnoozeOptionListener, mTaskId);
         // TODO: Consider whether user should be able to go back to this dialog or not
         assert getFragmentManager() != null;
-        customSnoozeTimeDialogFragment.show(getFragmentManager(), "snooze_custom");
+        customSnoozeOptionsDialogFragment.show(getFragmentManager(), "snooze_custom");
     }
 }

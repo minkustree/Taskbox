@@ -21,4 +21,5 @@
     <string name="task_status_done">Done</string>
     <string name="menu_action_test_notification">Test Notification</string>
     <string name="task_list_item_repeat_content_description">Repeat symbol</string>
+    <string name="custom_snooze_options_dlg_button_save">Save</string>
 </resources>

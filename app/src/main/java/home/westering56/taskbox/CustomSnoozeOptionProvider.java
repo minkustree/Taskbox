@@ -25,7 +25,7 @@ import static home.westering56.taskbox.Adjusters.MorningAdjuster;
  * This class expects to be re-created by an activity or fragment when configurations change. It
  * therefore persists no state in memory that can't be recreated.
  */
-public class CustomSnoozeTimeProvider {
+public class CustomSnoozeOptionProvider {
 
     private final List<Map<String, Object>> mSnoozeTimes;
     private final SimpleAdapter mAdapter;
@@ -36,7 +36,7 @@ public class CustomSnoozeTimeProvider {
     private static final String SNOOZE_TIME_ADJUSTER = "time_adjuster";
     private static final String SNOOZE_TIME_EXAMPLE = "time_example";
 
-    public CustomSnoozeTimeProvider(@NonNull Context context) {
+    public CustomSnoozeOptionProvider(@NonNull Context context) {
         mSnoozeTimes = initSnoozeTimes();
         mAdapter = new SimpleAdapter(context.getApplicationContext(),
                 mSnoozeTimes, R.layout.snooze_time_spinner_dropdown_item,

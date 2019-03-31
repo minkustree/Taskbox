@@ -26,9 +26,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import home.westering56.taskbox.data.room.Task;
-import home.westering56.taskbox.fragments.SnoozeDialogFragment;
+import home.westering56.taskbox.fragments.SnoozeOptionsDialogFragment;
 
-public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialogFragment.SnoozeOptionListener {
+public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptionsDialogFragment.SnoozeOptionListener {
     private static final String TAG = "TaskDetail";
 
     // Indicates the action the user took within the activity
@@ -260,13 +260,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
     private void onSnoozeClicked() {
         // Display a fragment to select a snooze time
         int taskId = task == null ? -1 : task.uid;
-        DialogFragment newFragment = SnoozeDialogFragment.newInstance(this, taskId);
+        DialogFragment newFragment = SnoozeOptionsDialogFragment.newInstance(this, taskId);
         newFragment.show(getSupportFragmentManager(), "snooze_dialog");
-    }
-
-    @Override
-    public void onSnoozeOptionSelected(LocalDateTime snoozeUntil) {
-        onSnoozeOptionSelected(snoozeUntil, null);
     }
 
     @Override
