@@ -1,4 +1,4 @@
-package home.westering56.taskbox;
+package home.westering56.taskbox.fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +15,8 @@ import androidx.annotation.ContentView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import home.westering56.taskbox.R;
+import home.westering56.taskbox.SnoozeOptionProvider;
 
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 

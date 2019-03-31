@@ -16,7 +16,7 @@ import java.time.temporal.Temporal;
 import androidx.annotation.NonNull;
 import home.westering56.taskbox.data.room.Task;
 
-class SnoozeTimeFormatter {
+public class SnoozeTimeFormatter {
     private static final DateTimeFormatter sDateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
     private static final DateTimeFormatter sThisYearDateFormatter = DateTimeFormatter.ofPattern("eee dd MMM");
     private static final DateTimeFormatter sTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);

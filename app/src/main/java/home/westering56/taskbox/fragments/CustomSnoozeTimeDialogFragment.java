@@ -1,4 +1,4 @@
-package home.westering56.taskbox;
+package home.westering56.taskbox.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -13,19 +13,27 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
+import home.westering56.taskbox.CustomSnoozeTimeProvider;
+import home.westering56.taskbox.R;
+import home.westering56.taskbox.RepeatedTaskAdapterFactory;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
+import home.westering56.taskbox.SnoozeTimeFormatter;
+import home.westering56.taskbox.TaskData;
 import home.westering56.taskbox.data.room.Task;
-import home.westering56.taskbox.fragments.DatePickerFragment;
-import home.westering56.taskbox.fragments.TimePickerFragment;
 
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
@@ -263,5 +271,39 @@ public class CustomSnoozeTimeDialogFragment extends DialogFragment
 
     private void revertToLastSelectedTimePosition() {
         mTimeSelector.setSelection(mModel.mLastTimeSelectedPosition);
+    }
+
+    /*
+     * View model implementation
+     */
+    public static class SnoozeCustomDataViewModel extends ViewModel {
+        public LocalDate mDate = null;
+        public LocalTime mTime = null;
+        public RecurrenceRule mRule = null;
+
+        public int mLastTimeSelectedPosition = 0;
+
+        private boolean mLoaded = false;
+
+        /** If {@link #mDate} or {@link #mTime} are null, will throw a {@link NullPointerException} */
+        public LocalDateTime toLocalDateTime() {
+            return LocalDateTime.of(mDate, mTime);
+        }
+
+        public void loadFrom(Task t) {
+            if (!mLoaded) { // load once only
+                /* Active tasks may still have snoozeUntil set from when they last woke.
+                   Use t.isSnoozed() over t.snoozeUntil != null to avoid restoring old snooze times. */
+                if (t.isSnoozed()) {
+                    LocalDateTime localDateTime = LocalDateTime.ofInstant(t.snoozeUntil, ZoneId.systemDefault());
+                    mDate = localDateTime.toLocalDate();
+                    mTime = localDateTime.toLocalTime();
+                }
+                if (t.isRepeating()) {
+                    mRule = t.rrule;
+                }
+                mLoaded = true;
+            }
+        }
     }
 }

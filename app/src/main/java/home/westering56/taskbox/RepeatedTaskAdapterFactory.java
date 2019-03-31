@@ -9,7 +9,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-class RepeatedTaskAdapterFactory {
+public class RepeatedTaskAdapterFactory {
 
     public static class RepetitionOption {
         final String mLabel;

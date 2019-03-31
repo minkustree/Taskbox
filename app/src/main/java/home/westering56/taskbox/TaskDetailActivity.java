@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import home.westering56.taskbox.data.room.Task;
+import home.westering56.taskbox.fragments.SnoozeDialogFragment;
 
 public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialogFragment.SnoozeOptionListener {
     private static final String TAG = "TaskDetail";
