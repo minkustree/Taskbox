@@ -120,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
     private final AdapterView.OnItemClickListener taskClickedHandler = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            showDetailView(id);
+            // We know that Task.uid is an int, not a long, so can cast safely here
+            showDetailView((int)id);
         }
     };
 
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showDetailView(long id) {
+    private void showDetailView(int id) {
         Intent intent = new Intent(this, TaskDetailActivity.class);
         intent.putExtra(EXTRA_TASK_ID, id);
         startActivityForResult(intent, REQUEST_EDIT_TASK);

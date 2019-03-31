@@ -129,7 +129,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeDialo
 
         // New task or existing task?
         Intent intent = getIntent();
-        long id = intent.getLongExtra(MainActivity.EXTRA_TASK_ID, -1);
+        int id = intent.getIntExtra(MainActivity.EXTRA_TASK_ID, -1);
         if (id != -1) { task = taskData.getTask(id); }
         Log.d(TAG, "Task ID was " + id + ", found task " + task);
         if (task != null) {

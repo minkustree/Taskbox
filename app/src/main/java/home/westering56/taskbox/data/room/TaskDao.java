@@ -38,7 +38,7 @@ public abstract class TaskDao {
     public Instant getNextWakeupDue() { return getNextTaskToWakeupAfter(Instant.now()); }
 
     @Query("SELECT * FROM task WHERE _id = :id LIMIT 1")
-    public abstract Task get(long id);
+    public abstract Task get(int id);
 
     @Insert
     public abstract void insert(Task task);

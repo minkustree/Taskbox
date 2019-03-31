@@ -220,7 +220,7 @@ public class TaskData {
         notifyDataSetChanged();
     }
 
-    public Task getTask(long id) {
+    public Task getTask(int id) {
         return taskDatabase.taskDao().get(id);
     }
 

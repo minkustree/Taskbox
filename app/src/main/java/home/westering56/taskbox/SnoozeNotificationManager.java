@@ -111,7 +111,7 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
         Log.d(TAG, "Notification done clicked");
         TaskData taskData = TaskData.getInstance(context);
         if (intent.hasExtra(EXTRA_TASK_ID)) {
-            long taskId = intent.getLongExtra(EXTRA_TASK_ID, -1);
+            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
             Task task = taskData.getTask(taskId);
             task.actionDone();
             taskData.updateTask(task);
@@ -145,7 +145,7 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
     private void onNotificationActionUndo(Context context, Intent intent) {
         Log.d(TAG, "Notification undo");
         if (intent.hasExtra(EXTRA_TASK_ID)) {
-            long taskId = intent.getLongExtra(EXTRA_TASK_ID, -1);
+            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
             TaskData taskData = TaskData.getInstance(context);
             taskData.undoLast();
             if (intent.hasExtra(EXTRA_NOTIFICATION_ID)) {
@@ -304,7 +304,7 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
     private static PendingIntent getPendingIntentForTask(Context context, @NonNull final Task task) {
         Intent taskDetailIntent = new Intent(context, TaskDetailActivity.class);
         Log.d(TAG, "Creating pending intent for task '" + task.summary + "' with ID " + task.uid);
-        taskDetailIntent.putExtra(EXTRA_TASK_ID, Long.valueOf(task.uid));
+        taskDetailIntent.putExtra(EXTRA_TASK_ID, task.uid);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(taskDetailIntent);
         // don't re-use pending intents, as each pending intent points to a different task, and
@@ -339,7 +339,7 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
         return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
-    private static PendingIntent getPendingIntentForDone(@NonNull Context context, long taskId, int notificationId) {
+    private static PendingIntent getPendingIntentForDone(@NonNull Context context, int taskId, int notificationId) {
         Log.d(TAG, "Creating pending intent for notification done action, notification id: " + notificationId);
         Intent intent = new Intent(context, SnoozeNotificationManager.class);
         intent.setAction(ACTION_NOTIFICATION_DONE);
@@ -348,7 +348,7 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
         return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private static PendingIntent getPendingIntentForUndo(@NonNull Context context, long taskId, int notificationId) {
+    private static PendingIntent getPendingIntentForUndo(@NonNull Context context, int taskId, int notificationId) {
         Log.d(TAG, "Creating pending intent for notification undo action, notification id: " + notificationId);
         Intent intent = new Intent(context, SnoozeNotificationManager.class);
         intent.setAction(ACTION_NOTIFICATION_UNDO);
