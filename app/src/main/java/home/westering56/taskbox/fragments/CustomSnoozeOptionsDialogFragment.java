@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import home.westering56.taskbox.CustomSnoozeOptionProvider;
 import home.westering56.taskbox.R;
@@ -67,7 +68,7 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
         return fragment;
     }
 
-    private SnoozeCustomDataViewModel mModel;
+    private CustomSnoozeViewModel mModel;
     private CustomSnoozeOptionProvider mCustomSnoozeOptionProvider;
     private SnoozeOptionsDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
 
@@ -89,14 +90,16 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
     @Override
     @SuppressLint("InflateParams")
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        mModel = ViewModelProviders.of(this).get(SnoozeCustomDataViewModel.class);
-        mCustomSnoozeOptionProvider = new CustomSnoozeOptionProvider(requireContext());
+        // fetch the task ID (-1 if there's no task)
         Bundle args = getArguments();
-        if (args != null && args.containsKey(EXTRA_TASK_ID)) {
-            int taskId = args.getInt(EXTRA_TASK_ID);
-            Task t = TaskData.getInstance(requireContext()).getTask(taskId);
-            mModel.loadFrom(t);
-        }
+        int taskId = (args != null && args.containsKey(EXTRA_TASK_ID)) ? args.getInt(EXTRA_TASK_ID) : -1;
+
+        // set up the model
+        CustomSnoozeViewModel.Factory factory = new CustomSnoozeViewModel.Factory(
+                TaskData.getInstance(requireContext()), taskId);
+        mModel = ViewModelProviders.of(this, factory).get(CustomSnoozeViewModel.class);
+
+        mCustomSnoozeOptionProvider = new CustomSnoozeOptionProvider(requireContext());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -274,17 +277,44 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
         mTimeSelector.setSelection(mModel.mLastTimeSelectedPosition);
     }
 
+
     /*
-     * View model implementation
+     * View model implementation, holds the data for this fragment
      */
-    public static class SnoozeCustomDataViewModel extends ViewModel {
+    public static class CustomSnoozeViewModel extends ViewModel {
+
+        public static class Factory implements ViewModelProvider.Factory {
+            private final TaskData factoryData;
+            private final int factoryId;
+
+            public Factory(TaskData data, int taskId) {
+                factoryData = data;
+                factoryId = taskId;
+            }
+
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                if (!modelClass.isAssignableFrom(CustomSnoozeViewModel.class)) {
+                    throw new IllegalArgumentException("Unknown ViewModel class");
+                }
+                //noinspection unchecked
+                return (T) new CustomSnoozeViewModel(factoryData, factoryId);
+            }
+        }
+
         public LocalDate mDate = null;
         public LocalTime mTime = null;
         public RecurrenceRule mRule = null;
 
         public int mLastTimeSelectedPosition = 0;
 
-        private boolean mLoaded = false;
+        public CustomSnoozeViewModel(TaskData taskData, int taskId) {
+            if (taskId != -1) { // only load if there's an existing task, else start from clean
+                Task t = taskData.getTask(taskId);
+                loadFrom(t);
+            }
+        }
 
         /**
          * If {@link #mDate} or {@link #mTime} are null, will throw a {@link NullPointerException}
@@ -293,19 +323,16 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
             return LocalDateTime.of(mDate, mTime);
         }
 
-        public void loadFrom(Task t) {
-            if (!mLoaded) { // load once only
-                /* Active tasks may still have snoozeUntil set from when they last woke.
-                   Use t.isSnoozed() over t.snoozeUntil != null to avoid restoring old snooze times. */
-                if (t.isSnoozed()) {
-                    LocalDateTime localDateTime = LocalDateTime.ofInstant(t.snoozeUntil, ZoneId.systemDefault());
-                    mDate = localDateTime.toLocalDate();
-                    mTime = localDateTime.toLocalTime();
-                }
-                if (t.isRepeating()) {
-                    mRule = t.rrule;
-                }
-                mLoaded = true;
+        private void loadFrom(Task t) {
+            /* Active tasks may still have snoozeUntil set from when they last woke.
+               Use t.isSnoozed() over t.snoozeUntil != null to avoid restoring old snooze times. */
+            if (t.isSnoozed()) {
+                LocalDateTime localDateTime = LocalDateTime.ofInstant(t.snoozeUntil, ZoneId.systemDefault());
+                mDate = localDateTime.toLocalDate();
+                mTime = localDateTime.toLocalTime();
+            }
+            if (t.isRepeating()) {
+                mRule = t.rrule;
             }
         }
     }
