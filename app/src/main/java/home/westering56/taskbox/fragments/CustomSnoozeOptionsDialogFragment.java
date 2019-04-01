@@ -185,10 +185,11 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
             // Set the spinner to be the position matching the time data
             mTimeSelector.setSelection(position);
         }
-        if (mModel.mRule != null) {
-            // TODO: Set the spinner to be the position matching the rule data
-            mRepeatSelector.setSelection(0);
-        }
+        Log.d(TAG, "Determining repeat spinner position for rule: " + mModel.mRule);
+        // if mRule is null, this should still select 'no repeat'
+        int position = RepeatedTaskAdapterFactory.getPositionForRule(mRepeatSelector.getAdapter(), mModel.mRule);
+        Log.d(TAG, "Repeat spinner position should be: " + position);
+        mRepeatSelector.setSelection(position == -1 ? 0 : position); // force 'not found' (-1) to be the default list entry
     }
 
     /*
