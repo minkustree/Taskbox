@@ -2,7 +2,9 @@ package home.westering56.taskbox.fragments;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
@@ -11,7 +13,6 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 
 import java.time.LocalDateTime;
 
-import androidx.annotation.ContentView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -20,7 +21,6 @@ import home.westering56.taskbox.SnoozeOptionProvider;
 
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
-@ContentView(R.layout.snooze_dialog)
 public class SnoozeOptionsDialogFragment extends DialogFragment {
     private static final String TAG = "SnoozeDialog";
     private SnoozeOptionListener mSnoozeOptionListener;
@@ -49,6 +49,13 @@ public class SnoozeOptionsDialogFragment extends DialogFragment {
 
     private void setSnoozeOptionListener(SnoozeOptionListener listener) {
         mSnoozeOptionListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.snooze_dialog, container, false);
     }
 
     @Override

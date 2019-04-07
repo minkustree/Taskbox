@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import home.westering56.taskbox.fragments.RecurrencePickerDialog;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TaskboxMain";
@@ -241,8 +242,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_action_delete_all:
                 mTaskData.deleteAllTasks();
                 return true;
-            case R.id.menu_action_test_notification:
-                SnoozeNotificationManager.testNotification(getApplicationContext());
+            case R.id.menu_action_test_something:
+                RecurrencePickerDialog.test(null, getSupportFragmentManager());
             default:
                 return super.onOptionsItemSelected(item);
         }

@@ -26,4 +26,15 @@
         <item>Monthly</item>
         <item>Yearly</item>
     </string-array>
+    <string-array name="custom_repeat_freq_spinner_values">
+        <item>days</item>
+        <item>weeks</item>
+        <item>months</item>
+        <item>years</item>
+    </string-array>
+    <string-array name="custom_repeat_ending_spinner_values">
+        <item>Forever</item>
+        <item>Until a particular date</item>
+        <item>Until a particular time</item>
+    </string-array>
 </resources>

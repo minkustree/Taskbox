@@ -34,7 +34,7 @@ public class RepeatedTaskAdapterFactory {
             RepetitionOption that = (RepetitionOption) o;
             // if either is null, they're equal only if the other is null too
             if (this.mRule == null) return that.mRule == null;
-            if (that.mRule == null) return this.mRule == null;
+            if (that.mRule == null) return false; // i.e. this.mRule == null, which is always false after the previous line.
             // if we get through all that, test for rule string equality
             return this.mRule.toString().equals(that.mRule.toString());
         }

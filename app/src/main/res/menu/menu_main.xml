@@ -10,6 +10,6 @@
         android:id="@+id/menu_action_delete_all"
         android:title="@string/menu_action_delete_all" />
     <item
-        android:id="@+id/menu_action_test_notification"
-        android:title="@string/menu_action_test_notification" />
+        android:id="@+id/menu_action_test_something"
+        android:title="@string/menu_action_test_something" />
 </menu>

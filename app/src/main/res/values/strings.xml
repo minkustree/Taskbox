@@ -19,7 +19,17 @@
     <string name="action_undo">Undo</string>
     <string name="notification_group_key">home.westering56.taskbox.NOTIFICATION_GROUP_KEY</string>
     <string name="task_status_done">Done</string>
-    <string name="menu_action_test_notification">Test Notification</string>
+    <string name="menu_action_test_something">Test something</string>
     <string name="task_list_item_repeat_content_description">Repeat symbol</string>
     <string name="custom_snooze_options_dlg_button_save">Save</string>
+    <string name="snooze_custom_repeat_dialog_repeat_every">Repeat every</string>
+    <string name="snooze_custom_repeat_dialog_repeat_on">Repeat on</string>
+    <string name="snooze_custom_repeat_weekly_label_mon">Mon</string>
+    <string name="snooze_custom_repeat_weekly_label_tue">Tue</string>
+    <string name="snooze_custom_repeat_weekly_label_wed">Wed</string>
+    <string name="snooze_custom_repeat_weekly_label_thu">Thu</string>
+    <string name="snooze_custom_repeat_weekly_label_fri">Fri</string>
+    <string name="snooze_custom_repeat_weekly_label_sat">Sat</string>
+    <string name="snooze_custom_repeat_weekly_label_sun">Sun</string>
+    <string name="snooze_custom_repeat_dialog_button_done_text">Done</string>
 </resources>

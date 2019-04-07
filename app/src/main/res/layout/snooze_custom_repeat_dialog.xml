@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="?attr/dialogPreferredPadding">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:labelFor="@id/snooze_custom_repeat_interval_value"
+        android:text="@string/snooze_custom_repeat_dialog_repeat_every"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+    <LinearLayout
+        android:id="@+id/snooze_custom_repeat_dialog_interval_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/snooze_custom_repeat_interval_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="2"
+            android:focusedByDefault="true"
+            android:gravity="center_horizontal"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            tools:text="1">
+
+            <requestFocus />
+        </EditText>
+
+        <Spinner
+            android:id="@+id/snooze_custom_repeat_dialog_freq_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            tools:entries="@array/custom_repeat_freq_spinner_values" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/snooze_custom_repeat_dialog_weekly_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/snooze_custom_repeat_dialog_weekly_repeat_on"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/snooze_custom_repeat_interval_value"
+            android:text="@string/snooze_custom_repeat_dialog_repeat_on"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ToggleButton
+                android:id="@+id/mon_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_mon"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_mon"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_mon" />
+
+            <ToggleButton
+                android:id="@+id/tue_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_tue"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_tue"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_tue" />
+
+            <ToggleButton
+                android:id="@+id/wed_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_wed"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_wed"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_wed" />
+
+            <ToggleButton
+                android:id="@+id/thu_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_thu"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_thu"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_thu" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <ToggleButton
+                android:id="@+id/fri_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_fri"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_fri"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_fri" />
+
+            <ToggleButton
+                android:id="@+id/sat_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_sat"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_sat"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_sat" />
+
+            <ToggleButton
+                android:id="@+id/sun_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_sun"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_sun"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_sun" />
+
+            <ToggleButton
+                android:id="@+id/placeholder_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="@string/snooze_custom_repeat_weekly_label_mon"
+                android:textOff="@string/snooze_custom_repeat_weekly_label_mon"
+                android:textOn="@string/snooze_custom_repeat_weekly_label_mon"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <include layout="@layout/snooze_custom_repeat_dialog_monthly" />
+
+    <LinearLayout
+        android:id="@+id/snooze_custom_repeat_dialog_ending_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/custom_repeat_ending_spinner_values" />
+
+        <EditText
+            android:id="@+id/editText3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="5"
+            android:inputType="date"
+            android:importantForAutofill="no"
+            tools:text="30/04" />
+
+        <EditText
+            android:id="@+id/editText4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="3"
+            android:inputType="number"
+            android:importantForAutofill="no"
+            tools:text="42" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="event(s)" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/snooze_custom_repeat_dialog_button_done"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/snooze_custom_repeat_dialog_button_done_text" />
+
+</LinearLayout>
