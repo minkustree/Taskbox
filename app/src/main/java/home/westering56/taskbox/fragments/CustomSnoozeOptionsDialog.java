@@ -39,7 +39,7 @@ import home.westering56.taskbox.data.room.Task;
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
 
-public class CustomSnoozeOptionsDialogFragment extends DialogFragment
+public class CustomSnoozeOptionsDialog extends DialogFragment
         implements DatePickerFragment.CancellableOnDateSetListener,
         TimePickerFragment.CancellableOnTimeSetListener,
         DialogInterface.OnClickListener {
@@ -59,8 +59,8 @@ public class CustomSnoozeOptionsDialogFragment extends DialogFragment
     /**
      * @param taskId @{@link home.westering56.taskbox.data.room.Task#uid} of the task we're snoozing, or -1 if no task is stored yet.
      */
-    public static CustomSnoozeOptionsDialogFragment newInstance(@NonNull SnoozeOptionsDialogFragment.SnoozeOptionListener listener, int taskId) {
-        CustomSnoozeOptionsDialogFragment fragment = new CustomSnoozeOptionsDialogFragment();
+    public static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionsDialogFragment.SnoozeOptionListener listener, int taskId) {
+        CustomSnoozeOptionsDialog fragment = new CustomSnoozeOptionsDialog();
         fragment.setSnoozeOptionListener(listener);
         Bundle args = new Bundle();
         args.putInt(EXTRA_TASK_ID, taskId);
