@@ -156,13 +156,13 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
         mMonthlyView = view.findViewById(R.id.snooze_custom_repeat_dialog_monthly_layout);
 
         mWeekdayButtons = new ToggleButton[7];
-        mWeekdayButtons[0] = view.findViewById(R.id.sun_button);
-        mWeekdayButtons[1] = view.findViewById(R.id.mon_button);
-        mWeekdayButtons[2] = view.findViewById(R.id.tue_button);
-        mWeekdayButtons[3] = view.findViewById(R.id.wed_button);
-        mWeekdayButtons[4] = view.findViewById(R.id.thu_button);
-        mWeekdayButtons[5] = view.findViewById(R.id.fri_button);
-        mWeekdayButtons[6] = view.findViewById(R.id.sat_button);
+        mWeekdayButtons[Weekday.SU.ordinal()] = view.findViewById(R.id.sun_button);
+        mWeekdayButtons[Weekday.MO.ordinal()] = view.findViewById(R.id.mon_button);
+        mWeekdayButtons[Weekday.TU.ordinal()] = view.findViewById(R.id.tue_button);
+        mWeekdayButtons[Weekday.WE.ordinal()] = view.findViewById(R.id.wed_button);
+        mWeekdayButtons[Weekday.TH.ordinal()] = view.findViewById(R.id.thu_button);
+        mWeekdayButtons[Weekday.FR.ordinal()] = view.findViewById(R.id.fri_button);
+        mWeekdayButtons[Weekday.SA.ordinal()] = view.findViewById(R.id.sat_button);
         for (ToggleButton weekdayButton : mWeekdayButtons) {
             weekdayButton.setOnCheckedChangeListener(this);
         }
