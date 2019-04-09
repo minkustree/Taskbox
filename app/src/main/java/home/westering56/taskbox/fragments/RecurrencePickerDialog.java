@@ -1,5 +1,6 @@
 package home.westering56.taskbox.fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,6 +45,7 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
 
     public interface OnRecurrencePickListener {
         void onRecurrencePicked(@NonNull RecurrenceRule rule);
+        void onRecurrencePickerCancelled();
     }
 
     /*
@@ -178,6 +180,12 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
         });
 
         updateDialog();
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        mListener.onRecurrencePickerCancelled();
     }
 
     private void initModelFromArguments() {

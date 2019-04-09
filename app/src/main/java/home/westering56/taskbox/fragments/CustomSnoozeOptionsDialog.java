@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,18 +42,9 @@ import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
 public class CustomSnoozeOptionsDialog extends DialogFragment
         implements DatePickerFragment.CancellableOnDateSetListener,
+        AdapterView.OnItemSelectedListener,
         TimePickerFragment.CancellableOnTimeSetListener,
-        DialogInterface.OnClickListener {
-
-    private abstract class ABSOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
-
-        @Override
-        public abstract void onItemSelected(AdapterView<?> parent, View view, int position, long id);
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
-    }
+        DialogInterface.OnClickListener, RecurrencePickerDialog.OnRecurrencePickListener {
 
     private static final String TAG = "CustomSnoozeTimeDlg";
 
@@ -127,19 +119,8 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
                 showDatePickerFragment();
             }
         });
-        mTimeSelector.setOnItemSelectedListener(new ABSOnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onTimeItemSelected(parent, position);
-            }
-        });
-        mRepeatSelector.setOnItemSelectedListener(new ABSOnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mModel.mRule = ((RepetitionOption) parent.getItemAtPosition(position)).getRule();
-                Log.d(TAG, "Selected repeat pattern: " + mModel.mRule);
-            }
-        });
+        mTimeSelector.setOnItemSelectedListener(this);
+        mRepeatSelector.setOnItemSelectedListener(this);
 
         // Construct the dialog and continue
         builder.setView(view).setTitle(R.string.snooze_pick_date_time_title)
@@ -161,7 +142,6 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     /**
      * Called when the dialog's positive button has been clicked to dispatch the
      * chosen custom snooze option result to the waiting listener.
-     *
      */
     @Override
     public void onClick(DialogInterface dialog, int which) {
@@ -184,13 +164,35 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             }
             // Set the spinner to be the position matching the time data
             mTimeSelector.setSelection(position);
+            mModel.mLastTimeSelectedPosition = position;
         }
+        // mModel.mRule
         Log.d(TAG, "Determining repeat spinner position for rule: " + mModel.mRule);
-        // if mRule is null, this should still select 'no repeat'
-        int position = RepeatedTaskAdapterFactory.getPositionForRule(mRepeatSelector.getAdapter(), mModel.mRule);
+        // will create or update the 'existing custom' position if mRule is not already in there
+        int position = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(mRepeatSelector.getAdapter(), mModel.mRule);
         Log.d(TAG, "Repeat spinner position should be: " + position);
-        mRepeatSelector.setSelection(position == -1 ? 0 : position); // force 'not found' (-1) to be the default list entry
+        mRepeatSelector.setSelection(position);
+        mModel.mLastRepeatSelectedPosition = position;
+
     }
+
+    /*
+     * Item selected methods
+     */
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, String.format("onItemSelected: parent=%s, view=%s, position=%d, id=%d", parent, view, position, id));
+        if (parent == mTimeSelector) {
+            onTimeItemSelected(parent, position);
+        }
+        if (parent == mRepeatSelector) {
+            onRepeatOptionSelected(parent, position);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) { /* no-op */ }
 
     /*
      * Date picking methods
@@ -221,16 +223,73 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             Objects.requireNonNull(getDialog()).cancel();
         }
     }
+
+
+    /*
+     * Repetition picking methods
+     *
+     * The repetition spinner list looks like:
+     *
+     * (Existing custom option)
+     * No repeat
+     * Daily
+     * Weekly
+     * Monthly
+     * Yearly
+     * Custom ...
+     *
+     * Where (Existing custom option) only exists if a custom rule has been set that doesn't match
+     * any of the other rules. If the user selects any other standard option, the (Existing custom
+     * option) entry disappears. If the user selects Custom .. and selects a new custom option, it
+     * sets or replaces the (existing custom option). If the user selects Custom.. and cancels,
+     * the original option is restored (even if it's existing custom option).
+     */
+    private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
+        //noinspection unchecked
+        final ArrayAdapter<RepetitionOption> adapter = (ArrayAdapter<RepetitionOption>) parent.getAdapter();
+        if (position == RepeatedTaskAdapterFactory.getPositionForCustomPicker(adapter)) {
+            showRecurrencePickerDialog();
+        } else {
+            // update the model with the rule from the position we selected
+            mModel.mRule = ((RepetitionOption) parent.getItemAtPosition(position)).getRule();
+            Log.d(TAG, "Selected repeat pattern: " + mModel.mRule);
+            mModel.mLastRepeatSelectedPosition = position;
+            // if we didn't pick the existing custom rule, remove it from the list of options
+            if (RepeatedTaskAdapterFactory.removeCustomEntryIfNotSelected(adapter, mModel.mRule)) {
+                // the data in the set changed - update selected position,
+                mRepeatSelector.setSelection(
+                        RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(adapter, mModel.mRule));
+            }
+        }
+    }
+
+    private void showRecurrencePickerDialog() {
+        RecurrencePickerDialog dialog = RecurrencePickerDialog.newInstance(this, mModel.mRule);
+        assert getFragmentManager() != null;
+        dialog.show(getFragmentManager(), "repeat_dialog");
+    }
+
+    @Override
+    public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
+        // Continue with setting the recurrence rule
+        Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
+        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(mRepeatSelector.getAdapter(), rule);
+        // update the selected postion to be the newly picked custom rule
+        Log.d(TAG, "Updating repeat selector spinner to select position " + pos);
+        mRepeatSelector.setSelection(pos);
+        // assume onRepeatOption will update mModel.mRule mLastRepeatSelectedPosition
+    }
+
+    @Override
+    public void onRecurrencePickerCancelled() {
+        Log.d(TAG, "Recurrence picker cancelled. Reverting to last selected repeat value");
+        // Restore old repeat position
+        mRepeatSelector.setSelection(mModel.mLastRepeatSelectedPosition);
+    }
+
     /*
      * Time picking methods
      */
-
-    private void showTimePickerFragment() {
-        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this);
-        // TODO: Put mModel.mTime into the arguments if it's there already
-        assert getFragmentManager() != null;
-        timePickerFragment.show(getFragmentManager(), "snooze_time_picker");
-    }
 
     /*
      * Time picking methods: happy path
@@ -247,6 +306,13 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             saveLastSelectedTimePosition();
             updateUiFromViewModel(); // not strictly necessary, but is a consistent pattern for future use
         }
+    }
+
+    private void showTimePickerFragment() {
+        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this);
+        // TODO: Put mModel.mTime into the arguments if it's there already
+        assert getFragmentManager() != null;
+        timePickerFragment.show(getFragmentManager(), "snooze_time_picker");
     }
 
     @Override
@@ -309,6 +375,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         public RecurrenceRule mRule = null;
 
         public int mLastTimeSelectedPosition = 0;
+        public int mLastRepeatSelectedPosition = 0;
 
         public CustomSnoozeViewModel(TaskData taskData, int taskId) {
             if (taskId != -1) { // only load if there's an existing task, else start from clean
