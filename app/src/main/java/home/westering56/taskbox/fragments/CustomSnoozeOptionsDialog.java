@@ -248,7 +248,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
         //noinspection unchecked
         final CustomSpinnerAdapter adapter = (CustomSpinnerAdapter) parent.getAdapter();
-        if (position == RepeatedTaskAdapterFactory.getPositionForCustomPicker(adapter)) {
+        if (position == adapter.getCustomPickPosition()) {
             showRecurrencePickerDialog();
         } else {
             // update the model with the rule from the position we selected

@@ -1,7 +1,6 @@
 package home.westering56.taskbox;
 
 import android.content.Context;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
 
@@ -21,7 +20,6 @@ public class RepeatedTaskAdapterFactory {
     private static final RepetitionOption WEEKLY_REPEAT = new RepetitionOption("Weekly", new RecurrenceRule(Freq.WEEKLY));
     private static final RepetitionOption MONTHLY_REPEAT = new RepetitionOption("Monthly", new RecurrenceRule(Freq.MONTHLY));
     private static final RepetitionOption YEARLY_REPEAT = new RepetitionOption("Yearly", new RecurrenceRule(Freq.YEARLY));
-    private static final RepetitionOption PICK_CUSTOM_REPEAT = new RepetitionOption("Custom...", new RecurrenceRule(Freq.SECONDLY)); // sentinel RecurrenceRule value
 
     public static class RepetitionOption {
         final String mLabel;
@@ -69,9 +67,8 @@ public class RepeatedTaskAdapterFactory {
         adapter.add(WEEKLY_REPEAT);
         adapter.add(MONTHLY_REPEAT);
         adapter.add(YEARLY_REPEAT);
-        // always at the end of the list - if not, change getPositionForCustomPicker()
-        adapter.add(PICK_CUSTOM_REPEAT);
-        return new CustomSpinnerAdapter(context, adapter, android.R.layout.simple_spinner_item, android.R.layout.simple_spinner_dropdown_item);
+        return new CustomSpinnerAdapter(context, adapter, android.R.layout.simple_spinner_item,
+                android.R.layout.simple_spinner_dropdown_item);
     }
 
     /**
@@ -89,12 +86,6 @@ public class RepeatedTaskAdapterFactory {
         // rule was not found, so let's assume it's custom. (re)set it if it's not there
         adapter.setCustomValue(new RepetitionOption("Custom: " + rule.toString(), rule));
         return 0;
-    }
-
-    public static int getPositionForCustomPicker(@NonNull Adapter adapter) {
-        final int pos = adapter.getCount() - 1;
-        assert adapter.getItem(pos) == PICK_CUSTOM_REPEAT;
-        return pos; // assumes that custom is always at the end of the list
     }
 
     /**

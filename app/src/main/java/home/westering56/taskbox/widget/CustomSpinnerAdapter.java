@@ -16,14 +16,18 @@ import java.util.Objects;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import home.westering56.taskbox.R;
 
 /**
  * A delegating Spinner adapter that includes a 'custom' option, inserting the selected custom value
- * at the start of the list (TODO: and the 'custom' selector at the end.)
+ * at the start of the list (and the 'custom' selector at the end.)
  */
 public class CustomSpinnerAdapter implements SpinnerAdapter {
     private static final String TAG = "CustomSpinnerAdapter";
     private static final int CUSTOM_VALUE_POSITION = 0; // if this changes, check to/fromDelegatePosition
+
+    @SuppressWarnings("WeakerAccess") // used as an external sentinel value. Maybe.
+    public static final Object CUSTOM_PICK_ITEM = new Object();
 
     private final SpinnerAdapter mDelegate;
     private final LayoutInflater mInflater;
@@ -63,6 +67,10 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         return mCustomValue != null;
     }
 
+    public int getCustomPickPosition() {
+        return getCount() - 1; // position is zero-based, count is one-based
+    }
+
     /** Convert from position in this adapter to position within the delegate adapter. */
     private int toDelegatePosition(int position) {
         int delegatePosition = position;
@@ -92,11 +100,10 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
-            return createCustomViewFromResource(mInflater, convertView, parent, mCustomDropDownViewResource);
-        } else {
-            return mDelegate.getDropDownView(toDelegatePosition(position), convertView, parent);
+        if ((position == CUSTOM_VALUE_POSITION && hasCustomValue()) || position == getCustomPickPosition()) {
+            return createCustomViewFromResource(mInflater, position, convertView, parent, mCustomDropDownViewResource);
         }
+        return mDelegate.getDropDownView(toDelegatePosition(position), convertView, parent);
     }
 
     /**
@@ -127,23 +134,23 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public int getCount() {
-        return fromDelegatePosition(mDelegate.getCount());
+        // +1 for the custom pick position that's always there
+        return fromDelegatePosition(mDelegate.getCount()) + 1;
     }
 
     /**
      * Get the data item associated with the specified position in the data set.
      *
      * @param position Position of the item whose data we want within the adapter's
-     * data set.
-     * @return The data at the specified position.
+     *                 data set.
+     * @return The data at the specified position. This will be {@link #CUSTOM_PICK_ITEM} if
+     * <tt>position</tt> equals {@link #getCustomPickPosition()}
      */
     @Override
     public Object getItem(int position) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
-            return getCustomValue();
-        } else {
-            return mDelegate.getItem(toDelegatePosition(position));
-        }
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return getCustomValue();
+        if (position == getCustomPickPosition()) return CUSTOM_PICK_ITEM;
+        return mDelegate.getItem(toDelegatePosition(position));
     }
 
     /**
@@ -154,11 +161,9 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public long getItemId(int position) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
-            return 0; // TODO: What's the ID of the custom value?
-        } else {
-            return mDelegate.getItemId(toDelegatePosition(position));
-        }
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return Long.MIN_VALUE; // TODO: What's the ID of the custom value?
+        if (position == getCustomPickPosition()) return Long.MAX_VALUE; // TODO: and the ID of the picker?
+        return mDelegate.getItemId(toDelegatePosition(position));
     }
 
     /**
@@ -192,13 +197,13 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
-            return createCustomViewFromResource(mInflater, convertView, parent, mCustomResource);
+        if ((position == CUSTOM_VALUE_POSITION && hasCustomValue()) || position == getCustomPickPosition()) {
+            return createCustomViewFromResource(mInflater, position, convertView, parent, mCustomResource);
         }
         return mDelegate.getView(toDelegatePosition(position), convertView, parent);
     }
 
-    private View createCustomViewFromResource(LayoutInflater inflater, View convertView,
+    private View createCustomViewFromResource(LayoutInflater inflater, int position, View convertView,
                                               ViewGroup parent, int resource) {
         final View v;
         final TextView text;
@@ -219,7 +224,12 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
             throw new IllegalStateException(
                     "CustomSpinnerAdapter requires the resource ID to be a TextView", e);
         }
-        final Object customValue = Objects.requireNonNull(getCustomValue(), "custom value");
+        final Object customValue;
+        if (position == getCustomPickPosition()) {
+            customValue = inflater.getContext().getString(R.string.custom_spinner_adapter_custom_picker);
+        } else {
+            customValue = Objects.requireNonNull(getCustomValue(), "custom value");
+        }
         if (customValue instanceof CharSequence) {
             text.setText((CharSequence) customValue);
         } else {
@@ -245,11 +255,9 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
           This should always be the same view type, as we have enforced getViewTypeCount == 1 at
           construction time.
          */
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
-            return 0;
-        } else {
-            return mDelegate.getItemViewType(toDelegatePosition(position));
-        }
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return 0;
+        if (position == getCustomPickPosition()) return 0;
+        return mDelegate.getItemViewType(toDelegatePosition(position));
     }
 
     /**
@@ -290,7 +298,7 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      * It should only be set (i.e., non-{@code null} if the values do not represent PII
      * (Personally Identifiable Information - sensitive data such as email addresses,
      * credit card numbers, passwords, etc...). For
-     * example, it's ok to return a list of month names, but not a list of usernames. A good rule of
+     * example, it's ok to return a list of month names, but not a list of user names. A good rule of
      * thumb is that if the adapter data comes from static resources, such data is not PII - see
      * {@link ViewStructure#setDataIsSensitive(boolean)} for more info.
      *
