@@ -29,6 +29,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import home.westering56.taskbox.ArrayAdapterWithCustom;
 import home.westering56.taskbox.CustomSnoozeOptionProvider;
 import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
@@ -169,7 +170,8 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         // mModel.mRule
         Log.d(TAG, "Determining repeat spinner position for rule: " + mModel.mRule);
         // will create or update the 'existing custom' position if mRule is not already in there
-        int position = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(mRepeatSelector.getAdapter(), mModel.mRule);
+        int position = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(
+                (ArrayAdapterWithCustom<RepetitionOption>) mRepeatSelector.getAdapter(), mModel.mRule);
         Log.d(TAG, "Repeat spinner position should be: " + position);
         mRepeatSelector.setSelection(position);
         mModel.mLastRepeatSelectedPosition = position;
@@ -246,7 +248,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
     private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
         //noinspection unchecked
-        final ArrayAdapter<RepetitionOption> adapter = (ArrayAdapter<RepetitionOption>) parent.getAdapter();
+        final ArrayAdapterWithCustom<RepetitionOption> adapter = (ArrayAdapterWithCustom<RepetitionOption>) parent.getAdapter();
         if (position == RepeatedTaskAdapterFactory.getPositionForCustomPicker(adapter)) {
             showRecurrencePickerDialog();
         } else {
@@ -273,7 +275,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
         // Continue with setting the recurrence rule
         Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
-        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(mRepeatSelector.getAdapter(), rule);
+        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry((ArrayAdapterWithCustom<RepetitionOption>) mRepeatSelector.getAdapter(), rule);
         // update the selected postion to be the newly picked custom rule
         Log.d(TAG, "Updating repeat selector spinner to select position " + pos);
         mRepeatSelector.setSelection(pos);
