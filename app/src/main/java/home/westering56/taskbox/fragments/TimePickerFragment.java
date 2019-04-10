@@ -14,7 +14,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+
     private CancellableOnTimeSetListener mOnTimeSetListener;
+    private LocalTime mInitialTime;
+
     /**
      * Extends OnTimeSetListener to include a 'cancelled' callback
      */
@@ -22,20 +25,25 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         void onTimePickerCancel();
     }
 
+    private void setInitialTime(LocalTime initialTime) {
+        this.mInitialTime = initialTime;
+    }
+
     @NonNull
-    public static TimePickerFragment newInstance(@NonNull CancellableOnTimeSetListener listener) {
+    static TimePickerFragment newInstance(@NonNull CancellableOnTimeSetListener listener,
+                                          @Nullable LocalTime initialTime) {
         TimePickerFragment fragment = new TimePickerFragment();
         fragment.setOnTimeSetListener(listener);
+        if (initialTime != null) fragment.setInitialTime(initialTime);
         return fragment;
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        // TODO: Adjust new snooze custom time to be something meaningful, rather than 'now'
-        LocalTime now = LocalTime.now();
+        LocalTime initialTime = mInitialTime != null ? mInitialTime : LocalTime.now();
         return new TimePickerDialog(requireActivity(), mOnTimeSetListener,
-                now.getHour(), now.getMinute(),
+                initialTime.getHour(), initialTime.getMinute(),
                 DateFormat.is24HourFormat(requireContext()));
     }
 

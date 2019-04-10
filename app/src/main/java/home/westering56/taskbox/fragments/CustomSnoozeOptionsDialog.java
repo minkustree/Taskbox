@@ -51,7 +51,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     /**
      * @param taskId @{@link home.westering56.taskbox.data.room.Task#uid} of the task we're snoozing, or -1 if no task is stored yet.
      */
-    public static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionsDialogFragment.SnoozeOptionListener listener, int taskId) {
+    static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionsDialogFragment.SnoozeOptionListener listener, int taskId) {
         CustomSnoozeOptionsDialog fragment = new CustomSnoozeOptionsDialog();
         fragment.setSnoozeOptionListener(listener);
         Bundle args = new Bundle();
@@ -204,8 +204,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
 
     private void showDatePickerFragment() {
-        DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(this);
-        // TODO: Put mModel.mDate into the arguments if it's there already
+        DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(this, mModel.mDate);
         assert getFragmentManager() != null;
         datePickerFragment.show(getFragmentManager(), "snooze_date_picker");
     }
@@ -292,9 +291,6 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         mRepeatSelector.setSelection(mModel.mLastRepeatSelectedPosition);
     }
 
-    /*
-     * Time picking methods
-     */
 
     /*
      * Time picking methods: happy path
@@ -314,11 +310,11 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
     private void showTimePickerFragment() {
-        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this);
-        // TODO: Put mModel.mTime into the arguments if it's there already
+        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this, mModel.mTime);
         assert getFragmentManager() != null;
         timePickerFragment.show(getFragmentManager(), "snooze_time_picker");
     }
+
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -353,13 +349,13 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     /*
      * View model implementation, holds the data for this fragment
      */
-    public static class CustomSnoozeViewModel extends ViewModel {
+    static class CustomSnoozeViewModel extends ViewModel {
 
-        public static class Factory implements ViewModelProvider.Factory {
+        static class Factory implements ViewModelProvider.Factory {
             private final TaskData factoryData;
             private final int factoryId;
 
-            public Factory(TaskData data, int taskId) {
+            Factory(TaskData data, int taskId) {
                 factoryData = data;
                 factoryId = taskId;
             }
@@ -375,14 +371,14 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             }
         }
 
-        public LocalDate mDate = null;
-        public LocalTime mTime = null;
-        public RecurrenceRule mRule = null;
+        LocalDate mDate = null;
+        LocalTime mTime = null;
+        RecurrenceRule mRule = null;
 
-        public int mLastTimeSelectedPosition = 0;
-        public int mLastRepeatSelectedPosition = 0;
+        int mLastTimeSelectedPosition = 0;
+        int mLastRepeatSelectedPosition = 0;
 
-        public CustomSnoozeViewModel(TaskData taskData, int taskId) {
+        CustomSnoozeViewModel(TaskData taskData, int taskId) {
             if (taskId != -1) { // only load if there's an existing task, else start from clean
                 Task t = taskData.getTask(taskId);
                 loadFrom(t);
@@ -392,7 +388,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         /**
          * If {@link #mDate} or {@link #mTime} are null, will throw a {@link NullPointerException}
          */
-        public LocalDateTime toLocalDateTime() {
+        LocalDateTime toLocalDateTime() {
             return LocalDateTime.of(mDate, mTime);
         }
 
