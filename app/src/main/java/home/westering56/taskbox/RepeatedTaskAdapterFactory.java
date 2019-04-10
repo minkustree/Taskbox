@@ -78,14 +78,11 @@ public class RepeatedTaskAdapterFactory {
      */
     public static int getPositionForRuleOrCreateCustomEntry(@NonNull CustomSpinnerAdapter adapter, @Nullable RecurrenceRule rule) {
         RepetitionOption target = new RepetitionOption("Unchecked", rule);
-        for (int i = 0; i < adapter.getCount(); i++) {
-            if (adapter.getItem(i).equals(target)) {
-                return i;
-            }
-        }
-        // rule was not found, so let's assume it's custom. (re)set it if it's not there
+        final int pos = adapter.positionOf(target);
+        if (pos != -1) return pos;
+        // rule was not found, so it must be cs custom. (re)set it if it's not there
         adapter.setCustomValue(new RepetitionOption("Custom: " + rule.toString(), rule));
-        return 0;
+        return adapter.getCustomValuePosition();
     }
 
     /**

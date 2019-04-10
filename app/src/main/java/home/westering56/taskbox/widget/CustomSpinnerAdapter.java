@@ -71,14 +71,25 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         return getCount() - 1; // position is zero-based, count is one-based
     }
 
-    /** Convert from position in this adapter to position within the delegate adapter. */
+    /**
+     * Return the position of the custom value if set, or -1 if {@link #hasCustomValue()} is false
+     */
+    public int getCustomValuePosition() {
+        return hasCustomValue() ? 0 : -1;
+    }
+
+    /**
+     * Convert from position in this adapter to position within the delegate adapter.
+     */
     private int toDelegatePosition(int position) {
         int delegatePosition = position;
         if (hasCustomValue()) delegatePosition -= 1; // easy when CUSTOM_VALUE_POSITION is 0
         return delegatePosition;
     }
 
-    /** Convert from position in the delegate adapter to position in this delegate adapter. */
+    /**
+     * Convert from position in the delegate adapter to position in this delegate adapter.
+     */
     private int fromDelegatePosition(int delegatePosition) {
         int position = delegatePosition;
         if (hasCustomValue()) position += 1; // easy when CUSTOM_VALUE_POSITION is 0
@@ -86,17 +97,31 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     }
 
     /**
+     * Linear search through the adapter's contents to find the position that holds an item which is
+     * equal (by Object{@link #equals(Object)}) to o
+     *
+     * @return the position of the item that equals o, or -1 if not found
+     */
+    public int positionOf(@NonNull Object o) {
+        for (int i = 0; i < getCount(); i++) {
+            if (o.equals(getItem(i))) return i;
+        }
+        return -1;
+    }
+
+
+    /**
      * Gets a {@link View} that displays in the drop down popup
      * the data at the specified position in the data set.
      *
-     * @param position index of the item whose view we want.
+     * @param position    index of the item whose view we want.
      * @param convertView the old view to reuse, if possible. Note: You should
-     *        check that this view is non-null and of an appropriate type before
-     *        using. If it is not possible to convert this view to display the
-     *        correct data, this method can create a new view.
-     * @param parent the parent that this view will eventually be attached to
+     *                    check that this view is non-null and of an appropriate type before
+     *                    using. If it is not possible to convert this view to display the
+     *                    correct data, this method can create a new view.
+     * @param parent      the parent that this view will eventually be attached to
      * @return a {@link View} corresponding to the data at the
-     *         specified position.
+     * specified position.
      */
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
@@ -161,8 +186,10 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public long getItemId(int position) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return Long.MIN_VALUE; // TODO: What's the ID of the custom value?
-        if (position == getCustomPickPosition()) return Long.MAX_VALUE; // TODO: and the ID of the picker?
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue())
+            return Long.MIN_VALUE; // TODO: What's the ID of the custom value?
+        if (position == getCustomPickPosition())
+            return Long.MAX_VALUE; // TODO: and the ID of the picker?
         return mDelegate.getItemId(toDelegatePosition(position));
     }
 
@@ -184,15 +211,15 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      * {@link LayoutInflater#inflate(int, ViewGroup, boolean)}
      * to specify a root view and to prevent attachment to the root.
      *
-     * @param position The position of the item within the adapter's data set of the item whose view
-     *        we want.
+     * @param position    The position of the item within the adapter's data set of the item whose view
+     *                    we want.
      * @param convertView The old view to reuse, if possible. Note: You should check that this view
-     *        is non-null and of an appropriate type before using. If it is not possible to convert
-     *        this view to display the correct data, this method can create a new view.
-     *        Heterogeneous lists can specify their number of view types, so that this View is
-     *        always of the right type (see {@link #getViewTypeCount()} and
-     *        {@link #getItemViewType(int)}).
-     * @param parent The parent that this view will eventually be attached to
+     *                    is non-null and of an appropriate type before using. If it is not possible to convert
+     *                    this view to display the correct data, this method can create a new view.
+     *                    Heterogeneous lists can specify their number of view types, so that this View is
+     *                    always of the right type (see {@link #getViewTypeCount()} and
+     *                    {@link #getItemViewType(int)}).
+     * @param parent      The parent that this view will eventually be attached to
      * @return A View corresponding to the data at the specified position.
      */
     @Override
@@ -242,11 +269,11 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      * Get the type of View that will be created by {@link #getView} for the specified item.
      *
      * @param position The position of the item within the adapter's data set whose view type we
-     *        want.
+     *                 want.
      * @return An integer representing the type of View. Two views should share the same type if one
-     *         can be converted to the other in {@link #getView}. Note: Integers must be in the
-     *         range 0 to {@link #getViewTypeCount} - 1. {@link #IGNORE_ITEM_VIEW_TYPE} can
-     *         also be returned.
+     * can be converted to the other in {@link #getView}. Note: Integers must be in the
+     * range 0 to {@link #getViewTypeCount} - 1. {@link #IGNORE_ITEM_VIEW_TYPE} can
+     * also be returned.
      * @see #IGNORE_ITEM_VIEW_TYPE
      */
     @Override
@@ -309,4 +336,5 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     public CharSequence[] getAutofillOptions() {
         return mDelegate.getAutofillOptions();
     }
+
 }
