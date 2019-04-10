@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,7 +28,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
-import home.westering56.taskbox.ArrayAdapterWithCustom;
+import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 import home.westering56.taskbox.CustomSnoozeOptionProvider;
 import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
@@ -171,7 +170,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         Log.d(TAG, "Determining repeat spinner position for rule: " + mModel.mRule);
         // will create or update the 'existing custom' position if mRule is not already in there
         int position = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(
-                (ArrayAdapterWithCustom<RepetitionOption>) mRepeatSelector.getAdapter(), mModel.mRule);
+                (CustomSpinnerAdapter) mRepeatSelector.getAdapter(), mModel.mRule);
         Log.d(TAG, "Repeat spinner position should be: " + position);
         mRepeatSelector.setSelection(position);
         mModel.mLastRepeatSelectedPosition = position;
@@ -248,7 +247,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
     private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
         //noinspection unchecked
-        final ArrayAdapterWithCustom<RepetitionOption> adapter = (ArrayAdapterWithCustom<RepetitionOption>) parent.getAdapter();
+        final CustomSpinnerAdapter adapter = (CustomSpinnerAdapter) parent.getAdapter();
         if (position == RepeatedTaskAdapterFactory.getPositionForCustomPicker(adapter)) {
             showRecurrencePickerDialog();
         } else {
@@ -275,7 +274,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
         // Continue with setting the recurrence rule
         Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
-        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry((ArrayAdapterWithCustom<RepetitionOption>) mRepeatSelector.getAdapter(), rule);
+        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry((CustomSpinnerAdapter) mRepeatSelector.getAdapter(), rule);
         // update the selected postion to be the newly picked custom rule
         Log.d(TAG, "Updating repeat selector spinner to select position " + pos);
         mRepeatSelector.setSelection(pos);

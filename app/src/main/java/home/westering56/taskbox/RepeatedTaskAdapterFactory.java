@@ -2,6 +2,8 @@ package home.westering56.taskbox;
 
 import android.content.Context;
 import android.widget.Adapter;
+import android.widget.ArrayAdapter;
+import android.widget.SpinnerAdapter;
 
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -10,6 +12,7 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 public class RepeatedTaskAdapterFactory {
 
@@ -57,8 +60,8 @@ public class RepeatedTaskAdapterFactory {
         }
     }
 
-    public static ArrayAdapterWithCustom<RepetitionOption> buildAdapter(Context context) {
-        ArrayAdapterWithCustom<RepetitionOption> adapter = new ArrayAdapterWithCustom<>(context, android.R.layout.simple_spinner_item);
+    public static SpinnerAdapter buildAdapter(@NonNull Context context) {
+        ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // TODO: Extract strings into resource file
         adapter.add(NO_REPEAT);
@@ -68,7 +71,7 @@ public class RepeatedTaskAdapterFactory {
         adapter.add(YEARLY_REPEAT);
         // always at the end of the list - if not, change getPositionForCustomPicker()
         adapter.add(PICK_CUSTOM_REPEAT);
-        return adapter;
+        return new CustomSpinnerAdapter(context, adapter, android.R.layout.simple_spinner_item, android.R.layout.simple_spinner_dropdown_item);
     }
 
     /**
@@ -76,7 +79,7 @@ public class RepeatedTaskAdapterFactory {
      * A rule of 'null' will find the 'Doesn't repeat' entry.
      * If rule is not found in the list, inserts it at position 0 as a custom rule, replacing what's there
      */
-    public static int getPositionForRuleOrCreateCustomEntry(@NonNull ArrayAdapterWithCustom<RepetitionOption> adapter, @Nullable RecurrenceRule rule) {
+    public static int getPositionForRuleOrCreateCustomEntry(@NonNull CustomSpinnerAdapter adapter, @Nullable RecurrenceRule rule) {
         RepetitionOption target = new RepetitionOption("Unchecked", rule);
         for (int i = 0; i < adapter.getCount(); i++) {
             if (adapter.getItem(i).equals(target)) {
@@ -98,8 +101,8 @@ public class RepeatedTaskAdapterFactory {
      * Removes the 'Existing custom rule' entry from the top of the list of data managed by the adapter
      * if it doesn't match the currently selected rule.
      */
-    public static boolean removeCustomEntryIfNotSelected(ArrayAdapterWithCustom<RepetitionOption> adapter, @Nullable RecurrenceRule selectedRule) {
-        if (adapter.hasCustomValue() && !isRuleEqual(adapter.getCustomValue().mRule, selectedRule)) {
+    public static boolean removeCustomEntryIfNotSelected(CustomSpinnerAdapter adapter, @Nullable RecurrenceRule selectedRule) {
+        if (adapter.hasCustomValue() && !isRuleEqual(((RepetitionOption)adapter.getCustomValue()).mRule, selectedRule)) {
             adapter.clearCustomValue();
             return true;
         }
