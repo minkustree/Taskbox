@@ -2,24 +2,18 @@ package home.westering56.taskbox;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
-import android.widget.SpinnerAdapter;
 
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 
 import java.util.Objects;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 public class RepeatedTaskAdapterFactory {
-
-    private static final RepetitionOption NO_REPEAT = new RepetitionOption("Doesn't repeat", null);
-    private static final RepetitionOption DAILY_REPEAT = new RepetitionOption("Daily", new RecurrenceRule(Freq.DAILY));
-    private static final RepetitionOption WEEKLY_REPEAT = new RepetitionOption("Weekly", new RecurrenceRule(Freq.WEEKLY));
-    private static final RepetitionOption MONTHLY_REPEAT = new RepetitionOption("Monthly", new RecurrenceRule(Freq.MONTHLY));
-    private static final RepetitionOption YEARLY_REPEAT = new RepetitionOption("Yearly", new RecurrenceRule(Freq.YEARLY));
 
     public static class RepetitionOption {
         final String mLabel;
@@ -57,6 +51,7 @@ public class RepeatedTaskAdapterFactory {
             return Objects.hash(mRule);
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public String toString() {
             return mLabel;
@@ -69,16 +64,18 @@ public class RepeatedTaskAdapterFactory {
     }
 
     public static CustomSpinnerAdapter buildAdapter(@NonNull Context context) {
-        ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // TODO: Extract strings into resource file
-        adapter.add(NO_REPEAT);
-        adapter.add(DAILY_REPEAT);
-        adapter.add(WEEKLY_REPEAT);
-        adapter.add(MONTHLY_REPEAT);
-        adapter.add(YEARLY_REPEAT);
-        return new CustomSpinnerAdapter(context, adapter, android.R.layout.simple_spinner_item,
-                android.R.layout.simple_spinner_dropdown_item);
+        @LayoutRes final int itemResource = android.R.layout.simple_spinner_item;
+        @LayoutRes final int dropDownResource = android.R.layout.simple_spinner_dropdown_item;
+        ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, itemResource);
+        adapter.setDropDownViewResource(dropDownResource);
+
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_doesnt_repeat), null));
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_daily), new RecurrenceRule(Freq.DAILY)));
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_weekly), new RecurrenceRule(Freq.WEEKLY)));
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_monthly), new RecurrenceRule(Freq.MONTHLY)));
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_yearly), new RecurrenceRule(Freq.YEARLY)));
+
+        return new CustomSpinnerAdapter(context, adapter, itemResource, dropDownResource);
     }
 
     /**
