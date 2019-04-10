@@ -50,6 +50,24 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         mCustomDropDownViewResource = customDropDownResource;
     }
 
+    /*
+     * TODO: What if this took an interface(s) which said how to inflate and bind both the custom value entry and the custom picker?
+     *
+     * interface CustomEntryView {
+     *    @LayoutRes int getLayoutResource()
+     *    @LayoutRes int getDropDownLayoutResource()
+     *    void bindView(View v, Object customValue)
+     * }
+     *
+     * interface CustomPickerView {
+     *    @LayoutRes int getLayoutResource()
+     *    @LayoutRes int getDropDownLayoutResource()
+     *    void bindView(View v, CharSequence customPickerLabel)
+     * }
+     *
+     * TODO: Would this handle the case where delegate was a simple adapter? (e.g. mTimeSpinner?)
+     */
+
     @Nullable
     public Object getCustomValue() {
         return mCustomValue;
