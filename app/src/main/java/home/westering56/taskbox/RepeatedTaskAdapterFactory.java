@@ -30,6 +30,16 @@ public class RepeatedTaskAdapterFactory {
             this.mRule = rule;
         }
 
+        // Creates a dummy object that can be used to compare recurrence rules
+        public static RepetitionOption buildDummyForRule(@Nullable RecurrenceRule rule) {
+            return new RepetitionOption("Dummy", rule);
+        }
+
+        // Creates a object used to represent a custom recurrence rule
+        public static RepetitionOption buildCustomForRule(@NonNull RecurrenceRule rule) {
+            return new RepetitionOption("Custom: " + rule.toString(), rule);
+        }
+
         /**
          * Two options are equal only if their mRule fields are equal. Label is ignored.
          */
@@ -58,7 +68,7 @@ public class RepeatedTaskAdapterFactory {
         }
     }
 
-    public static SpinnerAdapter buildAdapter(@NonNull Context context) {
+    public static CustomSpinnerAdapter buildAdapter(@NonNull Context context) {
         ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // TODO: Extract strings into resource file
@@ -69,32 +79,6 @@ public class RepeatedTaskAdapterFactory {
         adapter.add(YEARLY_REPEAT);
         return new CustomSpinnerAdapter(context, adapter, android.R.layout.simple_spinner_item,
                 android.R.layout.simple_spinner_dropdown_item);
-    }
-
-    /**
-     * Find the position of the entry which contains the specified recurrence rule.
-     * A rule of 'null' will find the 'Doesn't repeat' entry.
-     * If rule is not found in the list, inserts it at position 0 as a custom rule, replacing what's there
-     */
-    public static int getPositionForRuleOrCreateCustomEntry(@NonNull CustomSpinnerAdapter adapter, @Nullable RecurrenceRule rule) {
-        RepetitionOption target = new RepetitionOption("Unchecked", rule);
-        final int pos = adapter.positionOf(target);
-        if (pos != -1) return pos;
-        // rule was not found, so it must be cs custom. (re)set it if it's not there
-        adapter.setCustomValue(new RepetitionOption("Custom: " + rule.toString(), rule));
-        return adapter.getCustomValuePosition();
-    }
-
-    /**
-     * Removes the 'Existing custom rule' entry from the top of the list of data managed by the adapter
-     * if it doesn't match the currently selected rule.
-     */
-    public static boolean removeCustomEntryIfNotSelected(CustomSpinnerAdapter adapter, @Nullable RecurrenceRule selectedRule) {
-        if (adapter.hasCustomValue() && !isRuleEqual(((RepetitionOption)adapter.getCustomValue()).mRule, selectedRule)) {
-            adapter.clearCustomValue();
-            return true;
-        }
-        return false;
     }
 
     /**

@@ -55,8 +55,10 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         return mCustomValue;
     }
 
-    public void setCustomValue(@Nullable Object customValue) {
+    /** @return the position at which the custom value can be found */
+    public int setCustomValue(@Nullable Object customValue) {
         mCustomValue = customValue;
+        return getCustomValuePosition();
     }
 
     public void clearCustomValue() {

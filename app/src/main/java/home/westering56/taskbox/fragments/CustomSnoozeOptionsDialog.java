@@ -67,6 +67,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     private TextView mDateText;
     private Spinner mTimeSelector;
     private Spinner mRepeatSelector;
+    private CustomSpinnerAdapter mRepeatSelectorAdapter;
 
     private void setSnoozeOptionListener(@Nullable SnoozeOptionsDialogFragment.SnoozeOptionListener listener) {
         mSnoozeOptionListener = listener;
@@ -103,8 +104,9 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         mTimeSelector = view.findViewById(R.id.snooze_custom_time_selector);
         mTimeSelector.setAdapter(mCustomSnoozeOptionProvider.getAdapter());
 
+        mRepeatSelectorAdapter = RepeatedTaskAdapterFactory.buildAdapter(requireContext());
         mRepeatSelector = view.findViewById(R.id.snooze_custom_repeat_selector);
-        mRepeatSelector.setAdapter(RepeatedTaskAdapterFactory.buildAdapter(requireContext()));
+        mRepeatSelector.setAdapter(mRepeatSelectorAdapter);
 
         // Must call this before registering onItemSelected listeners, but after setting adapters.
         // Otherwise, listeners either fire as the UI is updated to match the view model or
@@ -169,9 +171,11 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         // mModel.mRule
         Log.d(TAG, "Determining repeat spinner position for rule: " + mModel.mRule);
         // will create or update the 'existing custom' position if mRule is not already in there
-        int position = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(
-                (CustomSpinnerAdapter) mRepeatSelector.getAdapter(), mModel.mRule);
-        Log.d(TAG, "Repeat spinner position should be: " + position);
+        int position = mRepeatSelectorAdapter.positionOf(RepetitionOption.buildDummyForRule(mModel.mRule));
+        if (position == -1) {
+            position = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(mModel.mRule));
+        }
+        Log.d(TAG, "Initialising repeat spinner position to be: " + position);
         mRepeatSelector.setSelection(position);
         mModel.mLastRepeatSelectedPosition = position;
 
@@ -247,19 +251,19 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
     private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
         //noinspection unchecked
-        final CustomSpinnerAdapter adapter = (CustomSpinnerAdapter) parent.getAdapter();
-        if (position == adapter.getCustomPickPosition()) {
+        if (position == mRepeatSelectorAdapter.getCustomPickPosition()) {
             showRecurrencePickerDialog();
         } else {
             // update the model with the rule from the position we selected
             mModel.mRule = ((RepetitionOption) parent.getItemAtPosition(position)).getRule();
             Log.d(TAG, "Selected repeat pattern: " + mModel.mRule);
             mModel.mLastRepeatSelectedPosition = position;
-            // if we didn't pick the existing custom rule, remove it from the list of options
-            if (RepeatedTaskAdapterFactory.removeCustomEntryIfNotSelected(adapter, mModel.mRule)) {
-                // the data in the set changed - update selected position,
-                mRepeatSelector.setSelection(
-                        RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry(adapter, mModel.mRule));
+            // if we didn't pick an existing custom rule, remove it from the list of options
+            if (position != mRepeatSelectorAdapter.getCustomValuePosition()) {
+                mRepeatSelectorAdapter.clearCustomValue();
+                // the data in the set may have changed - update selected position
+                mRepeatSelector.setSelection(mRepeatSelectorAdapter.positionOf(
+                        RepetitionOption.buildDummyForRule(mModel.mRule)));
             }
         }
     }
@@ -274,9 +278,9 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
         // Continue with setting the recurrence rule
         Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
-        int pos = RepeatedTaskAdapterFactory.getPositionForRuleOrCreateCustomEntry((CustomSpinnerAdapter) mRepeatSelector.getAdapter(), rule);
+        int pos = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(rule));
         // update the selected postion to be the newly picked custom rule
-        Log.d(TAG, "Updating repeat selector spinner to select position " + pos);
+        Log.d(TAG, "Updating repeat selector spinner to new custom position " + pos);
         mRepeatSelector.setSelection(pos);
         // assume onRepeatOption will update mModel.mRule mLastRepeatSelectedPosition
     }
