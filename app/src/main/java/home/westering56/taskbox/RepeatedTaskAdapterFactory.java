@@ -8,7 +8,6 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 
 import java.util.Objects;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
@@ -63,7 +62,7 @@ public class RepeatedTaskAdapterFactory {
         }
     }
 
-    public static CustomSpinnerAdapter buildAdapter(@NonNull Context context) {
+    public static CustomSpinnerAdapter<RepetitionOption> buildAdapter(@NonNull Context context) {
         ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -75,7 +74,7 @@ public class RepeatedTaskAdapterFactory {
 
         // No need to set a custom view binder - the custom spinner adapter works fine when
         // wrapped adapter views are simple text views that can have their contents set.
-        return new CustomSpinnerAdapter(context, adapter);
+        return new CustomSpinnerAdapter<>(adapter);
     }
 
     /**
@@ -85,6 +84,6 @@ public class RepeatedTaskAdapterFactory {
     private static boolean isRuleEqual(@Nullable final RecurrenceRule a, @Nullable final RecurrenceRule b) {
         if (a == null) return b == null;
         if (b == null) return false; // we know that a != null because of the previous line
-        return a.toString().equals(b.toString());
+        return Objects.equals(a.toString(), b.toString());
     }
 }

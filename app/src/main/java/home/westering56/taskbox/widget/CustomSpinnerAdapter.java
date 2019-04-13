@@ -1,6 +1,5 @@
 package home.westering56.taskbox.widget;
 
-import android.content.Context;
 import android.database.DataSetObserver;
 import android.service.autofill.AutofillService;
 import android.util.Log;
@@ -12,17 +11,22 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.Objects;
-import java.util.function.BiPredicate;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.arch.core.util.Function;
 import home.westering56.taskbox.R;
 
 /**
  * A delegating Spinner adapter that includes a 'custom' option, inserting the selected custom value
  * at the start of the list (and the 'custom' selector at the end.)
+ *
+ * @param <T> the type of the values stored in this adapter, see {@link #getCustomValue()},
+ *        {@link #setCustomValue(Object)} and {@link #positionOf(Object)}, as well as
+ *        {@link #setGetValueFromItemFn(Function)} for how to extract values from more complex
+ *        stored items
  */
-public class CustomSpinnerAdapter implements SpinnerAdapter {
+public class CustomSpinnerAdapter<T> implements SpinnerAdapter {
     private static final String TAG = "CustomSpinnerAdapter";
     private static final int CUSTOM_VALUE_POSITION = 0; // if this changes, check to/fromDelegatePosition
 
@@ -31,13 +35,14 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
 
     private final SpinnerAdapter mDelegate;
 
-    private Object mCustomValue;
-    private ViewBinder mViewBinder;
+    private T mCustomValue;
+    private ViewBinder<T> mViewBinder;
+    private Function<Object, ? extends T> mGetValueFromItemFn;
 
     /**
      * If the view resources in the delegate are not simple textViews, then implement a view binder
      */
-    public CustomSpinnerAdapter(@NonNull Context context, @NonNull SpinnerAdapter delegate) {
+    public CustomSpinnerAdapter(@NonNull SpinnerAdapter delegate) {
         if (delegate.getViewTypeCount() != 1) {
             throw new IllegalArgumentException("Delegate adapter view type count must be 1, for use with spinners");
         }
@@ -46,14 +51,14 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
 
     @SuppressWarnings("WeakerAccess")
     @Nullable
-    public Object getCustomValue() {
+    public T getCustomValue() {
         return mCustomValue;
     }
 
     /**
      * @return the position at which the custom value can be found
      */
-    public int setCustomValue(@Nullable Object customValue) {
+    public int setCustomValue(@Nullable T customValue) {
         mCustomValue = customValue;
         return getCustomValuePosition();
     }
@@ -97,23 +102,36 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     }
 
     /**
-     * Linear search through the adapter's contents to find the position that holds an item which is
-     * equal (by Object{@link #equals(Object)}) to o
+     * Linear search through the adapter's contents to find the position that holds an item which
+     * has a value is equal (by Object{@link #equals(Object)}) to value
+     * <p>
+     * If a position transform function is set ({@link #setGetValueFromItemFn(Function)}, it is
+     * used to determine the value of each item retrieved before comparing.
+     * <p>
+     * null values are permitted
      *
-     * @return the position of the item that equals o, or -1 if not found
+     * @return the position of the item whose value equals <tt>value</tt>, or -1 if not found
      */
-    public int positionOf(@NonNull Object o) {
+    public int positionOf(@Nullable T value) {
         for (int i = 0; i < getCount(); i++) {
-            if (o.equals(getItem(i))) return i;
+            if (i == getCustomPickPosition()) continue; // nothing matches the custom pick position
+            final T itemValue = getValue(i);
+            if (itemValue == value || (itemValue != null && itemValue.equals(value))) return i;
         }
         return -1;
     }
 
-    public <U> int positionOf(@NonNull U item, BiPredicate<U, Object> fn) {
-        for (int i = 0; i < getCount(); i++) {
-            if (fn.test(item, getItem(i))) return i;
-        }
-        return -1;
+    /**
+     * Set the function that converts from a stored adapter item to a value of use. Used by
+     * {@link #positionOf(Object)} and {@link #getValue(int)} to get the value, rather than the item.
+     * If it's not set, we assume that the value and the item in the adapter are the same.
+     * <p>
+     * The positionOf method iterates over each item in delegated adapter. If this
+     * function is set, then it will be applied to each object that returns to turn it into something
+     * of type T that can be tested for equality with the item being searched for.
+     */
+    public void setGetValueFromItemFn(Function<Object, ? extends T> fn) {
+        mGetValueFromItemFn = fn;
     }
 
     /**
@@ -164,6 +182,20 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     }
 
     /**
+     * @throws IllegalArgumentException if <tt>position</tt> is == {@link #getCustomPickPosition()}
+     */
+    @Nullable
+    public T getValue(int position) {
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return getCustomValue();
+        if (position == getCustomPickPosition()) throw new IllegalArgumentException("No value for the custom value picker entry");
+        if (mGetValueFromItemFn == null) {
+            //noinspection unchecked - cast and hope
+            return (T)getItem(position);
+        }
+        return mGetValueFromItemFn.apply(getItem(position));
+    }
+
+    /**
      * Get the row id associated with the specified position in the list.
      *
      * @param position The position of the item within the adapter's data set whose row id we want.
@@ -171,10 +203,13 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public long getItemId(int position) {
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue())
-            return Long.MIN_VALUE; // TODO: What's the ID of the custom value?
-        if (position == getCustomPickPosition())
-            return Long.MAX_VALUE; // TODO: and the ID of the picker?
+        // Min and Max values for Long seem unlikely to conflict with item Ids from delegate
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) {
+            return Long.MIN_VALUE;
+        }
+        if (position == getCustomPickPosition()) {
+            return Long.MAX_VALUE;
+        }
         return mDelegate.getItemId(toDelegatePosition(position));
     }
 
@@ -246,21 +281,19 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
 
     private void bindCustomView(View v, int position) {
         boolean viewBound = false;
-        final Object customValue;
+        final T customValue;
+        final String customValueText;
+
         // what value are we using - picker or custom value?
+        // did the user specify custom binding? If so, use it
         if (position == getCustomPickPosition()) {
-            customValue = v.getContext().getString(R.string.custom_spinner_adapter_custom_picker);
+            final String customPickString = v.getContext().getString(R.string.custom_spinner_adapter_custom_picker);
+            if (mViewBinder != null) viewBound = mViewBinder.bindPickerView(v, customPickString);
+            customValueText = customPickString;
         } else {
             customValue = Objects.requireNonNull(getCustomValue(), "custom value");
-        }
-
-        // did the user specify custom binding? If so, use it
-        if (mViewBinder != null) {
-            if (position == getCustomPickPosition()) {
-                viewBound = mViewBinder.bindPickerView(v, customValue);
-            } else {
-                viewBound = mViewBinder.bindCustomValueView(v, customValue);
-            }
+            if (mViewBinder != null) viewBound = mViewBinder.bindCustomValueView(v, customValue);
+            customValueText = customValue.toString();
         }
 
         if (!viewBound) {
@@ -275,22 +308,26 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
                 throw new IllegalStateException(
                         "CustomSpinnerAdapter requires the resource ID to be a TextView or a view binder to be used", e);
             }
-            text.setText(customValue.toString());
+            text.setText(customValueText);
         }
     }
 
-    public void setViewBinder(@Nullable ViewBinder custom) {
+    public void setViewBinder(@Nullable ViewBinder<T> custom) {
         mViewBinder = custom;
     }
 
-    public interface ViewBinder {
-        /** @return true if the view was bound, otherwise false. */
-        boolean bindCustomValueView(@NonNull View v, Object customValue);
+    @SuppressWarnings("SameReturnValue")
+    public interface ViewBinder<T> {
+        /**
+         * @return true if the view was bound, otherwise false.
+         */
+        boolean bindCustomValueView(@NonNull View v, T customValue);
 
-        /** @return true if the view was bound, otherwise false. */
-        boolean bindPickerView(@NonNull View v, Object customValue);
+        /**
+         * @return true if the view was bound, otherwise false.
+         */
+        boolean bindPickerView(@NonNull View v, String customPickerValue);
     }
-
 
 
     /**

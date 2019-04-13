@@ -47,7 +47,6 @@ public class SnoozeTimeFormatter {
         return target.format(sTimeFormatter);
     }
 
-
     public static CharSequence formatStatusLine(@NonNull Context context, @NonNull Task task) {
         CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(context, task.snoozeUntil);
         String buffer = context.getString(R.string.task_detail_snoozed_until, snoozeTime);
