@@ -12,8 +12,8 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import java.util.Objects;
+import java.util.function.BiPredicate;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import home.westering56.taskbox.R;
@@ -30,50 +30,29 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     public static final Object CUSTOM_PICK_ITEM = new Object();
 
     private final SpinnerAdapter mDelegate;
-    private final LayoutInflater mInflater;
-    private final int mCustomResource;
-    private int mCustomDropDownViewResource;
 
     private Object mCustomValue;
+    private ViewBinder mViewBinder;
 
     /**
-     * Throws {@link IllegalArgumentException} if the supplied delegate has a view type count of
-     * anything other than 1
+     * If the view resources in the delegate are not simple textViews, then implement a view binder
      */
-    public CustomSpinnerAdapter(@NonNull Context context, @NonNull SpinnerAdapter delegate, @LayoutRes int customResource, @LayoutRes int customDropDownResource) {
+    public CustomSpinnerAdapter(@NonNull Context context, @NonNull SpinnerAdapter delegate) {
         if (delegate.getViewTypeCount() != 1) {
-            throw new IllegalArgumentException("Only adapters with a single view type are not supported");
+            throw new IllegalArgumentException("Delegate adapter view type count must be 1, for use with spinners");
         }
         mDelegate = delegate;
-        mInflater = context.getSystemService(LayoutInflater.class);
-        mCustomResource = customResource;
-        mCustomDropDownViewResource = customDropDownResource;
     }
 
-    /*
-     * TODO: What if this took an interface(s) which said how to inflate and bind both the custom value entry and the custom picker?
-     *
-     * interface CustomEntryView {
-     *    @LayoutRes int getLayoutResource()
-     *    @LayoutRes int getDropDownLayoutResource()
-     *    void bindView(View v, Object customValue)
-     * }
-     *
-     * interface CustomPickerView {
-     *    @LayoutRes int getLayoutResource()
-     *    @LayoutRes int getDropDownLayoutResource()
-     *    void bindView(View v, CharSequence customPickerLabel)
-     * }
-     *
-     * TODO: Would this handle the case where delegate was a simple adapter? (e.g. mTimeSpinner?)
-     */
-
+    @SuppressWarnings("WeakerAccess")
     @Nullable
     public Object getCustomValue() {
         return mCustomValue;
     }
 
-    /** @return the position at which the custom value can be found */
+    /**
+     * @return the position at which the custom value can be found
+     */
     public int setCustomValue(@Nullable Object customValue) {
         mCustomValue = customValue;
         return getCustomValuePosition();
@@ -83,6 +62,7 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         setCustomValue(null);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public boolean hasCustomValue() {
         return mCustomValue != null;
     }
@@ -129,26 +109,11 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
         return -1;
     }
 
-
-    /**
-     * Gets a {@link View} that displays in the drop down popup
-     * the data at the specified position in the data set.
-     *
-     * @param position    index of the item whose view we want.
-     * @param convertView the old view to reuse, if possible. Note: You should
-     *                    check that this view is non-null and of an appropriate type before
-     *                    using. If it is not possible to convert this view to display the
-     *                    correct data, this method can create a new view.
-     * @param parent      the parent that this view will eventually be attached to
-     * @return a {@link View} corresponding to the data at the
-     * specified position.
-     */
-    @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        if ((position == CUSTOM_VALUE_POSITION && hasCustomValue()) || position == getCustomPickPosition()) {
-            return createCustomViewFromResource(mInflater, position, convertView, parent, mCustomDropDownViewResource);
+    public <U> int positionOf(@NonNull U item, BiPredicate<U, Object> fn) {
+        for (int i = 0; i < getCount(); i++) {
+            if (fn.test(item, getItem(i))) return i;
         }
-        return mDelegate.getDropDownView(toDelegatePosition(position), convertView, parent);
+        return -1;
     }
 
     /**
@@ -244,46 +209,89 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if ((position == CUSTOM_VALUE_POSITION && hasCustomValue()) || position == getCustomPickPosition()) {
-            return createCustomViewFromResource(mInflater, position, convertView, parent, mCustomResource);
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue() || position == getCustomPickPosition()) {
+            // all views must be the same for use in a spinner, so let the delegate do the hard work
+            // then rebind
+            View v = mDelegate.getView(0, null, parent);
+            bindCustomView(v, position);
+            return v;
         }
         return mDelegate.getView(toDelegatePosition(position), convertView, parent);
     }
 
-    private View createCustomViewFromResource(LayoutInflater inflater, int position, View convertView,
-                                              ViewGroup parent, int resource) {
-        final View v;
-        final TextView text;
-        if (convertView == null) {
-            v = inflater.inflate(resource, parent, false);
-        } else {
-            v = convertView;
+    /**
+     * Gets a {@link View} that displays in the drop down popup
+     * the data at the specified position in the data set.
+     *
+     * @param position    index of the item whose view we want.
+     * @param convertView the old view to reuse, if possible. Note: You should
+     *                    check that this view is non-null and of an appropriate type before
+     *                    using. If it is not possible to convert this view to display the
+     *                    correct data, this method can create a new view.
+     * @param parent      the parent that this view will eventually be attached to
+     * @return a {@link View} corresponding to the data at the
+     * specified position.
+     */
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue() || position == getCustomPickPosition()) {
+            // all views must be the same for use in a spinner, so let the delegate do the hard work
+            // then rebind
+            View v = mDelegate.getDropDownView(0, null, parent);
+            bindCustomView(v, position);
+            return v;
         }
+        return mDelegate.getDropDownView(toDelegatePosition(position), convertView, parent);
+    }
 
-        /* assume that we'll populate the view by:
-         a) assuming the whole view is a text view
-         b) setting the text view's value to customObject.toString()
-         */
-        try {
-            text = (TextView) v;
-        } catch (ClassCastException e) {
-            Log.e(TAG, "You must supply a resource ID for a TextView");
-            throw new IllegalStateException(
-                    "CustomSpinnerAdapter requires the resource ID to be a TextView", e);
-        }
+    private void bindCustomView(View v, int position) {
+        boolean viewBound = false;
         final Object customValue;
+        // what value are we using - picker or custom value?
         if (position == getCustomPickPosition()) {
-            customValue = inflater.getContext().getString(R.string.custom_spinner_adapter_custom_picker);
+            customValue = v.getContext().getString(R.string.custom_spinner_adapter_custom_picker);
         } else {
             customValue = Objects.requireNonNull(getCustomValue(), "custom value");
         }
-        if (customValue instanceof CharSequence) {
-            text.setText((CharSequence) customValue);
-        } else {
+
+        // did the user specify custom binding? If so, use it
+        if (mViewBinder != null) {
+            if (position == getCustomPickPosition()) {
+                viewBound = mViewBinder.bindPickerView(v, customValue);
+            } else {
+                viewBound = mViewBinder.bindCustomValueView(v, customValue);
+            }
+        }
+
+        if (!viewBound) {
+            // otherwise, we'll populate the view by:
+            //  a) assuming the whole view is a text view
+            //  b) setting the text view's value to customObject.toString()
+            TextView text;
+            try {
+                text = (TextView) v;
+            } catch (ClassCastException e) {
+                Log.e(TAG, "You must supply a resource ID for a TextView, or use a view binder");
+                throw new IllegalStateException(
+                        "CustomSpinnerAdapter requires the resource ID to be a TextView or a view binder to be used", e);
+            }
             text.setText(customValue.toString());
         }
-        return v;
     }
+
+    public void setViewBinder(@Nullable ViewBinder custom) {
+        mViewBinder = custom;
+    }
+
+    public interface ViewBinder {
+        /** @return true if the view was bound, otherwise false. */
+        boolean bindCustomValueView(@NonNull View v, Object customValue);
+
+        /** @return true if the view was bound, otherwise false. */
+        boolean bindPickerView(@NonNull View v, Object customValue);
+    }
+
+
 
     /**
      * Get the type of View that will be created by {@link #getView} for the specified item.
@@ -299,11 +307,12 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
     @Override
     public int getItemViewType(int position) {
         /*
-          This should always be the same view type, as we have enforced getViewTypeCount == 1 at
-          construction time.
+          In Spinner#setAdapter we're told that there can only be one item view type when adapters
+          are added to spinners ... so delegate
          */
-        if (position == CUSTOM_VALUE_POSITION && hasCustomValue()) return 0;
-        if (position == getCustomPickPosition()) return 0;
+        if (position == CUSTOM_VALUE_POSITION && hasCustomValue() || position == getCustomPickPosition()) {
+            return 0;
+        }
         return mDelegate.getItemViewType(toDelegatePosition(position));
     }
 
@@ -322,8 +331,7 @@ public class CustomSpinnerAdapter implements SpinnerAdapter {
      */
     @Override
     public int getViewTypeCount() {
-        // This should always be 1, as we checked it on construction
-        return 1;
+        return mDelegate.getViewTypeCount(); // delegates must be 0, or Spinner#setAdapter will throw
     }
 
     /**

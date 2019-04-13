@@ -13,6 +13,10 @@
     <string name="menu_item_snooze">Snooze</string>
     <string name="snooze_time_format_today">Today</string>
     <string name="snooze_time_format_tomorrow">Tomorrow</string>
+    <string name="snooze_time_picker_morning">Morning</string>
+    <string name="snooze_time_picker_afternoon">Afternoon</string>
+    <string name="snooze_time_picker_evening">Evening</string>
+    <string name="snooze_time_picker_custom_value">Custom</string>
     <string name="snooze_pick_date_time_title">Select date and time</string>
     <string name="snooze_dialog_custom">Custom</string>
     <string name="task_detail_snoozed_until">Snoozed until %1$s</string>

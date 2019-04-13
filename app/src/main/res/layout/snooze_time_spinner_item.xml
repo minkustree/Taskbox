@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Widget.AppCompat.DropDownItem.Spinner"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeightSmall"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal"
+    style="@style/Widget.AppCompat.TextView.SpinnerItem">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/snooze_time_spinner_item_title"
@@ -14,6 +15,7 @@
         android:layout_weight="1"
         android:ellipsize="marquee"
         android:singleLine="true"
+
         tools:text="Morning" />
 
     <TextView
@@ -25,6 +27,4 @@
         android:enabled="false"
         android:singleLine="true"
         tools:text="9:00 AM" />
-
-    <!---->
 </LinearLayout>

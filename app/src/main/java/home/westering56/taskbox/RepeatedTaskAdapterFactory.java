@@ -64,10 +64,8 @@ public class RepeatedTaskAdapterFactory {
     }
 
     public static CustomSpinnerAdapter buildAdapter(@NonNull Context context) {
-        @LayoutRes final int itemResource = android.R.layout.simple_spinner_item;
-        @LayoutRes final int dropDownResource = android.R.layout.simple_spinner_dropdown_item;
-        ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, itemResource);
-        adapter.setDropDownViewResource(dropDownResource);
+        ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_doesnt_repeat), null));
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_daily), new RecurrenceRule(Freq.DAILY)));
@@ -75,7 +73,9 @@ public class RepeatedTaskAdapterFactory {
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_monthly), new RecurrenceRule(Freq.MONTHLY)));
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_yearly), new RecurrenceRule(Freq.YEARLY)));
 
-        return new CustomSpinnerAdapter(context, adapter, itemResource, dropDownResource);
+        // No need to set a custom view binder - the custom spinner adapter works fine when
+        // wrapped adapter views are simple text views that can have their contents set.
+        return new CustomSpinnerAdapter(context, adapter);
     }
 
     /**

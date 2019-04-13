@@ -28,7 +28,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
-import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 import home.westering56.taskbox.CustomSnoozeOptionProvider;
 import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
@@ -36,6 +35,7 @@ import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
 import home.westering56.taskbox.SnoozeTimeFormatter;
 import home.westering56.taskbox.TaskData;
 import home.westering56.taskbox.data.room.Task;
+import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
@@ -61,12 +61,12 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
     private CustomSnoozeViewModel mModel;
-    private CustomSnoozeOptionProvider mCustomSnoozeOptionProvider;
     private SnoozeOptionsDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
 
     private TextView mDateText;
     private Spinner mTimeSelector;
     private Spinner mRepeatSelector;
+    private CustomSpinnerAdapter mTimeSelectorAdapter;
     private CustomSpinnerAdapter mRepeatSelectorAdapter;
 
     private void setSnoozeOptionListener(@Nullable SnoozeOptionsDialogFragment.SnoozeOptionListener listener) {
@@ -92,8 +92,6 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
                 TaskData.getInstance(requireContext()), taskId);
         mModel = ViewModelProviders.of(this, factory).get(CustomSnoozeViewModel.class);
 
-        mCustomSnoozeOptionProvider = new CustomSnoozeOptionProvider(requireContext());
-
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         // It's OK to pass in 'null' as root here, as layout params are replaced by alert dialog
@@ -102,10 +100,11 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         mDateText = view.findViewById(R.id.snooze_custom_date_selector);
 
         mTimeSelector = view.findViewById(R.id.snooze_custom_time_selector);
-        mTimeSelector.setAdapter(mCustomSnoozeOptionProvider.getAdapter());
+        mTimeSelectorAdapter = CustomSnoozeOptionProvider.buildAdapter(requireContext());
+        mTimeSelector.setAdapter(mTimeSelectorAdapter);
 
-        mRepeatSelectorAdapter = RepeatedTaskAdapterFactory.buildAdapter(requireContext());
         mRepeatSelector = view.findViewById(R.id.snooze_custom_repeat_selector);
+        mRepeatSelectorAdapter = RepeatedTaskAdapterFactory.buildAdapter(requireContext());
         mRepeatSelector.setAdapter(mRepeatSelectorAdapter);
 
         // Must call this before registering onItemSelected listeners, but after setting adapters.
@@ -157,12 +156,12 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             mDateText.setText(SnoozeTimeFormatter.formatDate(getContext(), mModel.mDate));
         }
         if (mModel.mTime != null) {
-            int position = mCustomSnoozeOptionProvider.getPositionForTime(mModel.mTime);
+            int position = mTimeSelectorAdapter.positionOf(mModel.mTime, CustomSnoozeOptionProvider.isTimeEqualToItem());
             // Update the time associated with the custom entry, if we have a custom time
-            if (position == mCustomSnoozeOptionProvider.getCustomPosition()) {
-                mCustomSnoozeOptionProvider.updateCustomTimeExample(mModel.mTime);
+            if (position == mTimeSelectorAdapter.getCustomValuePosition()) {
+                mTimeSelectorAdapter.setCustomValue(mModel.mTime);
             } else {
-                mCustomSnoozeOptionProvider.clearCustomTimeExample();
+                mTimeSelectorAdapter.clearCustomValue();
             }
             // Set the spinner to be the position matching the time data
             mTimeSelector.setSelection(position);
@@ -297,7 +296,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
 
     private void onTimeItemSelected(AdapterView<?> parent, int position) {
-        if (CustomSnoozeOptionProvider.isCustomPosition(parent, position)) {
+        if (position == mTimeSelectorAdapter.getCustomPickPosition()) {
             Log.d(TAG, "Custom time selected. Launching time picker fragment");
             showTimePickerFragment();
             // continues in onTimeSet or onTimePickerCancel
@@ -321,10 +320,9 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         Log.d(TAG, String.format("Setting custom time to %s:%s", hourOfDay, minute));
         final LocalTime customTime = LocalTime.of(hourOfDay, minute);
         mModel.mTime = customTime;
-
-        mCustomSnoozeOptionProvider.updateCustomTimeExample(customTime);
+        mTimeSelectorAdapter.setCustomValue(customTime);
         saveLastSelectedTimePosition();
-        updateUiFromViewModel();
+        mTimeSelector.setSelection(mTimeSelectorAdapter.positionOf(mModel.mTime, CustomSnoozeOptionProvider.isTimeEqualToItem()));
     }
 
     private void saveLastSelectedTimePosition() {
