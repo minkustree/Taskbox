@@ -243,7 +243,8 @@ public class MainActivity extends AppCompatActivity {
                 mTaskData.deleteAllTasks();
                 return true;
             case R.id.menu_action_test_something:
-                RecurrencePickerDialog.test(null, getSupportFragmentManager());
+                SnoozeNotificationManager.testNotification(this);
+//                RecurrencePickerDialog.test(null, getSupportFragmentManager());
             default:
                 return super.onOptionsItemSelected(item);
         }

@@ -130,7 +130,6 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
                         .setColor(context.getApplicationContext().getResources().getColor(R.color.colorPrimary, null))
                         .setCategory(NotificationCompat.CATEGORY_REMINDER)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(remoteViews)
                         .setDeleteIntent(getPendingIntentForNotificationDismiss(context, notificationId))
                         // .setTimeoutAfter(5 * 1000 /*ms*/) // use cancellable Handler instead
