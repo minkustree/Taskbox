@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener action = mUndoClickListener; // undo, unless it's a 'created' result
         switch (resultCode) {
             case RESULT_CANCELED:
-                label = "Cancelled"; break;
+                label = "Cancelled"; action = null; break;
             case TaskDetailActivity.RESULT_TASK_CREATED:
                 action = null; // No undo action. Fall through
             case TaskDetailActivity.RESULT_TASK_UPDATED:
