@@ -33,7 +33,7 @@
         android:hint="@string/task_detail_hint_text"
         android:imeOptions="actionDone"
         android:importantForAutofill="no"
-        android:inputType="text|textCapSentences"
+        android:inputType="text|textCapSentences|textAutoCorrect"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/task_detail_snooze_time">
