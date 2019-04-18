@@ -94,16 +94,6 @@ public class RepeatedTaskFormatterTest {
     }
 
     @Test
-    public void format_monthly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY")), is("Every month"));
-    }
-
-    @Test
-    public void format_multi_monthly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=42")), is("Every 42 months"));
-    }
-
-    @Test
     public void format_weekly() throws InvalidRecurrenceRuleException {
         assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY")), is("Every week"));
     }
@@ -121,6 +111,26 @@ public class RepeatedTaskFormatterTest {
     @Test
     public void format_multi_weekly_with_pattern2() throws InvalidRecurrenceRuleException {
         assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")), is("Every 2 weeks on Tue, Thu"));
+    }
+
+    @Test
+    public void format_monthly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY")), is("Every month"));
+    }
+
+    @Test
+    public void format_multi_monthly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=42")), is("Every 42 months"));
+    }
+
+    @Test
+    public void format_yearly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=YEARLY")), is("Every year"));
+    }
+
+    @Test
+    public void format_multi_yearly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=YEARLY;INTERVAL=4")), is("Every 4 years"));
     }
 
 }
