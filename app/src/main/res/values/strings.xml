@@ -42,4 +42,38 @@
     <string name="repeat_option_weekly">Weekly</string>
     <string name="repeat_option_monthly">Monthly</string>
     <string name="repeat_option_yearly">Yearly</string>
+    <plurals name="repeat_day_label">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="repeat_week_label">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="repeat_month_label">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="repeat_year_label">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <string-array name="repeat_weekday_short"><!-- Order by RecurrenceRule.WeekdayNum.ordinal -->
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+    </string-array>
+    <string-array name="repeat_weekday_long"><!-- Order by RecurrenceRule.WeekdayNum.ordinal -->
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
 </resources>
