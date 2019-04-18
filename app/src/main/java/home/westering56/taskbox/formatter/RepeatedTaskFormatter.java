@@ -18,7 +18,7 @@ public class RepeatedTaskFormatter {
         StringBuilder sb = new StringBuilder("Every ");
         final Resources res = context.getResources();
         int interval = rule.getInterval();
-        if (interval > 1) sb.append(interval);
+        if (interval > 1) sb.append(interval).append(" ");
         switch (rule.getFreq()) {
             case YEARLY:
                 sb.append(res.getQuantityString(R.plurals.repeat_year_label, interval));
@@ -41,7 +41,7 @@ public class RepeatedTaskFormatter {
 
     public static void appendByWeekdayParts(Resources res, StringBuilder sb, List<RecurrenceRule.WeekdayNum> byDayPart) {
         if (byDayPart == null || byDayPart.size() == 0) return;
-        sb.append("on ");
+        sb.append(" on ");
         if (byDayPart.size() == 1) {
             int index = byDayPart.get(0).weekday.ordinal();
             sb.append(res.getStringArray(R.array.repeat_weekday_long)[index]);

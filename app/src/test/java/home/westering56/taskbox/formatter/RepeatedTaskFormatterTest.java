@@ -3,37 +3,34 @@ package home.westering56.taskbox.formatter;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.dmfs.rfc5545.Weekday;
+import org.dmfs.rfc5545.recur.Freq;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class RepeatedTaskFormatterTest {
 
+    private Context mContext;
+
     @Before
-    public void setUp() throws Exception {
+    public void getContext() {
+        mContext = ApplicationProvider.getApplicationContext();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
-//    @Test
-//    public void format() {
-//    }
 
     @Test
     public void appendByWeekdayParts_null() {
@@ -45,8 +42,7 @@ public class RepeatedTaskFormatterTest {
     @Test
     public void appendByWeekdayParts_empty() {
         StringBuilder sb = new StringBuilder();
-        List<RecurrenceRule.WeekdayNum> testList = new ArrayList<RecurrenceRule.WeekdayNum>();
-        RepeatedTaskFormatter.appendByWeekdayParts(null, sb, testList);
+        RepeatedTaskFormatter.appendByWeekdayParts(null, sb, Collections.emptyList());
         assertThat(sb.toString().length(), is(0));
     }
 
@@ -56,9 +52,8 @@ public class RepeatedTaskFormatterTest {
         List<RecurrenceRule.WeekdayNum> testList = new ArrayList<RecurrenceRule.WeekdayNum>() {{
             add(new RecurrenceRule.WeekdayNum(0, Weekday.MO));
         }};
-        Context c = ApplicationProvider.getApplicationContext();
-        RepeatedTaskFormatter.appendByWeekdayParts(c.getResources(), sb, testList);
-        assertThat(sb.toString(), is("on Monday"));
+        RepeatedTaskFormatter.appendByWeekdayParts(mContext.getResources(), sb, testList);
+        assertThat(sb.toString(), is(" on Monday"));
     }
 
     @Test
@@ -68,9 +63,8 @@ public class RepeatedTaskFormatterTest {
             add(new RecurrenceRule.WeekdayNum(0, Weekday.SU));
             add(new RecurrenceRule.WeekdayNum(0, Weekday.MO));
         }};
-        Context c = ApplicationProvider.getApplicationContext();
-        RepeatedTaskFormatter.appendByWeekdayParts(c.getResources(), sb, testList);
-        assertThat(sb.toString(), is("on Sun, Mon"));
+        RepeatedTaskFormatter.appendByWeekdayParts(mContext.getResources(), sb, testList);
+        assertThat(sb.toString(), is(" on Sun, Mon"));
     }
 
     @Test
@@ -82,9 +76,51 @@ public class RepeatedTaskFormatterTest {
             add(new RecurrenceRule.WeekdayNum(0, Weekday.SU));
             add(new RecurrenceRule.WeekdayNum(0, Weekday.MO));
         }};
-        Context c = ApplicationProvider.getApplicationContext();
-        RepeatedTaskFormatter.appendByWeekdayParts(c.getResources(), sb, testList);
-        assertThat(sb.toString(), is("on Thu, Wed, Sun, Mon"));
+        RepeatedTaskFormatter.appendByWeekdayParts(mContext.getResources(), sb, testList);
+        assertThat(sb.toString(), is(" on Thu, Wed, Sun, Mon"));
+    }
+
+    @Test
+    public void format_daily() {
+        RecurrenceRule rule = new RecurrenceRule(Freq.DAILY);
+        assertThat(RepeatedTaskFormatter.format(mContext, rule), is("Every day"));
+    }
+
+    @Test
+    public void format_multi_daily() {
+        RecurrenceRule rule = new RecurrenceRule(Freq.DAILY);
+        rule.setInterval(3);
+        assertThat(RepeatedTaskFormatter.format(mContext, rule), is("Every 3 days"));
+    }
+
+    @Test
+    public void format_monthly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY")), is("Every month"));
+    }
+
+    @Test
+    public void format_multi_monthly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=42")), is("Every 42 months"));
+    }
+
+    @Test
+    public void format_weekly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY")), is("Every week"));
+    }
+
+    @Test
+    public void format_multi_weekly() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=10")), is("Every 10 weeks"));
+    }
+
+    @Test
+    public void format_multi_weekly_with_pattern() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TH")), is("Every 2 weeks on Thursday"));
+    }
+
+    @Test
+    public void format_multi_weekly_with_pattern2() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")), is("Every 2 weeks on Tue, Thu"));
     }
 
 }
