@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.dmfs.rfc5545.Weekday;
-import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.junit.Before;
@@ -81,16 +80,13 @@ public class RepeatedTaskFormatterTest {
     }
 
     @Test
-    public void format_daily() {
-        RecurrenceRule rule = new RecurrenceRule(Freq.DAILY);
-        assertThat(RepeatedTaskFormatter.format(mContext, rule), is("Every day"));
+    public void format_daily() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=DAILY")), is("Every day"));
     }
 
     @Test
-    public void format_multi_daily() {
-        RecurrenceRule rule = new RecurrenceRule(Freq.DAILY);
-        rule.setInterval(3);
-        assertThat(RepeatedTaskFormatter.format(mContext, rule), is("Every 3 days"));
+    public void format_multi_daily() throws InvalidRecurrenceRuleException {
+        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=DAILY;INTERVAL=3")), is("Every 3 days"));
     }
 
     @Test
