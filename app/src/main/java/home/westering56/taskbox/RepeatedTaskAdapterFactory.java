@@ -10,6 +10,8 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import home.westering56.taskbox.formatter.RepeatedTaskFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 public class RepeatedTaskAdapterFactory {
@@ -29,8 +31,8 @@ public class RepeatedTaskAdapterFactory {
         }
 
         // Creates a object used to represent a custom recurrence rule
-        public static RepetitionOption buildCustomForRule(@NonNull RecurrenceRule rule) {
-            return new RepetitionOption("Custom: " + rule.toString(), rule);
+        public static RepetitionOption buildCustomForRule(@NonNull Context context, @NonNull RecurrenceRule rule) {
+            return new RepetitionOption(RepeatedTaskFormatter.format(context, rule), rule);
         }
 
         /**

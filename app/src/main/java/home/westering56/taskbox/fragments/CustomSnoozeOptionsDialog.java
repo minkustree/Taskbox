@@ -240,7 +240,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         // will create or update the 'existing custom' position if mRule is not already in there
         int position = mRepeatSelectorAdapter.positionOf(RepetitionOption.buildDummyForRule(mModel.mRule));
         if (position == -1) {
-            position = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(mModel.mRule));
+            position = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(getContext(), mModel.mRule));
         }
         Log.d(TAG, "Initialising repeat spinner position to be: " + position);
         mRepeatSelector.setSelection(position);
@@ -344,7 +344,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
         // Continue with setting the recurrence rule
         Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
-        int pos = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(rule));
+        int pos = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(getContext(), rule));
         // update the selected position to be the newly picked custom rule
         Log.d(TAG, "Updating repeat selector spinner to new custom position " + pos);
         mRepeatSelector.setSelection(pos);
