@@ -5,27 +5,27 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:visibility="gone"
+    android:visibility="visible"
     tools:showIn="@layout/snooze_custom_repeat_dialog">
 
     <RadioButton
-        android:id="@+id/radioButton"
+        android:id="@+id/snooze_custom_monthly_same_day_radio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="on the same day each month" />
+        android:text="@string/snooze_custom_repeat_monthly_same_day" />
 
     <RadioButton
-        android:id="@+id/radioButton2"
+        android:id="@+id/snooze_custom_monthly_nth_day_of_week_radio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="on every {first|second|third|fourth|last} {DayOfWeek}" /> <!-- note last takes precedent over fourth -->
+        android:text="@string/snooze_custom_repeat_monthly_nth_day_of_week" />
 
     <RadioButton
-        android:id="@+id/radioButton3"
+        android:id="@+id/snooze_custom_monthly_last_day_radio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="on the last day of the month" />
+        android:text="@string/snooze_custom_repeat_monthly_last_day" />
 </RadioGroup>

@@ -335,7 +335,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
     private void showRecurrencePickerDialog() {
-        RecurrencePickerDialog dialog = RecurrencePickerDialog.newInstance(this, mModel.mRule);
+        RecurrencePickerDialog dialog = RecurrencePickerDialog.newInstance(this, mModel.mRule, mModel.mDate);
         assert getFragmentManager() != null;
         dialog.show(getFragmentManager(), "repeat_dialog");
     }

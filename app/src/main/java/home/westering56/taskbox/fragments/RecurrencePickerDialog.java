@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -21,6 +22,7 @@ import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,18 +35,20 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+
 import home.westering56.taskbox.R;
 
 public class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "RecurrencePickerDialog";
 
     public static void test(OnRecurrencePickListener listener, FragmentManager fragmentManager) {
-        RecurrencePickerDialog dlg = RecurrencePickerDialog.newInstance(listener, null);
+        RecurrencePickerDialog dlg = RecurrencePickerDialog.newInstance(listener, null, LocalDate.now());
         dlg.show(fragmentManager, "recurrence_picker");
     }
 
     public interface OnRecurrencePickListener {
         void onRecurrencePicked(@NonNull RecurrenceRule rule);
+
         void onRecurrencePickerCancelled();
     }
 
@@ -52,11 +56,14 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
      * Data Model for this dialog
      */
     static class RecurrencePickerViewModel extends ViewModel {
+
         static class Factory implements ViewModelProvider.Factory {
             private final RecurrenceRule factoryRule;
+            private final LocalDate startDate;
 
-            Factory(RecurrenceRule rule) {
-                factoryRule = rule;
+            Factory(RecurrenceRule rule, LocalDate startDate) {
+                this.factoryRule = rule;
+                this.startDate = startDate;
             }
 
             @NonNull
@@ -66,18 +73,24 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
                     throw new IllegalArgumentException("Unexpected model class " + modelClass);
                 }
                 //noinspection unchecked
-                return (T) new RecurrencePickerViewModel(factoryRule);
+                return (T) new RecurrencePickerViewModel(factoryRule, startDate);
             }
         }
 
         private final RecurrenceRule mRule;
+        private final LocalDate mStartDate;
 
-        RecurrencePickerViewModel(RecurrenceRule rule) {
+        RecurrencePickerViewModel(RecurrenceRule rule, LocalDate startDate) {
             this.mRule = rule;
+            this.mStartDate = startDate;
         }
 
         RecurrenceRule getRule() {
             return mRule;
+        }
+
+        LocalDate getStartDate() {
+            return mStartDate;
         }
     }
 
@@ -89,6 +102,9 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
     private View mWeeklyView;
     private View mMonthlyView;
     private ToggleButton[] mWeekdayButtons;
+    private RadioButton mMonthlySameDayRadio;
+    private RadioButton mMonthlyNthDayOfWeekRadio;
+    private RadioButton mMonthlyLastDayRadio;
 
     /**
      * Create a new instance of the fragment, displaying the specified {@link RecurrenceRule}.
@@ -98,9 +114,11 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
      */
     @NonNull
     public static RecurrencePickerDialog newInstance(@NonNull OnRecurrencePickListener listener,
-                                                     @Nullable RecurrenceRule rule) {
+                                                     @Nullable RecurrenceRule rule,
+                                                     @NonNull LocalDate startDate) {
         Bundle args = new Bundle();
         args.putString("EXTRA_RRULE", rule == null ? null : rule.toString());
+        args.putSerializable("EXTRA_STARTDATE", startDate);
         RecurrencePickerDialog fragment = new RecurrencePickerDialog();
         fragment.setArguments(args);
         fragment.setOnRecurrencePickListener(listener);
@@ -155,7 +173,6 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
         });
 
         mWeeklyView = view.findViewById(R.id.snooze_custom_repeat_dialog_weekly_layout);
-        mMonthlyView = view.findViewById(R.id.snooze_custom_repeat_dialog_monthly_layout);
 
         mWeekdayButtons = new ToggleButton[7];
         mWeekdayButtons[Weekday.SU.ordinal()] = view.findViewById(R.id.sun_button);
@@ -168,6 +185,11 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
         for (ToggleButton weekdayButton : mWeekdayButtons) {
             weekdayButton.setOnCheckedChangeListener(this);
         }
+
+        mMonthlyView = view.findViewById(R.id.snooze_custom_repeat_dialog_monthly_layout);
+        mMonthlySameDayRadio = view.findViewById(R.id.snooze_custom_monthly_same_day_radio);
+        mMonthlyNthDayOfWeekRadio = view.findViewById(R.id.snooze_custom_monthly_nth_day_of_week_radio);
+        mMonthlyLastDayRadio = view.findViewById(R.id.snooze_custom_monthly_last_day_radio);
 
         Button doneButton = view.findViewById(R.id.snooze_custom_repeat_dialog_button_done);
         doneButton.setOnClickListener(new View.OnClickListener() {
@@ -190,6 +212,7 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
 
     private void initModelFromArguments() {
         String rrule = Objects.requireNonNull(getArguments()).getString("EXTRA_RRULE");
+        LocalDate startDate = (LocalDate)Objects.requireNonNull(getArguments()).getSerializable("EXTRA_STARTDATE");
         RecurrenceRule rule = null;
         if (rrule != null) {
             try {
@@ -202,12 +225,13 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
             Log.d(TAG, "Defaulting to daily recurrence rule");
             rule = new RecurrenceRule(Freq.DAILY);
         }
-        mModel = ViewModelProviders.of(this, new RecurrencePickerViewModel.Factory(rule))
+        mModel = ViewModelProviders.of(this, new RecurrencePickerViewModel.Factory(rule, startDate))
                 .get(RecurrencePickerViewModel.class);
     }
 
     private void updateDialog() {
-        final RecurrenceRule rule = mModel.getRule();
+        RecurrenceRule rule = mModel.getRule();
+        LocalDate startDate = mModel.getStartDate();
         Log.d(TAG, "Updating dialog to match rule: " + rule.toString());
         mFrequencySpinner.setSelection(freqToPosition(rule.getFreq()));
 
@@ -230,6 +254,57 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
             for (int i = 0; i < mWeekdayButtons.length; i++) {
                 mWeekdayButtons[i].setChecked(shouldBeChecked[i]);
             }
+        }
+        if (rule.getFreq() == Freq.MONTHLY) {
+            // TODO: Break this out into smaller, meaningfully named methods
+            // TODO: figure out the flow before you write more code
+            // set some defaults if nothing is set yet
+            if (!rule.hasPart(RecurrenceRule.Part.BYDAY) || !rule.hasPart(RecurrenceRule.Part.BYMONTHDAY)) {
+                try {
+                    rule.setByPart(RecurrenceRule.Part.BYMONTHDAY, startDate.getDayOfMonth());
+                } catch (InvalidRecurrenceRuleException e) {
+                    throw new IllegalArgumentException(e);
+                }
+                int rrWeekdayNum = startDate.getDayOfWeek().getValue() % 7; // from monday = 1 to sunday = 0
+                final String weekday = getResources().getStringArray(R.array.repeat_weekday_long)[rrWeekdayNum];
+                int weekOrdinal = ((startDate.getDayOfMonth() -1) / 7) + 1;
+                String byDayString = getString(R.string.snooze_custom_repeat_monthly_nth_day_of_week, getStringForOrdinal(weekOrdinal), weekday);
+                mMonthlyNthDayOfWeekRadio.setText(byDayString);
+            }
+            if (rule.hasPart(RecurrenceRule.Part.BYMONTHDAY)) { // positive, this one. negative, last day(s) of the month
+                int dayValue = rule.getByPart(RecurrenceRule.Part.BYMONTHDAY).get(0);
+                if (dayValue < -1 || dayValue > 31 || dayValue == 0) {
+                    throw new IllegalStateException("Monthly recurrence rules must have BYMONTHDAY values in the set {-1, 1, .., 31}, not " + dayValue);
+                }
+                mMonthlySameDayRadio.setSelected(dayValue > 0);
+                mMonthlyLastDayRadio.setSelected(dayValue < 0);
+            } else if (rule.hasPart(RecurrenceRule.Part.BYDAY)) {
+                mMonthlyNthDayOfWeekRadio.setSelected(true);
+                RecurrenceRule.WeekdayNum weekdayNum = rule.getByDayPart().get(0);
+                final String weekday = getResources().getStringArray(R.array.repeat_weekday_long)[weekdayNum.weekday.ordinal()];
+                mMonthlyNthDayOfWeekRadio.setText(getString(R.string.snooze_custom_repeat_monthly_nth_day_of_week, getStringForOrdinal(weekdayNum.pos), weekday));
+            }
+        }
+    }
+
+
+
+    private static String getStringForOrdinal(final int ord) {
+        switch (ord) {
+            case -2:
+                return "second-to-last";
+            case -1:
+                return "last";
+            case 1:
+                return "first";
+            case 2:
+                return "second";
+            case 3:
+                return "third";
+            case 4:
+                return "fourth";
+            default:
+                return Integer.toString(ord);
         }
     }
 
