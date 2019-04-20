@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Objects;
 
 import home.westering56.taskbox.R;
+import home.westering56.taskbox.formatter.RepeatedTaskFormatter;
 
-import static home.westering56.taskbox.RecurrencePickerHelper.getStringForOrdinal;
 import static home.westering56.taskbox.RecurrencePickerHelper.getWeekOrdinalForDate;
 import static home.westering56.taskbox.RecurrencePickerHelper.isLastDayOfTheMonth;
 import static home.westering56.taskbox.RecurrencePickerHelper.weekdayFromDate;
@@ -393,15 +393,7 @@ class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnIte
     }
 
     private void updateMonthlyRuleTextFromModel() {
-        final LocalDate date = mModel.getStartDate();
-        // first week, second week, etc. -1 = 'last week'
-        final String ordinalText = getStringForOrdinal(getWeekOrdinalForDate(date));
-
-        // day of week
-        final String dowText = getResources().getStringArray(R.array.repeat_weekday_long)[weekdayFromDate(date).ordinal()];
-
-        // set the text
-        final String text = getString(R.string.snooze_custom_repeat_monthly_nth_day_of_week, ordinalText, dowText);
+        final String text = RepeatedTaskFormatter.getMonthlyNthDayOfWeekText(getResources(), mModel.getStartDate());
         mMonthlyNthDayOfWeekRadio.setText(text);
     }
 

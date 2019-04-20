@@ -44,7 +44,13 @@
     <string name="repeat_option_yearly">Yearly</string>
     <string name="snooze_custom_repeat_monthly_same_day">on the same day each month</string>
     <string name="snooze_custom_repeat_monthly_last_day">on the last day of the month</string>
-    <string name="snooze_custom_repeat_monthly_nth_day_of_week">on every %1$s %2$s</string><!-- "on every third Tuesday" note last takes precedent over fourth -->
+    <!-- "on every third Tuesday". Note last takes precedent over fourth -->
+    <string name="snooze_custom_repeat_monthly_nth_day_of_week">on every %1$s %2$s</string>
+    <string name="ordinal_fourth">fourth</string>
+    <string name="ordinal_third">third</string>
+    <string name="ordinal_second">second</string>
+    <string name="ordinal_first">first</string>
+    <string name="ordinal_last">last</string>
     <plurals name="repeat_day_label">
         <item quantity="one">day</item>
         <item quantity="other">days</item>

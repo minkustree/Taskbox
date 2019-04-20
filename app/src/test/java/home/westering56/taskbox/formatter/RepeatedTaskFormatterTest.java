@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static home.westering56.taskbox.formatter.RepeatedTaskFormatter.format;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -81,52 +82,66 @@ public class RepeatedTaskFormatterTest {
 
     @Test
     public void format_daily() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=DAILY")), is("Every day"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=DAILY")), is("Every day"));
     }
 
     @Test
     public void format_multi_daily() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=DAILY;INTERVAL=3")), is("Every 3 days"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=DAILY;INTERVAL=3")), is("Every 3 days"));
     }
 
     @Test
     public void format_weekly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY")), is("Every week"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=WEEKLY")), is("Every week"));
     }
 
     @Test
     public void format_multi_weekly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=10")), is("Every 10 weeks"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=10")), is("Every 10 weeks"));
     }
 
     @Test
     public void format_multi_weekly_with_pattern() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TH")), is("Every 2 weeks on Thursday"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TH")), is("Every 2 weeks on Thursday"));
     }
 
     @Test
     public void format_multi_weekly_with_pattern2() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")), is("Every 2 weeks on Tue, Thu"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=TU,TH")), is("Every 2 weeks on Tue, Thu"));
     }
 
     @Test
     public void format_monthly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY")), is("Every month"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=MONTHLY")), is("Every month"));
     }
 
     @Test
     public void format_multi_monthly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=42")), is("Every 42 months"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=42")), is("Every 42 months"));
     }
 
     @Test
     public void format_yearly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=YEARLY")), is("Every year"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=YEARLY")), is("Every year"));
     }
 
     @Test
     public void format_multi_yearly() throws InvalidRecurrenceRuleException {
-        assertThat(RepeatedTaskFormatter.format(mContext, new RecurrenceRule("FREQ=YEARLY;INTERVAL=4")), is("Every 4 years"));
+        assertThat(format(mContext, new RecurrenceRule("FREQ=YEARLY;INTERVAL=4")), is("Every 4 years"));
     }
 
+    @Test
+    public void format_monthly_every_30th() throws InvalidRecurrenceRuleException {
+        assertThat(format(mContext, new RecurrenceRule("FREQ=MONTHLY;BYMONTHDAY=30")), is("Every month on the 30th"));
+    }
+
+    @Test
+    public void format_3_monthly_every_last_day() throws InvalidRecurrenceRuleException {
+        assertThat(format(mContext, new RecurrenceRule("FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=-1")), is("Every 3 months on the last day of the month"));
+    }
+
+    @Test
+    public void format_monthly_every_second_sunday() throws InvalidRecurrenceRuleException {
+        assertThat(format(mContext, new RecurrenceRule("FREQ=MONTHLY;BYDAY=2SU")), is("Every month on the second Sunday"));
+    }
 }

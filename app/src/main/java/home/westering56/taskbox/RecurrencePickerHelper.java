@@ -25,25 +25,6 @@ public class RecurrencePickerHelper {
         }
     }
 
-    public static String getStringForOrdinal(final int ord) {
-        switch (ord) {
-            case -2:
-                return "second-to-last";
-            case -1:
-                return "last";
-            case 1:
-                return "first";
-            case 2:
-                return "second";
-            case 3:
-                return "third";
-            case 4:
-                return "fourth";
-            default:
-                return Integer.toString(ord);
-        }
-    }
-
     public static Weekday weekdayFromDate(@NonNull LocalDate date) {
         // convert from mon-start, 1-based (mon = 1, sun = 7) to sun-start, 0-based (sun = 0, mon = 1)
         return Weekday.values()[date.getDayOfWeek().getValue() % 7];
