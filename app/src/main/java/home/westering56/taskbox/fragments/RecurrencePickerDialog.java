@@ -46,7 +46,7 @@ import static home.westering56.taskbox.RecurrencePickerHelper.weekdayFromDate;
 import static org.dmfs.rfc5545.recur.RecurrenceRule.Part.BYDAY;
 import static org.dmfs.rfc5545.recur.RecurrenceRule.Part.BYMONTHDAY;
 
-class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
+public class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
     private static final String TAG = "RecurrencePickerDialog";
     private static final String EXTRA_RULE_STR = "EXTRA_RULE_STR";
     private static final String EXTRA_START_DATE = "EXTRA_START_DATE";
