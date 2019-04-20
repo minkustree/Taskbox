@@ -1,7 +1,6 @@
 package home.westering56.taskbox;
 
 import android.content.Context;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -26,7 +25,6 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 /**
  * Provides relevant snooze option choices.
  */
-@SuppressWarnings("WeakerAccess")
 public class SnoozeOptionProvider {
     private static final String SNOOZE_OPTION_TITLE = "option_title";
     private static final String SNOOZE_OPTION_INSTANT = "option_instant";
@@ -92,16 +90,13 @@ public class SnoozeOptionProvider {
                         R.layout.snooze_option_item,
                         new String[]{SNOOZE_OPTION_TITLE, SNOOZE_OPTION_INSTANT, SNOOZE_OPTION_ICON},
                         new int[]{R.id.snooze_option_item_title, R.id.snooze_option_item_detail, R.id.snooze_option_item_ic});
-                mAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                    @Override
-                    public boolean setViewValue(View view, Object data, String textRepresentation) {
-                        if (data instanceof Temporal) {
-                            ((TextView)view).setText(
-                                    SnoozeTimeFormatter.format(view.getContext(), (Temporal) data));
-                            return true;
-                        }
-                        return false;
+                mAdapter.setViewBinder((view, data, textRepresentation) -> {
+                    if (data instanceof Temporal) {
+                        ((TextView)view).setText(
+                                SnoozeTimeFormatter.format(view.getContext(), (Temporal) data));
+                        return true;
                     }
+                    return false;
                 });
             }
         }

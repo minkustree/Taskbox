@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -119,15 +118,12 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
             }
         });
         // react to keyboard 'done' and 'Enter key' as if Save had been pressed
-        taskSummary.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
-                    onSaveClicked();
-                    return true;
-                }
-                return false;
+        taskSummary.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
+                onSaveClicked();
+                return true;
             }
+            return false;
         });
 
         taskData = TaskData.getInstance(getApplicationContext());

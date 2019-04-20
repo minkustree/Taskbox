@@ -174,7 +174,8 @@
             android:ems="5"
             android:inputType="date"
             android:importantForAutofill="no"
-            tools:text="30/04" />
+            tools:text="30/04"
+            tools:ignore="LabelFor" />
 
         <EditText
             android:id="@+id/editText4"
@@ -183,7 +184,8 @@
             android:ems="3"
             android:inputType="number"
             android:importantForAutofill="no"
-            tools:text="42" />
+            tools:text="42"
+            tools:ignore="LabelFor" />
 
         <TextView
             android:id="@+id/textView3"

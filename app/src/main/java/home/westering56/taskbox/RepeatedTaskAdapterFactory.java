@@ -68,7 +68,7 @@ public class RepeatedTaskAdapterFactory {
         ArrayAdapter<RepetitionOption> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_doesnt_repeat), null));
+        adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_does_not_repeat), null));
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_daily), new RecurrenceRule(Freq.DAILY)));
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_weekly), new RecurrenceRule(Freq.WEEKLY)));
         adapter.add(new RepetitionOption(context.getString(R.string.repeat_option_monthly), new RecurrenceRule(Freq.MONTHLY)));

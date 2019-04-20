@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
 
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
@@ -71,13 +70,10 @@ public class SnoozeTimeAdapterFactory {
             }
         });
         // extracts the reference time for comparison purposes
-        adapter.setGetValueFromItemFn(new Function<Object, LocalTime>() {
-            @Override
-            public LocalTime apply(Object input) {
-                //noinspection unchecked cast
-                final Map<String, Object> itemAsMap = (Map<String, Object>) input;
-                return (LocalTime) itemAsMap.get(SNOOZE_TIME_REFERENCE);
-            }
+        adapter.setGetValueFromItemFn(input -> {
+            //noinspection unchecked cast
+            final Map<String, Object> itemAsMap = (Map<String, Object>) input;
+            return (LocalTime) itemAsMap.get(SNOOZE_TIME_REFERENCE);
         });
         return adapter;
     }

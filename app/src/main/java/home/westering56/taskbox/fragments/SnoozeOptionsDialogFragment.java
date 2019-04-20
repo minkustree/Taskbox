@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 
@@ -69,22 +68,14 @@ public class SnoozeOptionsDialogFragment extends DialogFragment {
 
         final GridView content = view.findViewById(R.id.snooze_dialog_content);
         content.setAdapter(SnoozeOptionProvider.newAdapter(requireContext()));
-        content.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mSnoozeOptionListener != null) {
-                    mSnoozeOptionListener.onSnoozeOptionSelected(
-                            SnoozeOptionProvider.getDateTimeAtPosition(parent, position), null);
-                }
+        content.setOnItemClickListener((parent, view1, position, id) -> {
+            if (mSnoozeOptionListener != null) {
+                mSnoozeOptionListener.onSnoozeOptionSelected(
+                        SnoozeOptionProvider.getDateTimeAtPosition(parent, position), null);
             }
         });
         final Button custom = view.findViewById(R.id.snooze_dialog_button_custom);
-        custom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCustomSnoozeTimeDialog();
-            }
-        });
+        custom.setOnClickListener(v -> showCustomSnoozeTimeDialog());
     }
 
     private void showCustomSnoozeTimeDialog() {

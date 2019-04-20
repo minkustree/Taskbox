@@ -86,7 +86,7 @@ public class TaskData {
      * Call when the underlying data set has changed, to call each registered {@link DataSetObserver}.
      * Called automatically when destructive operations happen.
      */
-    public void notifyDataSetChanged() {
+    void notifyDataSetChanged() {
         mDataSetObservable.notifyChanged();
     }
 
@@ -168,34 +168,27 @@ public class TaskData {
         taskDatabase = TaskDatabase.getDatabase(appContext);
 
         // Set up snoozeDataAdapter for active tasks
-        activeTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_1, new Supplier<Cursor>() {
-
-            @Override
-            public Cursor get() {
-                return taskDatabase.taskDao().loadAllActive();
-            }
-        }, new String[] {"summary"}, new int[] {android.R.id.text1});
+        activeTaskAdapter = new TaskCursorAdapter(appContext,
+                android.R.layout.simple_list_item_1,
+                () -> taskDatabase.taskDao().loadAllActive(),
+                new String[] {"summary"},
+                new int[] {android.R.id.text1});
         registerDataSetObserver(activeTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for done tasks
-        doneTaskAdapter = new TaskCursorAdapter(appContext, android.R.layout.simple_list_item_2, new Supplier<Cursor>() {
-
-            @Override
-            public Cursor get() {
-                return taskDatabase.taskDao().loadAllDone();
-            }
-        }, new String[] {"summary", "done_at"}, new int[] {android.R.id.text1, android.R.id.text2});
+        doneTaskAdapter = new TaskCursorAdapter(appContext,
+                android.R.layout.simple_list_item_2,
+                () -> taskDatabase.taskDao().loadAllDone(),
+                new String[] {"summary", "done_at"},
+                new int[] {android.R.id.text1, android.R.id.text2});
         doneTaskAdapter.setViewBinder(new DoneFormattingViewBinder());
         registerDataSetObserver(doneTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for snoozed tasks
-        snoozedTaskAdapter = new TaskCursorAdapter(appContext, R.layout.task_list_item, new Supplier<Cursor>() {
-
-            @Override
-            public Cursor get() {
-                return taskDatabase.taskDao().loadAllSnoozed();
-            }
-        }, new String[] {"summary", "snooze_until", "rrule"},
+        snoozedTaskAdapter = new TaskCursorAdapter(appContext,
+                R.layout.task_list_item,
+                () -> taskDatabase.taskDao().loadAllSnoozed(),
+                new String[] {"summary", "snooze_until", "rrule"},
                 new int[] {android.R.id.text1, android.R.id.text2, R.id.task_list_item_repeat_icon});
         snoozedTaskAdapter.setViewBinder(new SnoozeFormattingViewBinder());
         registerDataSetObserver(snoozedTaskAdapter.getTaskDataObserver());
@@ -213,15 +206,15 @@ public class TaskData {
         }
     }
 
-    public ListAdapter getActiveTaskAdapter() { return activeTaskAdapter; }
-    public ListAdapter getDoneTaskAdapter() {
+    ListAdapter getActiveTaskAdapter() { return activeTaskAdapter; }
+    ListAdapter getDoneTaskAdapter() {
         return doneTaskAdapter;
     }
-    public ListAdapter getSnoozedTaskAdapter() {
+    ListAdapter getSnoozedTaskAdapter() {
         return snoozedTaskAdapter;
     }
 
-    public void addSampleData(Context context) {
+    void addSampleData(Context context) {
         String[] sampleTasks = context.getApplicationContext().getResources().getStringArray(R.array.sampleTasks);
         for (String t : sampleTasks) {
             taskDatabase.taskDao().insert(new Task(t));
@@ -239,26 +232,26 @@ public class TaskData {
         return taskDatabase.taskDao().get(id);
     }
 
-    public void updateTask(Task task) {
+    void updateTask(Task task) {
         Task oldTask = taskDatabase.taskDao().get(task.uid);
         mUndoBuffer.storeUpdate(oldTask, task);
         taskDatabase.taskDao().update(task);
         notifyDataSetChanged();
     }
 
-    public void deleteTask(Task task) {
+    void deleteTask(Task task) {
         mUndoBuffer.storeDelete(task);
         taskDatabase.taskDao().delete(task);
         notifyDataSetChanged();
     }
 
-    public void deleteAllTasks() {
+    void deleteAllTasks() {
         mUndoBuffer.clear(); // cannot undo delete all
         taskDatabase.clearAllTables();
         notifyDataSetChanged();
     }
 
-    public void undoLast() {
+    void undoLast() {
         if (mUndoBuffer.isEmpty()) {
             Log.w(TAG, "Undo requested, but nothing in undo buffer");
             return;
@@ -281,7 +274,7 @@ public class TaskData {
     /**
      * The @{@link Instant} at which the next snoozed task is scheduled to wake.
      */
-    public Instant getNextWakeupInstant() {
+    Instant getNextWakeupInstant() {
         return taskDatabase.taskDao().getNextWakeupDue();
     }
 
@@ -289,7 +282,7 @@ public class TaskData {
      * Fetch the tasks that have become active during the time between the two specified instants.
      * @param now inclusive
      */
-    public List<Task> getNewlyActiveTasks(Instant lastChecked, Instant now) {
+    List<Task> getNewlyActiveTasks(Instant lastChecked, Instant now) {
         Log.d(TAG, "Fetching tasks that un-snoozed between " + lastChecked + " and " + now);
         return taskDatabase.taskDao().getNewlyActiveTasks(lastChecked, now);
     }

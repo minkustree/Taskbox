@@ -20,7 +20,7 @@
         <item>Choose life</item>
     </string-array>
     <string-array name="repeat_selector_values">
-        <item>Doesn\'t repeat</item>
+        <item>"Doesn't repeat"</item>
         <item>Daily</item>
         <item>Weekly</item>
         <item>Monthly</item>

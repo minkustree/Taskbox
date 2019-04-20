@@ -50,12 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDetailView();
-            }
-        });
+        fab.setOnClickListener(view -> showDetailView());
 
         mTaskData = TaskData.getInstance(getApplicationContext());
 
@@ -119,12 +114,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private final AdapterView.OnItemClickListener taskClickedHandler = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // We know that Task.uid is an int, not a long, so can cast safely here
-            showDetailView((int)id);
-        }
+    private final AdapterView.OnItemClickListener taskClickedHandler = (parent, view, position, id) -> {
+        // We know that Task.uid is an int, not a long, so can cast safely here
+        showDetailView((int)id);
     };
 
     private void updateList() {

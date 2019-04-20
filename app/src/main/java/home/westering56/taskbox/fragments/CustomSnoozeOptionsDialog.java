@@ -174,12 +174,9 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         updateUiFromModel();
 
         // Set listeners now that we've updated the selections & states of the UI
-        mDateText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "date picker clicked");
-                showDatePickerFragment();
-            }
+        mDateText.setOnClickListener(viewIgnored -> {
+            Log.d(TAG, "date picker clicked");
+            showDatePickerFragment();
         });
         mTimeSelector.setOnItemSelectedListener(this);
         mRepeatSelector.setOnItemSelectedListener(this);

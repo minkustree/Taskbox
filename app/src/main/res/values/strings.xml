@@ -37,7 +37,7 @@
     <string name="snooze_custom_repeat_weekly_label_sun">Sun</string>
     <string name="snooze_custom_repeat_dialog_button_done_text">Done</string>
     <string name="custom_spinner_adapter_custom_picker">Custom…</string>
-    <string name="repeat_option_doesnt_repeat">Doesn\'t repeat</string>
+    <string name="repeat_option_does_not_repeat">"Doesn't repeat"</string>
     <string name="repeat_option_daily">Daily</string>
     <string name="repeat_option_weekly">Weekly</string>
     <string name="repeat_option_monthly">Monthly</string>

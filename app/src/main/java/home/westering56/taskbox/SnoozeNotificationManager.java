@@ -272,13 +272,10 @@ public class SnoozeNotificationManager extends BroadcastReceiver {
         Log.d(TAG, "Scheduling removal of notification with ID: " + notificationId);
         Handler h = getDefaultHandler();
         Object token = new Object();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // once we're running, no point keeping the cancellation token any more
-                sTokenMap.remove(notificationId);
-                removeTaskNotification(context, notificationId);
-            }
+        h.postDelayed(() -> {
+            // once we're running, no point keeping the cancellation token any more
+            sTokenMap.remove(notificationId);
+            removeTaskNotification(context, notificationId);
         }, token, 5 * 1000);
         sTokenMap.put(notificationId, token);
     }
