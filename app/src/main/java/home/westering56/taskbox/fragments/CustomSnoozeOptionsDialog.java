@@ -32,7 +32,7 @@ import home.westering56.taskbox.SnoozeTimeAdapterFactory;
 import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
-import home.westering56.taskbox.SnoozeTimeFormatter;
+import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.TaskData;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
@@ -240,7 +240,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         // will create or update the 'existing custom' position if mRule is not already in there
         int position = mRepeatSelectorAdapter.positionOf(RepetitionOption.buildDummyForRule(mModel.mRule));
         if (position == -1) {
-            position = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(getContext(), mModel.mRule));
+            position = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(requireContext(), mModel.mRule));
         }
         Log.d(TAG, "Initialising repeat spinner position to be: " + position);
         mRepeatSelector.setSelection(position);
@@ -316,7 +316,6 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      * the original option is restored (even if it's existing custom option).
      */
     private void onRepeatOptionSelected(AdapterView<?> parent, int position) {
-        //noinspection unchecked
         if (position == mRepeatSelectorAdapter.getCustomPickPosition()) {
             showRecurrencePickerDialog();
         } else {
@@ -344,7 +343,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     public void onRecurrencePicked(@NonNull RecurrenceRule rule) {
         // Continue with setting the recurrence rule
         Log.d(TAG, "Recurrence picker completed. Updating custom entry & selecting new rule: " + rule);
-        int pos = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(getContext(), rule));
+        int pos = mRepeatSelectorAdapter.setCustomValue(RepetitionOption.buildCustomForRule(requireContext(), rule));
         // update the selected position to be the newly picked custom rule
         Log.d(TAG, "Updating repeat selector spinner to new custom position " + pos);
         mRepeatSelector.setSelection(pos);

@@ -1,4 +1,4 @@
-package home.westering56.taskbox;
+package home.westering56.taskbox.formatter;
 
 import android.content.Context;
 
@@ -14,6 +14,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 
 import androidx.annotation.NonNull;
+
+import home.westering56.taskbox.R;
 import home.westering56.taskbox.data.room.Task;
 
 public class SnoozeTimeFormatter {

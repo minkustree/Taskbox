@@ -15,6 +15,8 @@ import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
+
+import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 import static home.westering56.taskbox.Adjusters.AfternoonAdjuster;

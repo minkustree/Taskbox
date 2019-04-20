@@ -21,7 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import home.westering56.taskbox.fragments.RecurrencePickerDialog;
+
+import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TaskboxMain";

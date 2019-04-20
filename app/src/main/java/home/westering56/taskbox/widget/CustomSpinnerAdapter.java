@@ -116,7 +116,7 @@ public class CustomSpinnerAdapter<T> implements SpinnerAdapter {
         for (int i = 0; i < getCount(); i++) {
             if (i == getCustomPickPosition()) continue; // nothing matches the custom pick position
             final T itemValue = getValue(i);
-            if (itemValue == value || (itemValue != null && itemValue.equals(value))) return i;
+            if (Objects.equals(itemValue, value)) return i;
         }
         return -1;
     }

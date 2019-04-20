@@ -6,7 +6,7 @@
     android:layout_height="?android:attr/listPreferredItemHeightSmall"
     android:orientation="horizontal">
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    <TextView
         android:id="@+id/snooze_time_spinner_item_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
         android:layout_width="0dp"

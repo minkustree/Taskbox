@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
 
     private CancellableOnTimeSetListener mOnTimeSetListener;
     private LocalTime mInitialTime;

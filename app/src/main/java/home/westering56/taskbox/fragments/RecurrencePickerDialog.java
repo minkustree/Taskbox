@@ -46,7 +46,7 @@ import static home.westering56.taskbox.RecurrencePickerHelper.weekdayFromDate;
 import static org.dmfs.rfc5545.recur.RecurrenceRule.Part.BYDAY;
 import static org.dmfs.rfc5545.recur.RecurrenceRule.Part.BYMONTHDAY;
 
-public class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
+class RecurrencePickerDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener {
     private static final String TAG = "RecurrencePickerDialog";
     private static final String EXTRA_RULE_STR = "EXTRA_RULE_STR";
     private static final String EXTRA_START_DATE = "EXTRA_START_DATE";
@@ -340,7 +340,7 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
     }
 
     /*
-     * Weekly releated methods
+     * Weekly related methods
      */
 
     /**
@@ -369,7 +369,7 @@ public class RecurrencePickerDialog extends DialogFragment implements AdapterVie
      */
 
     /**
-     * Sets the 'selected' value of the monthly radio button group from the model, or unchecks
+     * Sets the 'selected' value of the monthly radio button group from the model, or un-checks
      * any selected radio in the mMonthlyGroup if we don't know how to display the rule in the model
      */
     private void updateSelectedMonthRuleFromModel() {
