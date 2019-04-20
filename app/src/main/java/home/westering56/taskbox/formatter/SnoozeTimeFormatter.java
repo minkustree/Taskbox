@@ -53,7 +53,7 @@ public class SnoozeTimeFormatter {
         CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(context, task.snoozeUntil);
         String buffer = context.getString(R.string.task_detail_snoozed_until, snoozeTime);
         if (task.isRepeating()) {
-            buffer += "\nRepeats according rule: " + task.rrule;
+            buffer += "\n" + RepeatedTaskFormatter.format(context, task.rrule);
         }
         return buffer;
     }
