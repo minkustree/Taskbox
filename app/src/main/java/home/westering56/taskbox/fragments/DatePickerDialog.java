@@ -1,6 +1,5 @@
 package home.westering56.taskbox.fragments;
 
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -12,26 +11,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class DatePickerDialog extends DialogFragment implements android.app.DatePickerDialog.OnDateSetListener {
 
     private LocalDate mInitialDate;
 
     /**
      * Extends OnDateSetListener to include a 'cancelled' callback
      */
-    public interface CancellableOnDateSetListener extends DatePickerDialog.OnDateSetListener {
+    public interface CancellableOnDateSetListener extends android.app.DatePickerDialog.OnDateSetListener {
         void onDatePickerCancel();
     }
 
     private CancellableOnDateSetListener mCancellableOnDateSetListener;
 
     @NonNull
-    public static DatePickerFragment newInstance(@NonNull CancellableOnDateSetListener listener,
-                                                 @Nullable LocalDate initialDate) {
-        DatePickerFragment datePickerFragment = new DatePickerFragment();
-        datePickerFragment.setOnDateSetListener(listener);
-        if (initialDate != null) datePickerFragment.setInitialDate(initialDate);
-        return datePickerFragment;
+    public static DatePickerDialog newInstance(@NonNull CancellableOnDateSetListener listener,
+                                               @Nullable LocalDate initialDate) {
+        DatePickerDialog datePickerDialog = new DatePickerDialog();
+        datePickerDialog.setOnDateSetListener(listener);
+        if (initialDate != null) datePickerDialog.setInitialDate(initialDate);
+        return datePickerDialog;
     }
 
     private void setOnDateSetListener(@Nullable CancellableOnDateSetListener listener) {
@@ -46,7 +45,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        final DatePickerDialog d = new DatePickerDialog(requireActivity());
+        final android.app.DatePickerDialog d = new android.app.DatePickerDialog(requireActivity());
         d.setOnDateSetListener(mCancellableOnDateSetListener);
         if (mInitialDate != null) {
             d.updateDate(mInitialDate.getYear(),

@@ -44,7 +44,7 @@ import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 
 
 public class CustomSnoozeOptionsDialog extends DialogFragment
-        implements DatePickerFragment.CancellableOnDateSetListener,
+        implements DatePickerDialog.CancellableOnDateSetListener,
         AdapterView.OnItemSelectedListener,
         TimePickerDialog.CancellableOnTimeSetListener,
         DialogInterface.OnClickListener, RecurrencePickerDialog.OnRecurrencePickListener {
@@ -273,9 +273,9 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
 
     private void showDatePickerFragment() {
-        DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(this, mModel.mDate);
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(this, mModel.mDate);
         assert getFragmentManager() != null;
-        datePickerFragment.show(getFragmentManager(), "snooze_date_picker");
+        datePickerDialog.show(getFragmentManager(), "snooze_date_picker");
     }
 
     @Override
