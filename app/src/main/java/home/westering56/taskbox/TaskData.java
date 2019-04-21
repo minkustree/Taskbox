@@ -163,16 +163,29 @@ public class TaskData {
         }
     }
 
+    private static class ActiveFormattingViewBinder implements SimpleCursorAdapter.ViewBinder {
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+            if (columnIndex == cursor.getColumnIndexOrThrow("rrule")) {
+                view.setVisibility(cursor.isNull(columnIndex) ? View.INVISIBLE : View.VISIBLE);
+                return true;
+            }
+            return false;
+        }
+    }
+
     private TaskData(@NonNull Context appContext) {
         mUndoBuffer = new UndoBuffer();
         mTaskDatabase = TaskDatabase.getDatabase(appContext);
 
         // Set up snoozeDataAdapter for active tasks
         mActiveTaskAdapter = new TaskCursorAdapter(appContext,
-                android.R.layout.simple_list_item_1,
+                R.layout.task_list_item_active,
                 () -> mTaskDatabase.taskDao().loadAllActive(),
-                new String[] {"summary"},
-                new int[] {android.R.id.text1});
+                new String[] {"summary", "rrule"},
+                new int[] {android.R.id.text1, R.id.task_list_item_repeat_icon});
+        mActiveTaskAdapter.setViewBinder(new ActiveFormattingViewBinder());
         registerDataSetObserver(mActiveTaskAdapter.getTaskDataObserver());
 
         // Set up snoozeDataAdapter for done tasks
