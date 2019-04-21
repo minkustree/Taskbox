@@ -3,18 +3,16 @@ package home.westering56.taskbox.fragments;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.DatePicker;
-
-import java.time.LocalDate;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-public class DatePickerDialog extends DialogFragment implements android.app.DatePickerDialog.OnDateSetListener {
+import java.time.LocalDate;
+import java.util.Objects;
 
-    private LocalDate mInitialDate;
-
+public class DatePickerDialog extends DialogFragment {
     /**
      * Extends OnDateSetListener to include a 'cancelled' callback
      */
@@ -22,48 +20,53 @@ public class DatePickerDialog extends DialogFragment implements android.app.Date
         void onDatePickerCancel();
     }
 
+    static String FRAGMENT_TAG = "DatePickerDialogTag";
+    private static final String TAG = "DatePickerDialog";
+
+    private static final String ARG_INITIAL_DATE = "ARG_INITIAL_DATE";
+    private static final String ARG_CALLBACK_TAG = "ARG_CALLBACK_TAG";
+
     private CancellableOnDateSetListener mCancellableOnDateSetListener;
 
+
+    @SuppressWarnings("SameParameterValue")
     @NonNull
-    public static DatePickerDialog newInstance(@NonNull CancellableOnDateSetListener listener,
+    static DatePickerDialog newInstance(@NonNull String callbackFragmentTag,
                                                @Nullable LocalDate initialDate) {
+        Log.d(TAG, String.format("newInstance. (callbackFragmentTag=%s, initialDate=%s)", callbackFragmentTag, initialDate));
         DatePickerDialog datePickerDialog = new DatePickerDialog();
-        datePickerDialog.setOnDateSetListener(listener);
-        if (initialDate != null) datePickerDialog.setInitialDate(initialDate);
+        datePickerDialog.setArguments(buildArguments(callbackFragmentTag, initialDate));
         return datePickerDialog;
     }
 
-    private void setOnDateSetListener(@Nullable CancellableOnDateSetListener listener) {
-        mCancellableOnDateSetListener = listener;
-    }
-
-    private void setInitialDate(LocalDate date) {
-        mInitialDate = date;
+    private static Bundle buildArguments(@NonNull String callbackFragmentTag,
+                                         @Nullable LocalDate initialDate) {
+        Bundle args = new Bundle();
+        args.putString(ARG_CALLBACK_TAG, callbackFragmentTag);
+        args.putSerializable(ARG_INITIAL_DATE, initialDate);
+        return args;
     }
 
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        final android.app.DatePickerDialog d = new android.app.DatePickerDialog(requireActivity());
-        d.setOnDateSetListener(mCancellableOnDateSetListener);
-        if (mInitialDate != null) {
-            d.updateDate(mInitialDate.getYear(),
-                    mInitialDate.getMonth().getValue() - 1,
-                    mInitialDate.getDayOfMonth());
+        Log.d(TAG, String.format("onCreateDialog. (savedInstanceState=%s)", savedInstanceState));
+        Bundle args = Objects.requireNonNull(getArguments());
+        final LocalDate initialDate = (LocalDate) args.getSerializable(ARG_INITIAL_DATE);
+        mCancellableOnDateSetListener = (CancellableOnDateSetListener) Objects.requireNonNull
+                (getFragmentManager()).findFragmentByTag(args.getString(ARG_CALLBACK_TAG));
+
+        Log.d(TAG, String.format("Creating inner Dialog. (initialDate=%s, listener=%s)",
+                initialDate, mCancellableOnDateSetListener));
+        android.app.DatePickerDialog dialog = new android.app.DatePickerDialog(requireContext());
+        dialog.setOnDateSetListener(mCancellableOnDateSetListener);
+        if (initialDate != null) {
+            dialog.updateDate(initialDate.getYear(),
+                    initialDate.getMonth().getValue() - 1,
+                    initialDate.getDayOfMonth());
         }
-        return d;
-    }
-
-    @Override
-    public void onDetach() {
-        mCancellableOnDateSetListener = null;
-        super.onDetach();
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-        mCancellableOnDateSetListener.onDateSet(view, year, month, dayOfMonth);
+        return dialog;
     }
 
     @Override

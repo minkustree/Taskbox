@@ -273,9 +273,16 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
      */
 
     private void showDatePickerFragment() {
-        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(this, mModel.mDate);
-        assert getFragmentManager() != null;
-        datePickerDialog.show(getFragmentManager(), "snooze_date_picker");
+        final FragmentManager manager = Objects.requireNonNull(getFragmentManager());
+        DatePickerDialog datePickerDialog = (DatePickerDialog) manager.findFragmentByTag(DatePickerDialog.FRAGMENT_TAG);
+
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (datePickerDialog == null) {
+            datePickerDialog = DatePickerDialog.newInstance(FRAGMENT_TAG, mModel.mDate);
+            transaction.add(datePickerDialog, DatePickerDialog.FRAGMENT_TAG);
+        }
+        transaction.show(datePickerDialog);
+        transaction.commit();
     }
 
     @Override
