@@ -11,6 +11,7 @@ import android.widget.GridView;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -81,7 +82,6 @@ public class SnoozeOptionsDialogFragment extends DialogFragment {
     private void showCustomSnoozeTimeDialog() {
         CustomSnoozeOptionsDialog customSnoozeOptionsDialog = CustomSnoozeOptionsDialog.newInstance(mSnoozeOptionListener, mTaskId);
         // TODO: Consider whether user should be able to go back to this dialog or not
-        assert getFragmentManager() != null;
-        customSnoozeOptionsDialog.show(getFragmentManager(), "snooze_custom");
+        customSnoozeOptionsDialog.show(Objects.requireNonNull(getFragmentManager()), CustomSnoozeOptionsDialog.FRAGMENT_TAG);
     }
 }

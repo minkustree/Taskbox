@@ -13,6 +13,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 
 import java.time.LocalDate;
@@ -21,20 +31,13 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-import home.westering56.taskbox.SnoozeTimeAdapterFactory;
 import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
-import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
+import home.westering56.taskbox.SnoozeTimeAdapterFactory;
 import home.westering56.taskbox.TaskData;
 import home.westering56.taskbox.data.room.Task;
+import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
 import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
@@ -43,10 +46,12 @@ import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
 public class CustomSnoozeOptionsDialog extends DialogFragment
         implements DatePickerFragment.CancellableOnDateSetListener,
         AdapterView.OnItemSelectedListener,
-        TimePickerFragment.CancellableOnTimeSetListener,
+        TimePickerDialog.CancellableOnTimeSetListener,
         DialogInterface.OnClickListener, RecurrencePickerDialog.OnRecurrencePickListener {
 
     private static final String TAG = "CustomSnoozeTimeDlg";
+
+    static final String FRAGMENT_TAG = "custom_snooze_dlg";
 
     /*
      * View model implementation, holds the data for this fragment
@@ -376,9 +381,26 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
     private void showTimePickerFragment() {
-        TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(this, mModel.mTime);
-        assert getFragmentManager() != null;
-        timePickerFragment.show(getFragmentManager(), "snooze_time_picker");
+        /*
+         * This currently gets fired each time we rotate, causing multiple time pickers to show.
+         * Only create a new fragment if we need to, otherwise, ensure the old one is showing.
+         */
+        Log.d(TAG, "showTimePickerFragment");
+        FragmentManager fragmentManager = Objects.requireNonNull(getFragmentManager());
+        TimePickerDialog timePickerFragment = (TimePickerDialog) fragmentManager.findFragmentByTag(TimePickerDialog.FRAGMENT_TAG);
+        Log.d(TAG, "After checking for existing fragment, timePickerFragment is " + timePickerFragment);
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (timePickerFragment == null) {
+            timePickerFragment = TimePickerDialog.newInstance(FRAGMENT_TAG, mModel.mTime);
+            Log.d(TAG, "Adding newly minted TimePickerDialog to the fragment transaction");
+            transaction.add(timePickerFragment, TimePickerDialog.FRAGMENT_TAG);
+        } // else... don't need to add a fragment that we previously found
+
+        Log.d(TAG, "Requesting show of timePickerFragment (may be existing fragment?)");
+        transaction.show(timePickerFragment);
+        Log.d(TAG, "Committing timePicker show transaction");
+        transaction.commit();
     }
 
     @Override
