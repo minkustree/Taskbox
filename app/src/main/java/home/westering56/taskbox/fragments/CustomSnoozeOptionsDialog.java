@@ -389,24 +389,19 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
 
     private void showTimePickerFragment() {
         /*
-         * This currently gets fired each time we rotate, causing multiple time pickers to show.
-         * Only create a new fragment if we need to, otherwise, ensure the old one is showing.
+         * This ens up getting called each time we rotate, causing multiple time pickers to show. So
+         * only create a new fragment if we need to, otherwise, else ensure the old one is showing.
          */
-        Log.d(TAG, "showTimePickerFragment");
-        FragmentManager fragmentManager = Objects.requireNonNull(getFragmentManager());
-        TimePickerDialog timePickerFragment = (TimePickerDialog) fragmentManager.findFragmentByTag(TimePickerDialog.FRAGMENT_TAG);
-        Log.d(TAG, "After checking for existing fragment, timePickerFragment is " + timePickerFragment);
+        FragmentManager manager = Objects.requireNonNull(getFragmentManager());
+        TimePickerDialog timePickerDialog = (TimePickerDialog) manager.findFragmentByTag(TimePickerDialog.FRAGMENT_TAG);
 
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if (timePickerFragment == null) {
-            timePickerFragment = TimePickerDialog.newInstance(FRAGMENT_TAG, mModel.mTime);
-            Log.d(TAG, "Adding newly minted TimePickerDialog to the fragment transaction");
-            transaction.add(timePickerFragment, TimePickerDialog.FRAGMENT_TAG);
-        } // else... don't need to add a fragment that we previously found
+        FragmentTransaction transaction = manager.beginTransaction();
+        if (timePickerDialog == null) {
+            timePickerDialog = TimePickerDialog.newInstance(FRAGMENT_TAG, mModel.mTime);
+            transaction.add(timePickerDialog, TimePickerDialog.FRAGMENT_TAG);
+        } // else... don't need to add a fragment that's been found to be there already. Continue.
 
-        Log.d(TAG, "Requesting show of timePickerFragment (may be existing fragment?)");
-        transaction.show(timePickerFragment);
-        Log.d(TAG, "Committing timePicker show transaction");
+        transaction.show(timePickerDialog);
         transaction.commit();
     }
 
