@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/task_detail_banner"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/listPreferredItemHeightSmall"
+    android:background="@color/colorPrimaryLight"
+    android:gravity="center_vertical"
+    android:paddingStart="?listPreferredItemPaddingStart"
+    android:paddingEnd="?listPreferredItemPaddingEnd"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:showIn="@layout/content_task_detail">
+
+    <TextView
+        android:id="@+id/task_detail_snooze_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/design_default_color_on_primary"
+        app:layout_constraintBottom_toTopOf="@+id/task_detail_repeat_status_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Snoozed until whenever" />
+
+    <ImageView
+        android:id="@+id/task_detail_repeat_status_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/task_detail_repeat_icon"
+        android:src="@drawable/ic_autorenew_black_24dp"
+        android:tint="@color/design_default_color_on_primary"
+        app:layout_constraintBottom_toBottomOf="@+id/task_detail_repeat_status_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/task_detail_repeat_status_text"
+        app:srcCompat="@drawable/ic_autorenew_black_24dp" />
+
+    <TextView
+        android:id="@+id/task_detail_repeat_status_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/design_default_color_on_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/task_detail_repeat_status_icon"
+        app:layout_constraintTop_toBottomOf="@+id/task_detail_snooze_time"
+        tools:text="every once in a blue moon" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/task_detail_repeat_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="task_detail_repeat_status_icon,task_detail_repeat_status_text"
+        tools:layout_editor_absoluteX="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

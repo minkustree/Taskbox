@@ -86,7 +86,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
     private EditText taskSummary;
     private View mBannerContainer;
     private TextView mSnoozeTimeBanner;
-    private TextView mRepeatBanner;
+    private View mRepeatBannerGroup;
+    private TextView mRepeatBannerText;
     private TaskData taskData;
     private Task task;
 
@@ -145,7 +146,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
 
         mBannerContainer = findViewById(R.id.task_detail_banner);
         mSnoozeTimeBanner = findViewById(R.id.task_detail_snooze_time);
-        mRepeatBanner = findViewById(R.id.task_detail_repeat_status);
+        mRepeatBannerGroup = findViewById(R.id.task_detail_repeat_status);
+        mRepeatBannerText = findViewById(R.id.task_detail_repeat_status_text);
         updateBanners();
     }
 
@@ -310,6 +312,7 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
 
     private void updateBanners() {
         boolean isBannerVisible = false;
+
         if (task == null || !task.isSnoozed()) {
             mSnoozeTimeBanner.setVisibility(View.GONE);
         } else {
@@ -318,15 +321,16 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
             mSnoozeTimeBanner.setVisibility(View.VISIBLE);
             isBannerVisible = true;
         }
+
         if (task == null || !task.isRepeating()) {
-            mRepeatBanner.setVisibility(View.GONE);
+            mRepeatBannerGroup.setVisibility(View.GONE);
         } else {
             CharSequence line = RepeatedTaskFormatter.format(this, task.rrule);
-            mRepeatBanner.setText(line);
-            mRepeatBanner.setVisibility(View.VISIBLE);
+            mRepeatBannerText.setText(line);
+            mRepeatBannerGroup.setVisibility(View.VISIBLE);
             isBannerVisible = true;
-
         }
+
         mBannerContainer.setVisibility(isBannerVisible ? View.VISIBLE : View.GONE);
     }
 }

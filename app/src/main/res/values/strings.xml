@@ -51,6 +51,7 @@
     <string name="ordinal_second">second</string>
     <string name="ordinal_first">first</string>
     <string name="ordinal_last">last</string>
+    <string name="task_detail_repeat_icon">Repeat</string>
     <plurals name="repeat_day_label">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
