@@ -55,7 +55,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     /*
      * View model implementation, holds the data for this fragment
      */
-    static class CustomSnoozeViewModel extends ViewModel {
+    public static class CustomSnoozeViewModel extends ViewModel {
         LocalDate mDate = null;
         LocalTime mTime = null;
         RecurrenceRule mRule = null;
