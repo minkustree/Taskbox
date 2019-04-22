@@ -2,6 +2,7 @@ package home.westering56.taskbox.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +21,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -35,62 +35,33 @@ import home.westering56.taskbox.R;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory;
 import home.westering56.taskbox.RepeatedTaskAdapterFactory.RepetitionOption;
 import home.westering56.taskbox.SnoozeTimeAdapterFactory;
-import home.westering56.taskbox.TaskData;
+import home.westering56.taskbox.TaskDetailActivity;
 import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
-import static home.westering56.taskbox.TaskDetailActivity.EXTRA_TASK_ID;
-
 
 public class CustomSnoozeOptionsDialog extends DialogFragment
-        implements DatePickerDialog.CancellableOnDateSetListener,
+        implements SnoozeOptionListener,
+        DatePickerDialog.CancellableOnDateSetListener,
         AdapterView.OnItemSelectedListener,
         TimePickerDialog.CancellableOnTimeSetListener,
         DialogInterface.OnClickListener, RecurrencePickerDialog.OnRecurrencePickListener {
 
-    private static final String TAG = "CustomSnoozeTimeDlg";
 
-    static final String FRAGMENT_TAG = "custom_snooze_dlg";
+    private static final String TAG = "CustomSnoozeOptDlg";
+    static final String FRAGMENT_TAG = TAG;
 
     /*
      * View model implementation, holds the data for this fragment
      */
     static class CustomSnoozeViewModel extends ViewModel {
-
-        static class Factory implements ViewModelProvider.Factory {
-            private final TaskData factoryData;
-            private final int factoryId;
-
-            Factory(TaskData data, int taskId) {
-                factoryData = data;
-                factoryId = taskId;
-            }
-
-            @NonNull
-            @Override
-            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                if (!modelClass.isAssignableFrom(CustomSnoozeViewModel.class)) {
-                    throw new IllegalArgumentException("Unknown ViewModel class");
-                }
-                //noinspection unchecked
-                return (T) new CustomSnoozeViewModel(factoryData, factoryId);
-            }
-        }
-
         LocalDate mDate = null;
         LocalTime mTime = null;
         RecurrenceRule mRule = null;
 
         int mLastTimeSelectedPosition = 0;
         int mLastRepeatSelectedPosition = 0;
-
-        CustomSnoozeViewModel(TaskData taskData, int taskId) {
-            if (taskId != -1) { // only load if there's an existing task, else start from clean
-                Task t = taskData.getTask(taskId);
-                loadFrom(t);
-            }
-        }
 
         /**
          * If {@link #mDate} or {@link #mTime} are null, will throw a {@link NullPointerException}
@@ -99,7 +70,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
             return LocalDateTime.of(mDate, mTime);
         }
 
-        private void loadFrom(Task t) {
+        void loadFrom(@NonNull final Task t) {
             /* Active tasks may still have snoozeUntil set from when they last woke.
                Use t.isSnoozed() over t.snoozeUntil != null to avoid restoring old snooze times. */
             if (t.isSnoozed()) {
@@ -114,16 +85,8 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
 
-    /**
-     * @param taskId @{@link home.westering56.taskbox.data.room.Task#uid} of the task we're snoozing, or -1 if no task is stored yet.
-     */
-    static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionListener listener, int taskId) {
-        CustomSnoozeOptionsDialog fragment = new CustomSnoozeOptionsDialog();
-        fragment.setSnoozeOptionListener(listener);
-        Bundle args = new Bundle();
-        args.putInt(EXTRA_TASK_ID, taskId);
-        fragment.setArguments(args);
-        return fragment;
+    static CustomSnoozeOptionsDialog newInstance() {
+        return new CustomSnoozeOptionsDialog();
     }
 
     private CustomSnoozeViewModel mModel;
@@ -135,28 +98,25 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     private CustomSpinnerAdapter<LocalTime> mTimeSelectorAdapter;
     private CustomSpinnerAdapter<RepetitionOption> mRepeatSelectorAdapter;
 
-    private void setSnoozeOptionListener(@Nullable SnoozeOptionListener listener) {
-        mSnoozeOptionListener = listener;
-    }
-
     @Override
-    public void onDestroy() {
-        mSnoozeOptionListener = null;
-        super.onDestroy();
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            mSnoozeOptionListener = (SnoozeOptionListener) context;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("CustomSnoozeOptionsDialog must be attached to Activity which implements SnoozeOptionListener");
+        }
     }
 
     @NonNull
     @Override
     @SuppressLint("InflateParams")
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        // fetch the task ID (-1 if there's no task)
-        Bundle args = getArguments();
-        int taskId = (args != null && args.containsKey(EXTRA_TASK_ID)) ? args.getInt(EXTRA_TASK_ID) : -1;
+        // set up the models
+        TaskDetailActivity.TaskDetailViewModel taskViewModel = ViewModelProviders.of(requireActivity()).get(TaskDetailActivity.TaskDetailViewModel.class);
+        mModel = ViewModelProviders.of(requireActivity()).get(CustomSnoozeViewModel.class);
+        mModel.loadFrom(taskViewModel.getTask());
 
-        // set up the model
-        CustomSnoozeViewModel.Factory factory = new CustomSnoozeViewModel.Factory(
-                TaskData.getInstance(requireContext()), taskId);
-        mModel = ViewModelProviders.of(this, factory).get(CustomSnoozeViewModel.class);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -203,6 +163,13 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         }
     }
 
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        // re-show the calling fragment
+        Objects.requireNonNull(getFragmentManager()).popBackStack();
+    }
+
     /**
      * Called when the dialog's positive button has been clicked to dispatch the
      * chosen custom snooze option result to the waiting listener.
@@ -210,8 +177,18 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     @Override
     public void onClick(DialogInterface dialog, int which) {
         Log.d(TAG, "Save button clicked");
-        assert mSnoozeOptionListener != null;
-        mSnoozeOptionListener.onSnoozeOptionSelected(mModel.toLocalDateTime(), mModel.mRule);
+        onSnoozeOptionSelected(mModel.toLocalDateTime(), mModel.mRule);
+    }
+
+    /**
+     * @param snoozeUntil the chosen time until which the task will snooze
+     * @param rule        {@link RecurrenceRule} that describes how this task repeats after snoozing,
+     */
+    @Override
+    public void onSnoozeOptionSelected(LocalDateTime snoozeUntil, RecurrenceRule rule) {
+        mSnoozeOptionListener.onSnoozeOptionSelected(snoozeUntil, rule);
+        // all done. No need to go back, decisions on snooze time have all been made. Just get out.
+        Objects.requireNonNull(getFragmentManager()).beginTransaction().remove(this).commit();
     }
 
     private void updateUiFromModel() {

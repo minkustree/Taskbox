@@ -33,7 +33,7 @@ import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.formatter.RepeatedTaskFormatter;
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.fragments.SnoozeOptionListener;
-import home.westering56.taskbox.fragments.SnoozeOptionsDialogFragment;
+import home.westering56.taskbox.fragments.SnoozeOptionsDialog;
 
 public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptionListener {
     public static final String EXTRA_TASK_ID = "TASK_ID";
@@ -54,47 +54,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
      * display appropriate UI, even if they didn't call this as startActivityForResult
      */
     private static TaskDetailActionResult sActionResult;
-
-    static class TaskDetailViewModel extends ViewModel {
-        private Task mOriginalTask;
-        private Task mTask;
-
-        public TaskDetailViewModel() {
-            super();
-            mTask = new Task();
-        }
-
-        void load(@NonNull Context context, int taskId) {
-            mOriginalTask = TaskData.getInstance(context).getTask(taskId);
-            mTask = TaskData.getInstance(context).getTask(taskId); // a separate copy for live changes
-        }
-
-        Task getTask() {
-            return mTask;
-        }
-
-        void clearTask() {
-            mTask = null;
-        }
-
-        boolean isNewTask() {
-            return mOriginalTask == null;
-        }
-
-        int commit(@NonNull Context context) {
-            if (isNewTask()) { // creating
-                TaskData.getInstance(context).addTask(mTask);
-                return RESULT_TASK_CREATED;
-            } else if (mTask == null) { // deleting
-                TaskData.getInstance(context).deleteTask(mOriginalTask);
-                return RESULT_TASK_DELETED;
-            } else { // updating
-                TaskData.getInstance(context).updateTask(mTask);
-                return RESULT_TASK_UPDATED;
-            }
-        }
-
-    }
 
     /**
      * Used to store result data for MainActivity to pick up via static methods
@@ -130,6 +89,46 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
     private static void setActionResult(TaskDetailActionResult actionResult) {
         synchronized (TaskDetailActivity.class) {
             sActionResult = actionResult;
+        }
+    }
+
+    public static class TaskDetailViewModel extends ViewModel {
+        private Task mOriginalTask;
+        private Task mTask;
+
+        public TaskDetailViewModel() {
+            super();
+            mTask = new Task();
+        }
+
+        void load(@NonNull Context context, int taskId) {
+            mOriginalTask = TaskData.getInstance(context).getTask(taskId);
+            mTask = TaskData.getInstance(context).getTask(taskId); // a separate copy for live changes
+        }
+
+        public Task getTask() {
+            return mTask;
+        }
+
+        void clearTask() {
+            mTask = null;
+        }
+
+        boolean isNewTask() {
+            return mOriginalTask == null;
+        }
+
+        int commit(@NonNull Context context) {
+            if (isNewTask()) { // creating
+                TaskData.getInstance(context).addTask(mTask);
+                return RESULT_TASK_CREATED;
+            } else if (mTask == null) { // deleting
+                TaskData.getInstance(context).deleteTask(mOriginalTask);
+                return RESULT_TASK_DELETED;
+            } else { // updating
+                TaskData.getInstance(context).updateTask(mTask);
+                return RESULT_TASK_UPDATED;
+            }
         }
     }
 
@@ -314,11 +313,8 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
     }
 
     private void onSnoozeClicked() {
-        final Task task = mModel.getTask();
-        // Display a fragment to select a snooze time
-        int taskId = task.uid == 0 ? -1 : task.uid; // newly initialised task will have a uid of 0. translate to -1 == 'not set'
-        DialogFragment newFragment = SnoozeOptionsDialogFragment.newInstance(taskId);
-        newFragment.show(getSupportFragmentManager(), SnoozeOptionsDialogFragment.TAG);
+        DialogFragment newFragment = SnoozeOptionsDialog.newInstance();
+        newFragment.show(getSupportFragmentManager(), SnoozeOptionsDialog.TAG);
     }
 
     @Override
@@ -373,4 +369,6 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
 
         mBannerContainer.setVisibility(isBannerVisible ? View.VISIBLE : View.GONE);
     }
+
+
 }

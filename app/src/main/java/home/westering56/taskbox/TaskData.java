@@ -210,7 +210,7 @@ public class TaskData {
         registerDataSetObserver(SnoozeNotificationManager.newTaskDataObserver(appContext));
     }
 
-    public static TaskData getInstance(@NonNull Context context) {
+    static TaskData getInstance(@NonNull Context context) {
         synchronized (TaskData.class) {
             if (sInstance == null) {
                 sInstance = new TaskData(context.getApplicationContext());
@@ -241,13 +241,13 @@ public class TaskData {
         notifyDataSetChanged();
     }
 
-    public void addTask(@NonNull Task task) {
+    void addTask(@NonNull Task task) {
         mUndoBuffer.clear(); // can't undo this
         mTaskDatabase.taskDao().insert(task);
         notifyDataSetChanged();
     }
 
-    public Task getTask(int id) {
+    Task getTask(int id) {
         return mTaskDatabase.taskDao().get(id);
     }
 
