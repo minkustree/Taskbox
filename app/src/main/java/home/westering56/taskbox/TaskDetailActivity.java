@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import home.westering56.taskbox.data.room.Task;
+import home.westering56.taskbox.formatter.RepeatedTaskFormatter;
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.fragments.SnoozeOptionsDialogFragment;
 
@@ -83,7 +84,9 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
     }
 
     private EditText taskSummary;
+    private View mBannerContainer;
     private TextView mSnoozeTimeBanner;
+    private TextView mRepeatBanner;
     private TaskData taskData;
     private Task task;
 
@@ -140,8 +143,10 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
             taskSummary.setSelection(taskSummary.length());
         }
 
+        mBannerContainer = findViewById(R.id.task_detail_banner);
         mSnoozeTimeBanner = findViewById(R.id.task_detail_snooze_time);
-        updateSnoozeTimeBanner();
+        mRepeatBanner = findViewById(R.id.task_detail_repeat_status);
+        updateBanners();
     }
 
     @Override
@@ -303,12 +308,25 @@ public class TaskDetailActivity extends AppCompatActivity implements SnoozeOptio
         assert task != null;
     }
 
-    private void updateSnoozeTimeBanner() {
+    private void updateBanners() {
+        boolean isBannerVisible = false;
         if (task == null || !task.isSnoozed()) {
             mSnoozeTimeBanner.setVisibility(View.GONE);
         } else {
             CharSequence line = SnoozeTimeFormatter.formatStatusLine(this, task);
             mSnoozeTimeBanner.setText(line);
+            mSnoozeTimeBanner.setVisibility(View.VISIBLE);
+            isBannerVisible = true;
         }
+        if (task == null || !task.isRepeating()) {
+            mRepeatBanner.setVisibility(View.GONE);
+        } else {
+            CharSequence line = RepeatedTaskFormatter.format(this, task.rrule);
+            mRepeatBanner.setText(line);
+            mRepeatBanner.setVisibility(View.VISIBLE);
+            isBannerVisible = true;
+
+        }
+        mBannerContainer.setVisibility(isBannerVisible ? View.VISIBLE : View.GONE);
     }
 }

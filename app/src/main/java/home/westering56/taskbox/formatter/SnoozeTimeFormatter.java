@@ -51,11 +51,7 @@ public class SnoozeTimeFormatter {
 
     public static CharSequence formatStatusLine(@NonNull Context context, @NonNull Task task) {
         CharSequence snoozeTime = SnoozeTimeFormatter.formatInstant(context, task.snoozeUntil);
-        String buffer = context.getString(R.string.task_detail_snoozed_until, snoozeTime);
-        if (task.isRepeating()) {
-            buffer += "\n" + RepeatedTaskFormatter.format(context, task.rrule);
-        }
-        return buffer;
+        return context.getString(R.string.task_detail_snoozed_until, snoozeTime);
     }
 
     public static CharSequence formatAdapterLine(@NonNull Context context, Instant snoozeUntil) {

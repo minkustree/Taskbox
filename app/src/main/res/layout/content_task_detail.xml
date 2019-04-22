@@ -8,23 +8,45 @@
     tools:context=".TaskDetailActivity"
     tools:showIn="@layout/activity_task_detail">
 
-    <TextView
-        android:id="@+id/task_detail_snooze_time"
-        android:layout_width="0dp"
+
+    <LinearLayout
+        android:id="@+id/task_detail_banner"
+        android:layout_width="match_parent"
         android:layout_height="?attr/listPreferredItemHeightSmall"
         android:background="@color/colorPrimaryLight"
         android:gravity="center_vertical"
+        android:orientation="vertical"
         android:paddingStart="?attr/listPreferredItemPaddingStart"
         android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-        android:textColor="@color/design_default_color_on_primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Snoozed until whenever" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/task_detail_snooze_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/design_default_color_on_primary"
+            tools:text="Snoozed until whenever" />
+
+        <TextView
+            android:id="@+id/task_detail_repeat_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:textColor="@color/design_default_color_on_primary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Repeats from time to time" />
+    </LinearLayout>
+
 
     <EditText
         android:id="@+id/task_detail_summary_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -36,11 +58,10 @@
         android:inputType="text|textCapSentences|textAutoCorrect"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/task_detail_snooze_time">
+        app:layout_constraintTop_toBottomOf="@+id/task_detail_banner">
 
         <requestFocus />
     </EditText>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
