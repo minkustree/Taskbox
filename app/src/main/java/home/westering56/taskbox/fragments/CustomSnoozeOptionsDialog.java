@@ -40,7 +40,7 @@ import home.westering56.taskbox.data.room.Task;
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 import home.westering56.taskbox.widget.CustomSpinnerAdapter;
 
-import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
+import static home.westering56.taskbox.TaskDetailActivity.EXTRA_TASK_ID;
 
 
 public class CustomSnoozeOptionsDialog extends DialogFragment
@@ -117,7 +117,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     /**
      * @param taskId @{@link home.westering56.taskbox.data.room.Task#uid} of the task we're snoozing, or -1 if no task is stored yet.
      */
-    static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionsDialogFragment.SnoozeOptionListener listener, int taskId) {
+    static CustomSnoozeOptionsDialog newInstance(@NonNull SnoozeOptionListener listener, int taskId) {
         CustomSnoozeOptionsDialog fragment = new CustomSnoozeOptionsDialog();
         fragment.setSnoozeOptionListener(listener);
         Bundle args = new Bundle();
@@ -127,7 +127,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     }
 
     private CustomSnoozeViewModel mModel;
-    private SnoozeOptionsDialogFragment.SnoozeOptionListener mSnoozeOptionListener;
+    private SnoozeOptionListener mSnoozeOptionListener;
 
     private TextView mDateText;
     private Spinner mTimeSelector;
@@ -135,7 +135,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
     private CustomSpinnerAdapter<LocalTime> mTimeSelectorAdapter;
     private CustomSpinnerAdapter<RepetitionOption> mRepeatSelectorAdapter;
 
-    private void setSnoozeOptionListener(@Nullable SnoozeOptionsDialogFragment.SnoozeOptionListener listener) {
+    private void setSnoozeOptionListener(@Nullable SnoozeOptionListener listener) {
         mSnoozeOptionListener = listener;
     }
 
@@ -399,7 +399,7 @@ public class CustomSnoozeOptionsDialog extends DialogFragment
         if (timePickerDialog == null) {
             timePickerDialog = TimePickerDialog.newInstance(FRAGMENT_TAG, mModel.mTime);
             transaction.add(timePickerDialog, TimePickerDialog.FRAGMENT_TAG);
-        } // else... don't need to add a fragment that's been found to be there already. Continue.
+        } // else... don't need to addTask a fragment that's been found to be there already. Continue.
 
         transaction.show(timePickerDialog);
         transaction.commit();

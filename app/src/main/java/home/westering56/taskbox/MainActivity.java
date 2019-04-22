@@ -26,7 +26,6 @@ import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TaskboxMain";
-    public static final String EXTRA_TASK_ID = "home.westering56.taskbox.TASK_ID";
     private static final String STATE_SELECTED_TAB = "home.westering56.taskbox.SELECTED_TAB";
 
     private static final int REQUEST_NEW_TASK   = 1;
@@ -138,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDetailView(int id) {
         Intent intent = new Intent(this, TaskDetailActivity.class);
-        intent.putExtra(EXTRA_TASK_ID, id);
+        intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, id);
         startActivityForResult(intent, REQUEST_EDIT_TASK);
     }
     private void showDetailView() {

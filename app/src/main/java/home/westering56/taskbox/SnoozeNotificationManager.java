@@ -25,7 +25,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.TaskStackBuilder;
 import home.westering56.taskbox.data.room.Task;
 
-import static home.westering56.taskbox.MainActivity.EXTRA_TASK_ID;
+import static home.westering56.taskbox.TaskDetailActivity.EXTRA_TASK_ID;
 
 public class SnoozeNotificationManager extends BroadcastReceiver {
     private static final String TAG = "SnoozeNotifyMgr";

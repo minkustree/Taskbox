@@ -241,6 +241,12 @@ public class TaskData {
         notifyDataSetChanged();
     }
 
+    public void addTask(@NonNull Task task) {
+        mUndoBuffer.clear(); // can't undo this
+        mTaskDatabase.taskDao().insert(task);
+        notifyDataSetChanged();
+    }
+
     public Task getTask(int id) {
         return mTaskDatabase.taskDao().get(id);
     }
