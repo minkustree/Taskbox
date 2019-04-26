@@ -1,11 +1,15 @@
 package home.westering56.taskbox;
 
+import android.app.Activity;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListAdapter;
 
+import androidx.test.espresso.Espresso;
+import androidx.test.espresso.NoActivityResumedException;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,9 +29,11 @@ import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.fail;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -48,9 +54,14 @@ public class TaskDetailActivityTest {
         mTaskData = TaskData.getInstance(InstrumentationRegistry.getInstrumentation().getTargetContext());
     }
 
+    private boolean isKeyboardOpened() {
+        return InstrumentationRegistry.getInstrumentation().getTargetContext().getSystemService(InputMethodManager.class).isAcceptingText();
+    }
+
     @Test
     public void newTaskAndSave() {
         final String UUID_STRING = UUID.randomUUID().toString();
+        assertThat(isKeyboardOpened(), is(true));
 
         onView(withId(R.id.task_detail_summary_text))
                 .check(matches(allOf(withText(""), withHint(R.string.task_detail_hint_text))));
@@ -82,6 +93,34 @@ public class TaskDetailActivityTest {
         ListAdapter adapter = mTaskData.getActiveTaskAdapter();
         assertThat(adapter.getCount(), is(1));
         assertThat(mTaskData.getTask((int) adapter.getItemId(0)).summary, is(UUID_STRING));
+    }
+
+    @Test
+    public void newTaskCanBeCancelledAfterCreation() {
+        performCancelActivity();
+        assertThat(mActivityRule.getActivityResult().getResultCode(), is(Activity.RESULT_CANCELED));
+    }
+
+    private void performCancelActivity() {
+        Espresso.closeSoftKeyboard();
+        try {
+            Espresso.pressBack();
+            fail("Expected NoActivityResumedException");
+        } catch (NoActivityResumedException expected) {
+        }
+    }
+
+    @Test
+    public void newTaskCanBeCancelledWithoutSavingChanges() {
+        int activeTaskCountBefore = mTaskData.getActiveTaskAdapter().getCount();
+
+        UUID uuid = UUID.randomUUID();
+        onView(withId(R.id.task_detail_summary_text)).perform(typeTextIntoFocusedView(uuid.toString()));
+
+        performCancelActivity();
+
+        assertThat(mActivityRule.getActivityResult().getResultCode(), is(equalTo(Activity.RESULT_CANCELED)));
+        assertThat(mTaskData.getActiveTaskAdapter().getCount(), is(equalTo(activeTaskCountBefore)));
     }
 
 }
