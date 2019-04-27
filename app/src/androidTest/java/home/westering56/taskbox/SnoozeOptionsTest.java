@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.*;
 public class SnoozeOptionsTest {
 
     @Rule
-    public ActivityTestRule<TaskDetailActivity> mActivityTestRule = new ActivityTestRule<>(TaskDetailActivity.class);
+    public final ActivityTestRule<TaskDetailActivity> mActivityTestRule = new ActivityTestRule<>(TaskDetailActivity.class);
 
     @Test
     public void settingSnoozeOptionsCreatesSnoozeBar() {

@@ -235,12 +235,6 @@ public class TaskData {
         notifyDataSetChanged();
     }
 
-    public void add(CharSequence taskSummary) {
-        mUndoBuffer.clear(); // can't undo this
-        mTaskDatabase.taskDao().insert(new Task(taskSummary));
-        notifyDataSetChanged();
-    }
-
     void addTask(@NonNull Task task) {
         mUndoBuffer.clear(); // can't undo this
         mTaskDatabase.taskDao().insert(task);

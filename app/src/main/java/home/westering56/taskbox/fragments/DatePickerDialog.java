@@ -20,7 +20,7 @@ public class DatePickerDialog extends DialogFragment {
         void onDatePickerCancel();
     }
 
-    static String FRAGMENT_TAG = "DatePickerDialogTag";
+    static final String FRAGMENT_TAG = "DatePickerDialogTag";
     private static final String TAG = "DatePickerDialog";
 
     private static final String ARG_INITIAL_DATE = "ARG_INITIAL_DATE";

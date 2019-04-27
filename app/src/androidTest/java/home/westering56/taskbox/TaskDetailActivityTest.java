@@ -41,7 +41,7 @@ import static org.junit.Assert.fail;
 public class TaskDetailActivityTest {
 
     @Rule
-    public ActivityTestRule<TaskDetailActivity> mActivityRule = new ActivityTestRule<>(TaskDetailActivity.class);
+    public final ActivityTestRule<TaskDetailActivity> mActivityRule = new ActivityTestRule<>(TaskDetailActivity.class);
     private TaskData mTaskData;
 
     @Before
