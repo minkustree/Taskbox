@@ -8,6 +8,7 @@ import android.widget.TextView;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 
 import static home.westering56.taskbox.Adjusters.AfternoonAdjuster;
 import static home.westering56.taskbox.Adjusters.EveningAdjuster;
+import static home.westering56.taskbox.Adjusters.NextAfternoon;
+import static home.westering56.taskbox.Adjusters.NextMorning;
+import static home.westering56.taskbox.Adjusters.NextEvening;
 import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
 import static home.westering56.taskbox.Adjusters.TomorrowMorningAdjuster;
 import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
@@ -116,7 +120,14 @@ public class SnoozeOptionProvider {
      * @return
      */
     public static List<LocalDateTime> getOptionsForDate(LocalDateTime date) {
-        return null;
+        ArrayList<LocalDateTime> results = new ArrayList<>();
+        results.add(date.with(NextMorning));
+        results.add(date.with(NextAfternoon));
+        results.add(date.with(NextEvening));
+        results.add(date.with(WeekendAdjuster));
+        results.add(date.with(StartOfWeekAdjuster));
+        Collections.sort(results);
+        return results;
     }
 
 }
