@@ -7,10 +7,14 @@ import java.time.temporal.TemporalAdjuster;
 
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.TemporalAdjusters.next;
 
 
 class Adjusters {
+
+    // times within this tolerance before a target time will be considered to be at the target time
+    private static final long TOLERANCE_MINS = 5;
 
     private static final TemporalAdjuster TopOfTheHourAdjuster = temporal -> temporal
             .with(ChronoField.MINUTE_OF_HOUR, 0)
@@ -18,8 +22,8 @@ class Adjusters {
             .with(ChronoField.NANO_OF_SECOND, 0);
 
     static final TemporalAdjuster MorningAdjuster = temporal -> temporal
-                .with(HOUR_OF_DAY, 9)
-                .with(TopOfTheHourAdjuster);
+            .with(HOUR_OF_DAY, 9)
+            .with(TopOfTheHourAdjuster);
 
     static final TemporalAdjuster AfternoonAdjuster = temporal -> temporal
             .with(HOUR_OF_DAY, 13)
@@ -42,7 +46,6 @@ class Adjusters {
             .with(MorningAdjuster);
 
 
-
     static final TemporalAdjuster NextMorning = Next(MorningAdjuster);
     static final TemporalAdjuster NextAfternoon = Next(AfternoonAdjuster);
     static final TemporalAdjuster NextEvening = Next(EveningAdjuster);
@@ -50,26 +53,21 @@ class Adjusters {
     /**
      * Returns an adjuster that makes the specified adjustment, then ensures it happens in the
      * future if needed.
-     *
+     * <p>
      * Note: This implementation ensures things happen in the future by adding at least a day to the
-     * original temporal, then adjusting. It won't therefore work for adjusters that need more fine-
+     * original temporal, then adjusting. It probably won't work for adjusters that need more fine-
      * grained adjustement than that
-     * @param adjuster
-     * @return
-     */
-    static final TemporalAdjuster Next(final TemporalAdjuster adjuster) {
-        return (temporal) -> {
-            // Temporal implementations MUST implement Comparable, according to
-            // https://developer.android.com/reference/java/time/temporal/Temporal
-            //noinspection unchecked
-            final Comparable<Temporal> adjustedTemporal = (Comparable<Temporal>) temporal.with(adjuster);
-            if (adjustedTemporal.compareTo(temporal) <= 0) { // adjusted time is before or equal to the original time
+     **/
+    static TemporalAdjuster Next(final TemporalAdjuster adjuster) {
+        return temporal -> {
+            final Temporal adjustedTemporal = temporal.with(adjuster);
+            // if new time is within 5 mins of the old time, add a day and try again
+            if (MINUTES.between(temporal, adjustedTemporal) <= TOLERANCE_MINS) {
                 return temporal.plus(1, DAYS).with(adjuster); // find the next one
             } else {
                 return temporal.with(adjuster);
             }
         };
     }
-
 
 }

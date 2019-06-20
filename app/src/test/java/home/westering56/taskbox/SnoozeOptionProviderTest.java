@@ -43,15 +43,7 @@ public class SnoozeOptionProviderTest {
      */
 
 
-    // if time is 3pm on Thursday, show:
-    // * This Evening
-    // * Tomorrow Morning
-    // * Tomorrow Afternoon
-    // * This Weekend
-    // * Next Week
-
-
-    LocalDateTime date;
+    private LocalDateTime date;
 
     @Before
     public void initialiseDate() {
@@ -141,8 +133,27 @@ public class SnoozeOptionProviderTest {
     }
 
     @Test
-    public void expectedTimesForMonday1pmPlus() {
+    public void expectedTimesForMonday1pmPlusSeconds() {
         date = date.withHour(13).with(next(MONDAY)).plus(30, SECONDS);
+
+        List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
+
+
+
+        assertThat(options, IsCollectionWithSize.hasSize(5));
+
+        date = date.truncatedTo(MINUTES);
+        assertThat(options.get(0), equalTo(date.withHour(18).withMinute(0)));
+        assertThat(options.get(1), equalTo(date.with(next(TUESDAY)).withHour(9).withMinute(0)));
+        assertThat(options.get(2), equalTo(date.with(next(TUESDAY)).withHour(13).withMinute(0)));
+        assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
+        assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0)));
+
+    }
+
+    @Test
+    public void expectedTimesForMonday1pmPlusMinutes() {
+        date = date.withHour(13).with(next(MONDAY)).plus(1, MINUTES);
 
         List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
 
@@ -163,6 +174,8 @@ public class SnoozeOptionProviderTest {
         List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
 
         assertThat(options, IsCollectionWithSize.hasSize(5));
+
+        date = date.truncatedTo(MINUTES); // needed to ignore the seconds part
 
         assertThat(options.get(0), equalTo(date.withHour(18).withMinute(0)));
         assertThat(options.get(1), equalTo(date.with(next(TUESDAY)).withHour(9).withMinute(0)));
