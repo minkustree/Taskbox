@@ -1,30 +1,32 @@
 package home.westering56.taskbox;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import org.hamcrest.FeatureMatcher;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjuster;
+import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
+import static home.westering56.taskbox.Adjusters.NextAfternoon;
+import static home.westering56.taskbox.Adjusters.NextMorning;
+import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
+import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.time.temporal.TemporalAdjusters.next;
+import static java.time.temporal.TemporalAdjusters.nextOrSame;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -113,6 +115,22 @@ public class SnoozeOptionProviderTest {
         assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0)));
 
     }
+
+    @Test
+    public void expectedTimesForMonday9am() {
+        date = date.withHour(9).with(next(MONDAY));
+
+        List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
+
+        assertThat(options, IsCollectionWithSize.hasSize(5));
+
+        assertThat(options.get(1), equalTo(date.withHour(13).withMinute(0)));
+        assertThat(options.get(2), equalTo(date.withHour(18).withMinute(0)));
+        assertThat(options.get(0), equalTo(date.with(next(TUESDAY)).withHour(9).withMinute(0)));
+        assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
+        assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0))); // next monday is a week away - c.f. nextOrSame()
+    }
+
 
     // todo: Expected times just before, on and just after one of our changeover periods
 
@@ -252,4 +270,157 @@ public class SnoozeOptionProviderTest {
         assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(13).withMinute(0)));
         assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0)));
     }
+
+
+    static LocalDate anyMonday = LocalDate.of(2019, 1, 1).with(nextOrSame(MONDAY));
+    static LocalDate anyFriday = LocalDate.of(2019, 1, 1).with(nextOrSame(FRIDAY));
+    static LocalDate anySaturday = LocalDate.of(2019, 1, 1).with(nextOrSame(SATURDAY));
+    static LocalDate anySunday = LocalDate.of(2019, 1, 1).with(nextOrSame(SUNDAY));
+
+    @Test
+    public void labelForThisMorning() {
+        LocalTime originTime = LocalTime.of(7, 30);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextMorning));
+        assertThat(label, is("This Morning"));
+    }
+
+    @Test
+    public void labelForTomorrowMorning() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextMorning));
+        assertThat(label, is("Tomorrow Morning"));
+    }
+
+    @Test
+    public void labelForTomorrowMorningOnFridayNight() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyFriday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextMorning));
+        assertThat(label, is("Tomorrow Morning"));
+        assertThat(label, is(not("This Weekend")));
+    }
+
+    @Test
+    public void labelForThisMorningOnEarlySaturday() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyFriday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextMorning));
+        assertThat(label, is("Tomorrow Morning"));
+        assertThat(label, is(not("This Weekend")));
+    }
+
+    @Test
+    public void labelForThisAfternoon() {
+        LocalTime originTime = LocalTime.of(7, 30);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextAfternoon));
+        assertThat(label, is("This Afternoon"));
+    }
+
+    @Test
+    public void labelForTomorrowAfternoon() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextAfternoon));
+        assertThat(label, is("Tomorrow Afternoon"));
+    }
+
+    @Test
+    public void labelForTomorrowAfternoonSat() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anySaturday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(NextAfternoon));
+        assertThat(label, is("Tomorrow Afternoon"));
+    }
+
+    @Test
+    public void labelForThisWeekend() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyFriday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(WeekendAdjuster));
+        assertThat(label, is("This Weekend"));
+    }
+
+    @Test
+    public void labelForThisWeekendSatAM() {
+        LocalTime originTime = LocalTime.of(07, 30);
+        LocalDateTime origin = LocalDateTime.of(anySaturday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(WeekendAdjuster));
+        assertThat(label, is("This Weekend"));
+    }
+
+    @Test
+    public void labelForNextWeekendSatPM() {
+        LocalTime originTime = LocalTime.of(15, 30);
+        LocalDateTime origin = LocalDateTime.of(anySaturday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(WeekendAdjuster));
+        assertThat(label, is("Next Weekend"));
+    }
+
+    @Test
+    public void labelForNextWeekendSunPM() {
+        LocalTime originTime = LocalTime.of(13, 00);
+        LocalDateTime origin = LocalDateTime.of(anySunday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(WeekendAdjuster));
+        assertThat(label, is("Next Weekend"));
+    }
+
+    @Test
+    public void labelForNextWeek() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anyFriday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
+        assertThat(label, is("Next Week"));
+    }
+
+    @Test
+    public void labelForNextWeekSunAm() {
+        LocalTime originTime = LocalTime.of(10, 30);
+        LocalDateTime origin = LocalDateTime.of(anySunday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
+        assertThat(label, is("Next Week"));
+    }
+
+    @Test
+    public void labelForNextWeekSunEve() {
+        LocalTime originTime = LocalTime.of(22, 30);
+        LocalDateTime origin = LocalDateTime.of(anySunday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
+        assertThat(label, is("Next Week"));
+    }
+
+    @Test
+    public void labelForNextWeekMonEarly() {
+        LocalTime originTime = LocalTime.of(5, 0);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
+        assertThat(label, is("This Week"));
+    }
+
+    @Test
+    public void labelForNextWeekMon9AM() {
+        LocalTime originTime = LocalTime.of(9, 0);
+        LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
+
+        CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
+        assertThat(label, is("This Week"));
+    }
+
 }

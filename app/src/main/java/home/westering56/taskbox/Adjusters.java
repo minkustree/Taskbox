@@ -9,6 +9,7 @@ import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.TemporalAdjusters.next;
+import static java.time.temporal.TemporalAdjusters.nextOrSame;
 
 
 class Adjusters {
@@ -42,7 +43,7 @@ class Adjusters {
             .with(MorningAdjuster);
 
     static final TemporalAdjuster WeekendAdjuster = temporal -> temporal
-            .with(next(DayOfWeek.SATURDAY))
+            .with(nextOrSame(DayOfWeek.SATURDAY))
             .with(MorningAdjuster);
 
 

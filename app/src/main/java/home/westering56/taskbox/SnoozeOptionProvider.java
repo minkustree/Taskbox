@@ -5,8 +5,15 @@ import android.widget.AdapterView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,12 +26,18 @@ import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 
 import static home.westering56.taskbox.Adjusters.AfternoonAdjuster;
 import static home.westering56.taskbox.Adjusters.EveningAdjuster;
+import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 import static home.westering56.taskbox.Adjusters.NextAfternoon;
 import static home.westering56.taskbox.Adjusters.NextMorning;
 import static home.westering56.taskbox.Adjusters.NextEvening;
 import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
 import static home.westering56.taskbox.Adjusters.TomorrowMorningAdjuster;
 import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
+import static java.time.DayOfWeek.MONDAY;
+import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 /**
  * Provides relevant snooze option choices.
@@ -128,6 +141,66 @@ public class SnoozeOptionProvider {
         results.add(date.with(StartOfWeekAdjuster));
         Collections.sort(results);
         return results;
+    }
+
+
+    public static CharSequence getLabelForOptionDateTime(LocalDateTime now, LocalDateTime target) {
+        StringBuilder sb = new StringBuilder();
+
+        // Exception for weekend
+        if (now.with(WeekendAdjuster).equals(target)) {
+            if (now.getDayOfWeek() == SATURDAY || now.getDayOfWeek() == SUNDAY) {
+                // if we're before 9am on Sat, then it's "This Weekend"
+                if (now.toLocalDate().equals(target.toLocalDate()) && now.isBefore(target)) {
+                    return "This Weekend";
+                }
+                else { // if we're after 9am on Sat, Sun then it's "Next Weekend"
+                    return "Next Weekend";
+                }
+            }
+            // For every other day of the week, it's this weekend
+            return "This Weekend";
+        }
+
+        // Exception for Next Week
+        if (now.with(StartOfWeekAdjuster).equals(target)) {
+            // pre 9am on Monday
+            if (now.getDayOfWeek() == MONDAY &&
+                    now.toLocalDate().equals(target.toLocalDate()) &&
+                    now.isBefore(target)) {
+                return "This Week";
+            } else {
+                return "Next Week";
+            }
+        }
+        // Date part
+        final LocalDate nowDate = now.toLocalDate();
+        final LocalDate targetDate = target.toLocalDate();
+
+        // Today if it's the same day, tomorrow if it's the day after.
+        if (nowDate.equals(targetDate)) {
+            sb.append("This");
+        } else if (nowDate.plusDays(1).equals(targetDate)) {
+            sb.append("Tomorrow");
+        } else {
+            sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(targetDate));
+        }
+
+        sb.append(" ");
+
+        // Time part
+        final LocalTime targetTime = target.toLocalTime();
+
+        if (targetTime.with(MorningAdjuster).equals(targetTime)) {
+            sb.append("Morning");
+        } else if (targetTime.with(AfternoonAdjuster).equals(targetTime)) {
+            sb.append("Afternoon");
+        } else if (targetTime.with(EveningAdjuster).equals(targetTime)) {
+            sb.append("Evening");
+        } else {
+            sb.append(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(targetTime));
+        }
+        return sb.toString();
     }
 
 }
