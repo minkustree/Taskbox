@@ -46,6 +46,7 @@ public class SnoozeOptionProvider {
         snoozeOptions = initSnoozeOptions();
     }
 
+
     private ArrayList<Map<String, Object>> initSnoozeOptions() {
         ArrayList<Map<String, Object>> options = new ArrayList<>();
         options.add(new HashMap<String, Object>() {{
@@ -107,6 +108,15 @@ public class SnoozeOptionProvider {
         //noinspection unchecked
         Map<String, Object> item = (Map<String, Object>) parent.getItemAtPosition(position);
         return (LocalDateTime) item.get(SNOOZE_OPTION_INSTANT);
+    }
+
+    /**
+     * Get the list of snooze options that should be shown for a given date
+     * @param date
+     * @return
+     */
+    public static List<LocalDateTime> getOptionsForDate(LocalDateTime date) {
+        return null;
     }
 
 }
