@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.List;
 
 import static home.westering56.taskbox.Adjusters.NextAfternoon;
@@ -59,12 +60,14 @@ public class SnoozeOptionProviderTest {
         List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
 
         assertThat(options, IsCollectionWithSize.hasSize(5));
-        assertThat(options.get(0), equalTo(date.withHour(9).withMinute(0)));
-        assertThat(options.get(1), equalTo(date.withHour(13).withMinute(0)));
-        assertThat(options.get(2), equalTo(date.withHour(18).withMinute(0)));
-        assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
-        assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0))); // next monday is a week away - c.f. nextOrSame()
 
+        assertThat(options, is(equalTo(Arrays.asList(
+                date.withHour(9).withMinute(0),
+                date.withHour(13).withMinute(0),
+                date.withHour(18).withMinute(0),
+                date.with(next(SATURDAY)).withHour(9).withMinute(0),
+                date.with(next(MONDAY)).withHour(9).withMinute(0))
+        )));
     }
 
     @Test
@@ -122,13 +125,13 @@ public class SnoozeOptionProviderTest {
 
         List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
 
-        assertThat(options, IsCollectionWithSize.hasSize(5));
-
-        assertThat(options.get(1), equalTo(date.withHour(13).withMinute(0)));
-        assertThat(options.get(2), equalTo(date.withHour(18).withMinute(0)));
-        assertThat(options.get(0), equalTo(date.with(next(TUESDAY)).withHour(9).withMinute(0)));
-        assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
-        assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0))); // next monday is a week away - c.f. nextOrSame()
+        assertThat(options, is(equalTo(Arrays.asList(
+                date.withHour(13).withMinute(0),
+                date.withHour(18).withMinute(0),
+                date.with(next(TUESDAY)).withHour(9).withMinute(0),
+                date.with(next(SATURDAY)).withHour(9).withMinute(0),
+                date.with(next(MONDAY)).withHour(9).withMinute(0))
+        )));
     }
 
 
@@ -420,7 +423,7 @@ public class SnoozeOptionProviderTest {
         LocalDateTime origin = LocalDateTime.of(anyMonday, originTime);
 
         CharSequence label = SnoozeOptionProvider.getLabelForOptionDateTime(origin, origin.with(StartOfWeekAdjuster));
-        assertThat(label, is("This Week"));
+        assertThat(label, is("Next Week"));
     }
 
 }
