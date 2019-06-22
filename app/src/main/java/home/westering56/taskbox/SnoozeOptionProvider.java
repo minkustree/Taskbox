@@ -5,21 +5,23 @@ import android.widget.AdapterView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
@@ -36,8 +38,6 @@ import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
-import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.ChronoUnit.MINUTES;
 
 /**
  * Provides relevant snooze option choices.
@@ -143,6 +143,57 @@ public class SnoozeOptionProvider {
         return results;
     }
 
+    static class SnoozeOption {
+        LocalDateTime dateTime;
+        CharSequence label;
+        @DrawableRes int drawableId;
+
+        public SnoozeOption(@NonNull LocalDateTime dateTime, @NonNull CharSequence label, @DrawableRes int drawableId) {
+            this.dateTime = dateTime;
+            this.label = label;
+            this.drawableId = drawableId;
+        }
+
+        public static SnoozeOption of(@NonNull LocalDateTime now, @NonNull TemporalAdjuster adjuster, @DrawableRes int drawableId) {
+            final LocalDateTime target = now.with(adjuster);
+            return new SnoozeOption(target, getLabelForOptionDateTime(now, target), drawableId);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SnoozeOption that = (SnoozeOption) o;
+            return drawableId == that.drawableId &&
+                    dateTime.equals(that.dateTime) &&
+                    label.equals(that.label);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(dateTime, label, drawableId);
+        }
+
+        @Override
+        public String toString() {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E dd-M-yyyy hh:mm");
+            return "SnoozeOption{" +
+                    "dateTime=" + formatter.format(dateTime) +
+                    ", label=" + label +
+                    ", drawableId=" + drawableId +
+                    '}';
+        }
+    }
+
+    public static List<SnoozeOption> getSnoozeOptionsForDateTime(LocalDateTime dateTime) {
+        ArrayList<SnoozeOption> results = new ArrayList<>();
+        results.add(SnoozeOption.of(dateTime, NextMorning, R.drawable.ic_morning_24dp));
+        results.add(SnoozeOption.of(dateTime, NextAfternoon, R.drawable.ic_restaurant_black_24dp));
+        results.add(SnoozeOption.of(dateTime, NextEvening, R.drawable.ic_hot_tub_black_24dp));
+        results.add(SnoozeOption.of(dateTime, WeekendAdjuster, R.drawable.ic_weekend_black_24dp));
+        results.add(SnoozeOption.of(dateTime, StartOfWeekAdjuster, R.drawable.ic_next_week_black_24dp));
+        return results;
+    }
 
     public static CharSequence getLabelForOptionDateTime(LocalDateTime now, LocalDateTime target) {
         StringBuilder sb = new StringBuilder();

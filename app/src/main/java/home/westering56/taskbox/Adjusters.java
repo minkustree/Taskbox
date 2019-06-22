@@ -42,9 +42,11 @@ class Adjusters {
             .with(next(DayOfWeek.MONDAY))
             .with(MorningAdjuster);
 
-    static final TemporalAdjuster WeekendAdjuster = temporal -> temporal
-            .with(nextOrSame(DayOfWeek.SATURDAY))
-            .with(MorningAdjuster);
+    static final TemporalAdjuster WeekendAdjuster = temporal -> {
+       return temporal
+                .with(next(DayOfWeek.SATURDAY))
+                .with(MorningAdjuster);
+    };
 
 
     static final TemporalAdjuster NextMorning = Next(MorningAdjuster);
