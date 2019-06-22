@@ -8,14 +8,13 @@ import android.widget.TextView;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +143,8 @@ public class SnoozeOptionProvider {
     }
 
     static class SnoozeOption {
+        static DateTimeFormatter sToStringFormatter = DateTimeFormatter.ofPattern("E dd-M-yyyy hh:mm");
+
         LocalDateTime dateTime;
         CharSequence label;
         @DrawableRes int drawableId;
@@ -176,13 +177,17 @@ public class SnoozeOptionProvider {
 
         @Override
         public String toString() {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E dd-M-yyyy hh:mm");
             return "SnoozeOption{" +
-                    "dateTime=" + formatter.format(dateTime) +
+                    "dateTime=" + sToStringFormatter.format(dateTime) +
                     ", label=" + label +
                     ", drawableId=" + drawableId +
                     '}';
         }
+
+        public LocalDateTime getDateTime() {
+            return dateTime;
+        }
+
     }
 
     public static List<SnoozeOption> getSnoozeOptionsForDateTime(LocalDateTime dateTime) {
@@ -192,6 +197,8 @@ public class SnoozeOptionProvider {
         results.add(SnoozeOption.of(dateTime, NextEvening, R.drawable.ic_hot_tub_black_24dp));
         results.add(SnoozeOption.of(dateTime, WeekendAdjuster, R.drawable.ic_weekend_black_24dp));
         results.add(SnoozeOption.of(dateTime, StartOfWeekAdjuster, R.drawable.ic_next_week_black_24dp));
+        Comparator<SnoozeOption> comparator = Comparator.comparing(SnoozeOption::getDateTime);
+        Collections.sort(results, comparator);
         return results;
     }
 
