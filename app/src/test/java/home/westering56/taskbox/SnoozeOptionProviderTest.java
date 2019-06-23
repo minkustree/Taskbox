@@ -308,6 +308,23 @@ public class SnoozeOptionProviderTest {
     }
 
     @Test
+    public void expectedTimesForSaturday10am() {
+        // Checking that 'this morning' is Sat at 9am, and 'next weekend' is the following week (not 'this weekend')
+        date = date.withHour(10).with(next(SATURDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
+                new SnoozeOption(date.withHour(9).withMinute(0).plus(1, DAYS), "Tomorrow Morning", MORNING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
+        ))));
+    }
+
+
+    @Test
     public void expectedTimesForSunday7am() {
         // Check that weekend slot is 'next weekend' rather than 'this weekend'
         date = date.withHour(7).with(next(SUNDAY));
@@ -340,6 +357,42 @@ public class SnoozeOptionProviderTest {
     }
 
     // TODO: Test cases for times within tolerance of 'next week' / 'weekend' corner cases
+
+    @Test
+    public void expectedTimesForSaturday856am() {
+        // check correct handling of 'next weekend' when we're within tolerance
+
+        // Checking that 'this morning' is Sat at 9am, and 'next weekend' is the following week (not 'this weekend')
+        date = date.withHour(8).withMinute(56).with(next(SATURDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
+                new SnoozeOption(date.plus(1, DAYS).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
+        ))));
+    }
+
+    @Test
+    public void expectedTimesForFriday1756am() {
+        // check correct handling of 'next weekend' when we're within tolerance, should be the same as friday after 6pm
+
+        // Checking that 'this morning' is Sat at 9am, and 'next weekend' is the following week (not 'this weekend')
+        date = date.withHour(17).withMinute(56).with(next(FRIDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.plus(1, DAYS).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
+                new SnoozeOption(date.plus(1, DAYS).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.plus(1, DAYS).withHour(18).withMinute(0), "Tomorrow Evening", EVENING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).plus(1, WEEKS).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
+        ))));
+    }
 
     // TODO: Extract more test cases from the old label tests below, e.g. 'next week' / 'tomorrow morning' / 'this morning' corner cases.
 /*
