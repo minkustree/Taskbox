@@ -15,8 +15,10 @@ import home.westering56.taskbox.SnoozeOptionProvider.SnoozeOption;
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.DayOfWeek.TUESDAY;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -25,10 +27,9 @@ import static java.time.temporal.TemporalAdjusters.next;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
-//@RunWith(AndroidJUnit4.class)
+
 @SmallTest
 public class SnoozeOptionProviderTest {
-
 
     /*
      * If time is 7pm on a Monday, show:
@@ -142,8 +143,6 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
-
-
 
     // Expected times just before, on and just after one of our changeover periods
 
@@ -276,22 +275,74 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(SATURDAY)).plus(1, WEEKS).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
         ))));
     }
-/*
+
     @Test
     public void expectedTimesForFriday9pm() {
         date = date.withHour(21).with(next(FRIDAY));
 
-        List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
 
         assertThat(options, is(equalTo(Arrays.asList(
-                date.with(next(SATURDAY)).withHour(9).withMinute(0), // Tomorrow Morning
-                date.with(next(SATURDAY)).withHour(13).withMinute(0), // Tomorrow Afternoon
-                date.with(next(SATURDAY)).withHour(18).withMinute(0), // Tomorrow Evening
-                date.with(next(MONDAY)).withHour(9).withMinute(0), // Next Week
-                date.with(next(SATURDAY)).plusWeeks(1).withHour(9).withMinute(0) // Next Weekend
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(18).withMinute(0), "Tomorrow Evening", EVENING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).plus(1, WEEKS).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
         ))));
     }
 
+    @Test
+    public void expectedTimesForSaturday7am() {
+        // Checking that 'this morning' is Sat at 9am, and 'next weekend' is the following week (not 'this weekend')
+        date = date.withHour(7).with(next(SATURDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.withHour(9).withMinute(0), "This Morning", MORNING_ID),
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
+        ))));
+    }
+
+    @Test
+    public void expectedTimesForSunday7am() {
+        // Check that weekend slot is 'next weekend' rather than 'this weekend'
+        date = date.withHour(7).with(next(SUNDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.withHour(9).withMinute(0), "This Morning", MORNING_ID),
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
+        ))));
+    }
+
+    @Test
+    public void expectedTimesForSunday10am() {
+        // Check correct handling of 'next week' and 'tomorrow morning'
+        date = date.withHour(10).with(next(SUNDAY));
+
+        List<SnoozeOption> options = SnoozeOptionProvider.getSnoozeOptionsForDateTime(date);
+
+        assertThat(options, is(equalTo(Arrays.asList(
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
+                new SnoozeOption(date.plus(1, DAYS).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID),
+                new SnoozeOption(date.with(next(MONDAY)).plus(1, WEEKS).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
+        ))));
+    }
+
+    // TODO: Test cases for times within tolerance of 'next week' / 'weekend' corner cases
+
+    // TODO: Extract more test cases from the old label tests below, e.g. 'next week' / 'tomorrow morning' / 'this morning' corner cases.
+/*
 
     static LocalDate anyMonday = LocalDate.of(2019, 1, 1).with(nextOrSame(MONDAY));
     static LocalDate anyFriday = LocalDate.of(2019, 1, 1).with(nextOrSame(FRIDAY));

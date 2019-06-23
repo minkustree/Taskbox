@@ -1,5 +1,7 @@
 package home.westering56.taskbox;
 
+import androidx.test.filters.SmallTest;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,6 +23,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@SmallTest
 public class AdjustersTest {
 
     private static TemporalAdjuster TenAM = temporal -> temporal

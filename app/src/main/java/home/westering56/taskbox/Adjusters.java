@@ -1,5 +1,7 @@
 package home.westering56.taskbox;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
@@ -34,10 +36,6 @@ class Adjusters {
             .with(HOUR_OF_DAY, 18)
             .with(TopOfTheHourAdjuster);
 
-    static final TemporalAdjuster TomorrowMorningAdjuster = temporal -> temporal
-            .plus(1, DAYS)
-            .with(MorningAdjuster);
-
     static final TemporalAdjuster StartOfWeekAdjuster = temporal -> temporal
             .with(next(DayOfWeek.MONDAY))
             .with(MorningAdjuster);
@@ -46,18 +44,29 @@ class Adjusters {
              .with(next(DayOfWeek.SATURDAY))
              .with(MorningAdjuster);
 
-    static final TemporalAdjuster WeekendNotTomorrowMorningAdjuster = temporal -> {
-        if (temporal.with(TomorrowMorningAdjuster).equals(temporal.with(WeekendAdjuster))) {
-            return temporal.with(WeekendAdjuster).plus(1, WEEKS);
-        } else {
-            return temporal.with(WeekendAdjuster);
-        }
-    };
-
-
     static final TemporalAdjuster NextMorning = Next(MorningAdjuster);
     static final TemporalAdjuster NextAfternoon = Next(AfternoonAdjuster);
     static final TemporalAdjuster NextEvening = Next(EveningAdjuster);
+
+    static final TemporalAdjuster WeekendNotTomorrowMorningAdjuster = NotTomorrowMorning(WeekendAdjuster);
+    static final TemporalAdjuster NextWeekNotTomorrowMorningAdjuster = NotTomorrowMorning(StartOfWeekAdjuster);
+
+
+    /**
+     * Returns an adjuster that is guaranteed to adjust to value that is different to what
+     * {@link #NextMorning} would adjust to.
+     * <p>
+     * If the same adjustment would be made, the adjuster will seek to a week's time.
+     */
+    private static TemporalAdjuster NotTomorrowMorning(final TemporalAdjuster adjuster) {
+        return temporal -> {
+            if (temporal.with(NextMorning).equals(temporal.with(adjuster))) {
+                return temporal.with(adjuster).plus(1, WEEKS);
+            } else {
+                return temporal.with(adjuster);
+            }
+        };
+    }
 
     /**
      * Returns an adjuster that makes the specified adjustment, then ensures it happens in the
@@ -67,6 +76,7 @@ class Adjusters {
      * original temporal, then adjusting. It probably won't work for adjusters that need more fine-
      * grained adjustment than that
      **/
+    @VisibleForTesting
     static TemporalAdjuster Next(final TemporalAdjuster adjuster) {
         return temporal -> {
             final Temporal adjustedTemporal = temporal.with(adjuster);

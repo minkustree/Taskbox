@@ -31,12 +31,11 @@ import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 import static home.westering56.taskbox.Adjusters.NextAfternoon;
 import static home.westering56.taskbox.Adjusters.NextMorning;
 import static home.westering56.taskbox.Adjusters.NextEvening;
+import static home.westering56.taskbox.Adjusters.NextWeekNotTomorrowMorningAdjuster;
 import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
-import static home.westering56.taskbox.Adjusters.TomorrowMorningAdjuster;
 import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 import static home.westering56.taskbox.Adjusters.WeekendNotTomorrowMorningAdjuster;
 import static java.time.DayOfWeek.FRIDAY;
-import static java.time.DayOfWeek.MONDAY;
 import static java.time.temporal.ChronoUnit.WEEKS;
 
 /**
@@ -68,27 +67,27 @@ public class SnoozeOptionProvider {
         ArrayList<Map<String, Object>> options = new ArrayList<>();
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "Tomorrow Morning");
-            put(SNOOZE_OPTION_INSTANT, TomorrowMorningAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, NextMorning.adjustInto(LocalDateTime.now()));
             put(SNOOZE_OPTION_ICON, R.drawable.ic_morning_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Afternoon");
-            put(SNOOZE_OPTION_INSTANT, AfternoonAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, NextAfternoon.adjustInto(LocalDateTime.now()));
             put(SNOOZE_OPTION_ICON, R.drawable.ic_restaurant_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Evening");
-            put(SNOOZE_OPTION_INSTANT, EveningAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, NextEvening.adjustInto(LocalDateTime.now()));
             put(SNOOZE_OPTION_ICON, R.drawable.ic_hot_tub_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "Next Week");
-            put(SNOOZE_OPTION_INSTANT, StartOfWeekAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, NextWeekNotTomorrowMorningAdjuster.adjustInto(LocalDateTime.now()));
             put(SNOOZE_OPTION_ICON, R.drawable.ic_next_week_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
             put(SNOOZE_OPTION_TITLE, "This Weekend");
-            put(SNOOZE_OPTION_INSTANT, WeekendAdjuster.adjustInto(LocalDateTime.now()));
+            put(SNOOZE_OPTION_INSTANT, WeekendNotTomorrowMorningAdjuster.adjustInto(LocalDateTime.now()));
             put(SNOOZE_OPTION_ICON, R.drawable.ic_weekend_black_24dp);
         }});
         options.add(new HashMap<String, Object>() {{
@@ -126,7 +125,7 @@ public class SnoozeOptionProvider {
         Map<String, Object> item = (Map<String, Object>) parent.getItemAtPosition(position);
         return (LocalDateTime) item.get(SNOOZE_OPTION_INSTANT);
     }
-    
+
     static class SnoozeOption {
         static final DateTimeFormatter sToStringFormatter = DateTimeFormatter.ofPattern("E dd-M-yyyy hh:mm");
 
@@ -181,7 +180,7 @@ public class SnoozeOptionProvider {
         results.add(SnoozeOption.of(dateTime, NextAfternoon, R.drawable.ic_restaurant_black_24dp));
         results.add(SnoozeOption.of(dateTime, NextEvening, R.drawable.ic_hot_tub_black_24dp));
         results.add(SnoozeOption.of(dateTime, WeekendNotTomorrowMorningAdjuster, R.drawable.ic_weekend_black_24dp));
-        results.add(SnoozeOption.of(dateTime, StartOfWeekAdjuster, R.drawable.ic_next_week_black_24dp));
+        results.add(SnoozeOption.of(dateTime, NextWeekNotTomorrowMorningAdjuster, R.drawable.ic_next_week_black_24dp));
         Comparator<SnoozeOption> comparator = Comparator.comparing(SnoozeOption::getDateTime);
         Collections.sort(results, comparator);
         return results;
@@ -197,6 +196,9 @@ public class SnoozeOptionProvider {
 
         if (adjuster == WeekendAdjuster || adjuster == WeekendNotTomorrowMorningAdjuster) {
             sb.append(getLabelForWeekend(now, target));
+        }
+        if (adjuster == StartOfWeekAdjuster || adjuster == NextWeekNotTomorrowMorningAdjuster) {
+            sb.append(getLabelForStartOfWeek());
         }
         if (sb.length() == 0) {
             sb.append(getLabelForOptionDateTime(now, target));
@@ -216,21 +218,15 @@ public class SnoozeOptionProvider {
         }
     }
 
+    private static CharSequence getLabelForStartOfWeek() {
+        // For the start of the week, it's almost always 'Next Week'
+        return "Next Week";
+    }
+
 
     private static CharSequence getLabelForOptionDateTime(LocalDateTime now, LocalDateTime target) {
         StringBuilder sb = new StringBuilder();
 
-        // Exception for Next Week
-        if (now.with(StartOfWeekAdjuster).equals(target)) {
-            // pre 9am on Monday
-            if (now.getDayOfWeek() == MONDAY &&
-                    now.toLocalDate().equals(target.toLocalDate()) &&
-                    now.isBefore(target)) {
-                return "This Week";
-            } else {
-                return "Next Week";
-            }
-        }
         // Date part
         final LocalDate nowDate = now.toLocalDate();
         final LocalDate targetDate = target.toLocalDate();
