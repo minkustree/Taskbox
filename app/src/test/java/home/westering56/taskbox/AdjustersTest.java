@@ -52,29 +52,29 @@ public class AdjustersTest {
 
     @Test
     public void testNextGivesNextDayIfOriginalJustAfterTargetTime() {
-        Temporal threeMinsAfterTenAM = LocalDateTime.of(originalDate, tenAmTime.plus(3, MINUTES));
-        assertThat(threeMinsAfterTenAM.with(Next(TenAM)),
+        Temporal threeMinAfterTenAM = LocalDateTime.of(originalDate, tenAmTime.plus(3, MINUTES));
+        assertThat(threeMinAfterTenAM.with(Next(TenAM)),
                 is(equalTo(LocalDateTime.of(originalDate.plus(1, DAYS), tenAmTime))));
     }
 
     @Test
     public void testNextGivesSameDayIfOriginalSignificantlyBeforeTargetTime() {
-        Temporal sevenMinsBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(7, MINUTES);
-        assertThat(sevenMinsBeforeTenAm.with(Next(TenAM)),
+        Temporal sevenMinBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(7, MINUTES);
+        assertThat(sevenMinBeforeTenAm.with(Next(TenAM)),
                 is(equalTo(LocalDateTime.of(originalDate, tenAmTime))));
     }
 
     @Test
     public void testNextGivesNextDayIfOriginalJustBeforeTargetTime() {
-        Temporal twoMinsBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(2, MINUTES);
-        assertThat(twoMinsBeforeTenAm.with(Next(TenAM)),
+        Temporal twoMinBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(2, MINUTES);
+        assertThat(twoMinBeforeTenAm.with(Next(TenAM)),
                 is(equalTo(LocalDateTime.of(originalDate.plus(1, DAYS), tenAmTime))));
     }
 
     @Test
     public void testNextGivesNextDayIfOriginalOnTheBoundaryBeforeTargetTime() {
-        Temporal fiveMinsBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(5, MINUTES);
-        assertThat(fiveMinsBeforeTenAm.with(Next(TenAM)),
+        Temporal fiveMinBeforeTenAm = LocalDateTime.of(originalDate, tenAmTime).minus(5, MINUTES);
+        assertThat(fiveMinBeforeTenAm.with(Next(TenAM)),
                 is(equalTo(LocalDateTime.of(originalDate.plus(1, DAYS), tenAmTime))));
     }
 

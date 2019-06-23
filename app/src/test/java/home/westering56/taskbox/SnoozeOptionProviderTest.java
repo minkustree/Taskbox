@@ -3,27 +3,18 @@ package home.westering56.taskbox;
 import androidx.annotation.DrawableRes;
 import androidx.test.filters.SmallTest;
 
-import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.List;
 
 import home.westering56.taskbox.SnoozeOptionProvider.SnoozeOption;
 
-import static home.westering56.taskbox.Adjusters.NextAfternoon;
-import static home.westering56.taskbox.Adjusters.NextMorning;
-import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
-import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
-import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.temporal.ChronoUnit.HOURS;
@@ -31,7 +22,6 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.time.temporal.ChronoUnit.WEEKS;
 import static java.time.temporal.TemporalAdjusters.next;
-import static java.time.temporal.TemporalAdjusters.nextOrSame;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -56,7 +46,7 @@ public class SnoozeOptionProviderTest {
     private static final @DrawableRes int AFTERNOON_ID = R.drawable.ic_restaurant_black_24dp;
     private static final @DrawableRes int EVENING_ID = R.drawable.ic_hot_tub_black_24dp;
     private static final @DrawableRes int WEEKEND_ID = R.drawable.ic_weekend_black_24dp;
-    private static final @DrawableRes int NEXTWEEK_ID = R.drawable.ic_next_week_black_24dp;
+    private static final @DrawableRes int NEXT_WEEK_ID = R.drawable.ic_next_week_black_24dp;
 
     @Before
     public void initialiseDate() {
@@ -74,7 +64,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -89,7 +79,7 @@ public class SnoozeOptionProviderTest {
             new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
             new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
             new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-            new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+            new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -104,7 +94,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -119,7 +109,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(18).withMinute(0), "Tomorrow Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -134,7 +124,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -149,7 +139,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -168,7 +158,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -184,7 +174,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -199,7 +189,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -215,7 +205,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -230,7 +220,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -245,7 +235,7 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(TUESDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
@@ -268,12 +258,10 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.with(next(FRIDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(FRIDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID)
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
         ))));
     }
 
-
-    // TODO: Should this de-duplicate Tommorrow Morning (Sat, 9am) and 'This Weekend' (Sat, 9am)?
     @Test
     public void expectedTimesForFriday3pm() {
         date = date.withHour(15).with(next(FRIDAY));
@@ -284,19 +272,9 @@ public class SnoozeOptionProviderTest {
                 new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "Tomorrow Morning", MORNING_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(13).withMinute(0), "Tomorrow Afternoon", AFTERNOON_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXTWEEK_ID),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID),
                 new SnoozeOption(date.with(next(SATURDAY)).plus(1, WEEKS).withHour(9).withMinute(0), "Next Weekend", WEEKEND_ID)
         ))));
-//
-//        List<LocalDateTime> options = SnoozeOptionProvider.getOptionsForDate(date);
-//
-//        assertThat(options, IsCollectionWithSize.hasSize(5));
-//
-//        assertThat(options.get(0), equalTo(date.withHour(18).withMinute(0)));
-//        assertThat(options.get(1), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
-//        assertThat(options.get(2), equalTo(date.with(next(SATURDAY)).withHour(9).withMinute(0)));
-//        assertThat(options.get(3), equalTo(date.with(next(SATURDAY)).withHour(13).withMinute(0)));
-//        assertThat(options.get(4), equalTo(date.with(next(MONDAY)).withHour(9).withMinute(0)));
     }
 /*
     @Test

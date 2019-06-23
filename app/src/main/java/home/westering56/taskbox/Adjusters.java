@@ -1,7 +1,5 @@
 package home.westering56.taskbox;
 
-import org.dmfs.rfc5545.Weekday;
-
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
@@ -12,13 +10,12 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.WEEKS;
 import static java.time.temporal.TemporalAdjusters.next;
-import static java.time.temporal.TemporalAdjusters.nextOrSame;
 
 
 class Adjusters {
 
     // times within this tolerance before a target time will be considered to be at the target time
-    private static final long TOLERANCE_MINS = 5;
+    private static final long TOLERANCE_MIN = 5;
 
     private static final TemporalAdjuster TopOfTheHourAdjuster = temporal -> temporal
             .with(ChronoField.MINUTE_OF_HOUR, 0)
@@ -68,13 +65,13 @@ class Adjusters {
      * <p>
      * Note: This implementation ensures things happen in the future by adding at least a day to the
      * original temporal, then adjusting. It probably won't work for adjusters that need more fine-
-     * grained adjustement than that
+     * grained adjustment than that
      **/
     static TemporalAdjuster Next(final TemporalAdjuster adjuster) {
         return temporal -> {
             final Temporal adjustedTemporal = temporal.with(adjuster);
-            // if new time is within 5 mins of the old time, add a day and try again
-            if (MINUTES.between(temporal, adjustedTemporal) <= TOLERANCE_MINS) {
+            // if new time is within 5 min of the old time, add a day and try again
+            if (MINUTES.between(temporal, adjustedTemporal) <= TOLERANCE_MIN) {
                 return temporal.plus(1, DAYS).with(adjuster); // find the next one
             } else {
                 return temporal.with(adjuster);
