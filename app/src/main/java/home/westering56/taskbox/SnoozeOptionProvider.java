@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
@@ -34,9 +35,12 @@ import static home.westering56.taskbox.Adjusters.NextEvening;
 import static home.westering56.taskbox.Adjusters.StartOfWeekAdjuster;
 import static home.westering56.taskbox.Adjusters.TomorrowMorningAdjuster;
 import static home.westering56.taskbox.Adjusters.WeekendAdjuster;
+import static home.westering56.taskbox.Adjusters.WeekendNotTomorrowMorningAdjuster;
+import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
+import static java.time.temporal.ChronoUnit.WEEKS;
 
 /**
  * Provides relevant snooze option choices.
@@ -126,21 +130,21 @@ public class SnoozeOptionProvider {
         return (LocalDateTime) item.get(SNOOZE_OPTION_INSTANT);
     }
 
-    /**
-     * Get the list of snooze options that should be shown for a given date
-     * @param date
-     * @return
-     */
-    public static List<LocalDateTime> getOptionsForDate(LocalDateTime date) {
-        ArrayList<LocalDateTime> results = new ArrayList<>();
-        results.add(date.with(NextMorning));
-        results.add(date.with(NextAfternoon));
-        results.add(date.with(NextEvening));
-        results.add(date.with(WeekendAdjuster));
-        results.add(date.with(StartOfWeekAdjuster));
-        Collections.sort(results);
-        return results;
-    }
+//    /**
+//     * Get the list of snooze options that should be shown for a given date
+//     * @param date
+//     * @return
+//     */
+//    public static List<LocalDateTime> getOptionsForDate(LocalDateTime date) {
+//        ArrayList<LocalDateTime> results = new ArrayList<>();
+//        results.add(date.with(NextMorning));
+//        results.add(date.with(NextAfternoon));
+//        results.add(date.with(NextEvening));
+//        results.add(date.with(WeekendAdjuster));
+//        results.add(date.with(StartOfWeekAdjuster));
+//        Collections.sort(results);
+//        return results;
+//    }
 
     static class SnoozeOption {
         static DateTimeFormatter sToStringFormatter = DateTimeFormatter.ofPattern("E dd-M-yyyy hh:mm");
@@ -157,7 +161,7 @@ public class SnoozeOptionProvider {
 
         public static SnoozeOption of(@NonNull LocalDateTime now, @NonNull TemporalAdjuster adjuster, @DrawableRes int drawableId) {
             final LocalDateTime target = now.with(adjuster);
-            return new SnoozeOption(target, getLabelForOptionDateTime(now, target), drawableId);
+            return new SnoozeOption(target, getLabelForAdjuster(now, adjuster), drawableId);
         }
 
         @Override
@@ -195,30 +199,57 @@ public class SnoozeOptionProvider {
         results.add(SnoozeOption.of(dateTime, NextMorning, R.drawable.ic_morning_24dp));
         results.add(SnoozeOption.of(dateTime, NextAfternoon, R.drawable.ic_restaurant_black_24dp));
         results.add(SnoozeOption.of(dateTime, NextEvening, R.drawable.ic_hot_tub_black_24dp));
-        results.add(SnoozeOption.of(dateTime, WeekendAdjuster, R.drawable.ic_weekend_black_24dp));
+        results.add(SnoozeOption.of(dateTime, WeekendNotTomorrowMorningAdjuster, R.drawable.ic_weekend_black_24dp));
         results.add(SnoozeOption.of(dateTime, StartOfWeekAdjuster, R.drawable.ic_next_week_black_24dp));
         Comparator<SnoozeOption> comparator = Comparator.comparing(SnoozeOption::getDateTime);
         Collections.sort(results, comparator);
         return results;
     }
 
+    private static boolean isWeekday(LocalDateTime date) {
+        return date.getDayOfWeek().getValue() <= FRIDAY.getValue();
+    }
+
+    public static CharSequence getLabelForAdjuster(@NonNull LocalDateTime now, @NonNull TemporalAdjuster adjuster) {
+        final LocalDateTime target = now.with(adjuster);
+        StringBuilder sb = new StringBuilder();
+
+        if (adjuster == WeekendAdjuster || adjuster == WeekendNotTomorrowMorningAdjuster) {
+            // For weekdays the coming weekend is always 'this weekend', any weekend after is 'next weekend'
+            // If we're before 9am on Saturday, it's also 'this weekend'
+            // otherwise, it's 'next weekend'
+
+            if ((isWeekday(now) && WEEKS.between(now, target) < 1) ||
+                    (now.toLocalDate().equals(target.toLocalDate()) && now.isBefore(target))) {
+                sb.append("This");
+            } else {
+                sb.append("Next");
+            }
+            sb.append(" Weekend");
+        }
+        if (sb.length() == 0) {
+            sb.append(getLabelForOptionDateTime(now, target));
+        }
+        return sb.toString();
+    }
+
     public static CharSequence getLabelForOptionDateTime(LocalDateTime now, LocalDateTime target) {
         StringBuilder sb = new StringBuilder();
 
-        // Exception for weekend
-        if (now.with(WeekendAdjuster).equals(target)) {
-            if (now.getDayOfWeek() == SATURDAY || now.getDayOfWeek() == SUNDAY) {
-                // if we're before 9am on Sat, then it's "This Weekend"
-                if (now.toLocalDate().equals(target.toLocalDate()) && now.isBefore(target)) {
-                    return "This Weekend";
-                }
-                else { // if we're after 9am on Sat, Sun then it's "Next Weekend"
-                    return "Next Weekend";
-                }
-            }
-            // For every other day of the week, it's this weekend
-            return "This Weekend";
-        }
+//        // Exception for weekend
+//        if (now.with(WeekendAdjuster).equals(target)) {
+//            if (now.getDayOfWeek() == SATURDAY || now.getDayOfWeek() == SUNDAY) {
+//                // if we're before 9am on Sat, then it's "This Weekend"
+//                if (now.toLocalDate().equals(target.toLocalDate()) && now.isBefore(target)) {
+//                    return "This Weekend";
+//                }
+//                else { // if we're after 9am on Sat, Sun then it's "Next Weekend"
+//                    return "Next Weekend";
+//                }
+//            }
+//            // For every other day of the week, it's this weekend
+//            return "This Weekend";
+//        }
 
         // Exception for Next Week
         if (now.with(StartOfWeekAdjuster).equals(target)) {

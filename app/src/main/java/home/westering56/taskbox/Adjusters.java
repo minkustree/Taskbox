@@ -1,5 +1,7 @@
 package home.westering56.taskbox;
 
+import org.dmfs.rfc5545.Weekday;
+
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
@@ -8,6 +10,7 @@ import java.time.temporal.TemporalAdjuster;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.WEEKS;
 import static java.time.temporal.TemporalAdjusters.next;
 import static java.time.temporal.TemporalAdjusters.nextOrSame;
 
@@ -42,10 +45,16 @@ class Adjusters {
             .with(next(DayOfWeek.MONDAY))
             .with(MorningAdjuster);
 
-    static final TemporalAdjuster WeekendAdjuster = temporal -> {
-       return temporal
-                .with(next(DayOfWeek.SATURDAY))
-                .with(MorningAdjuster);
+    static final TemporalAdjuster WeekendAdjuster = temporal -> temporal
+             .with(next(DayOfWeek.SATURDAY))
+             .with(MorningAdjuster);
+
+    static final TemporalAdjuster WeekendNotTomorrowMorningAdjuster = temporal -> {
+        if (temporal.with(TomorrowMorningAdjuster).equals(temporal.with(WeekendAdjuster))) {
+            return temporal.with(WeekendAdjuster).plus(1, WEEKS);
+        } else {
+            return temporal.with(WeekendAdjuster);
+        }
     };
 
 
