@@ -1,6 +1,5 @@
 package home.westering56.taskbox;
 
-import androidx.annotation.DrawableRes;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -12,6 +11,11 @@ import java.util.List;
 
 import home.westering56.taskbox.SnoozeOptionProvider.SnoozeOption;
 
+import static home.westering56.taskbox.SnoozeOptionProvider.AFTERNOON_ID;
+import static home.westering56.taskbox.SnoozeOptionProvider.EVENING_ID;
+import static home.westering56.taskbox.SnoozeOptionProvider.MORNING_ID;
+import static home.westering56.taskbox.SnoozeOptionProvider.NEXT_WEEK_ID;
+import static home.westering56.taskbox.SnoozeOptionProvider.WEEKEND_ID;
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
@@ -31,11 +35,6 @@ import static org.hamcrest.MatcherAssert.*;
 @SmallTest
 public class SnoozeOptionProviderTest {
 
-    private static final @DrawableRes int MORNING_ID = R.drawable.ic_morning_24dp;
-    private static final @DrawableRes int AFTERNOON_ID = R.drawable.ic_restaurant_black_24dp;
-    private static final @DrawableRes int EVENING_ID = R.drawable.ic_hot_tub_black_24dp;
-    private static final @DrawableRes int WEEKEND_ID = R.drawable.ic_weekend_black_24dp;
-    private static final @DrawableRes int NEXT_WEEK_ID = R.drawable.ic_next_week_black_24dp;
 
     private static final CharSequence THIS_MORNING = "This Morning";
     private static final CharSequence TOMORROW_MORNING = "Tomorrow Morning";

@@ -27,7 +27,7 @@ public class RepeatedTaskFormatterTest {
     private Context mContext;
 
     @Before
-    public void getContext() {
+    public void initContext() {
         mContext = ApplicationProvider.getApplicationContext();
     }
 

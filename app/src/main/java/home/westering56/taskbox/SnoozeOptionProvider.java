@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
 
@@ -42,9 +43,16 @@ import static java.time.temporal.ChronoUnit.WEEKS;
  * Provides relevant snooze option choices.
  */
 public class SnoozeOptionProvider {
-    private static final String SNOOZE_OPTION_TITLE = "option_title";
-    private static final String SNOOZE_OPTION_INSTANT = "option_instant";
-    private static final String SNOOZE_OPTION_ICON = "option_icon";
+
+    @VisibleForTesting static final @DrawableRes int MORNING_ID = R.drawable.ic_morning_24dp;
+    @VisibleForTesting static final @DrawableRes int AFTERNOON_ID = R.drawable.ic_restaurant_black_24dp;
+    @VisibleForTesting static final @DrawableRes int EVENING_ID = R.drawable.ic_hot_tub_black_24dp;
+    @VisibleForTesting static final @DrawableRes int WEEKEND_ID = R.drawable.ic_weekend_black_24dp;
+    @VisibleForTesting static final @DrawableRes int NEXT_WEEK_ID = R.drawable.ic_next_week_black_24dp;
+
+    @VisibleForTesting static final String SNOOZE_OPTION_TITLE = "option_title";
+    @VisibleForTesting static final String SNOOZE_OPTION_INSTANT = "option_instant";
+    @VisibleForTesting static final String SNOOZE_OPTION_ICON = "option_icon";
 
     private final List<Map<String, Object>> snoozeOptions;
     private SimpleAdapter mAdapter;
@@ -159,6 +167,7 @@ public class SnoozeOptionProvider {
             return Objects.hash(dateTime, label, drawableId);
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public String toString() {
             return "SnoozeOption{" +
