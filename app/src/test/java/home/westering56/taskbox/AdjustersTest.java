@@ -12,15 +12,21 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 
+import static home.westering56.taskbox.Adjusters.MorningAdjuster;
 import static home.westering56.taskbox.Adjusters.Next;
+import static home.westering56.taskbox.Adjusters.NextAfternoon;
+import static home.westering56.taskbox.Adjusters.NextMorning;
+import static home.westering56.taskbox.Adjusters.NotTomorrowMorning;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.WEEKS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SmallTest
@@ -81,4 +87,20 @@ public class AdjustersTest {
                 is(equalTo(LocalDateTime.of(originalDate.plus(1, DAYS), tenAmTime))));
     }
 
+    @Test
+    public void testNotTomorrowMorningAddsAWeekIfItWouldCollideWithNextMorning() {
+        // Without NotTomorrowMorning, the two would be the same
+        assertThat(original.with(NextMorning), is(equalTo(original.with(MorningAdjuster))));
+        // With NotTomorrowMorning, the two differ by one week
+        assertThat(original.with(NotTomorrowMorning(NextMorning)),
+                is(equalTo(original.with(MorningAdjuster).plus(1, WEEKS))));
+    }
+
+    @Test
+    public void testNotTomorrowMorningPassesThroughNonCollidingCases() {
+        // Without NotTomorrowMorning, the two are different
+        assertThat(original.with(NextAfternoon), is(not(equalTo(original.with(MorningAdjuster)))));
+        // In this case, NotTomorrowMorning has no effect
+        assertThat(original.with(NotTomorrowMorning(NextAfternoon)), is(equalTo(original.with(NextAfternoon))));
+    }
 }

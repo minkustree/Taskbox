@@ -58,7 +58,8 @@ class Adjusters {
      * <p>
      * If the same adjustment would be made, the adjuster will seek to a week's time.
      */
-    private static TemporalAdjuster NotTomorrowMorning(final TemporalAdjuster adjuster) {
+    @VisibleForTesting
+    static TemporalAdjuster NotTomorrowMorning(final TemporalAdjuster adjuster) {
         return temporal -> {
             if (temporal.with(NextMorning).equals(temporal.with(adjuster))) {
                 return temporal.with(adjuster).plus(1, WEEKS);
