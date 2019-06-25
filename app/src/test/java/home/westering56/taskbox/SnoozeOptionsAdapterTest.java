@@ -24,7 +24,7 @@ import static home.westering56.taskbox.SnoozeOptionProvider.EVENING_ID;
 import static home.westering56.taskbox.SnoozeOptionProvider.MORNING_ID;
 import static home.westering56.taskbox.SnoozeOptionProvider.NEXT_WEEK_ID;
 import static home.westering56.taskbox.SnoozeOptionProvider.SNOOZE_OPTION_ICON;
-import static home.westering56.taskbox.SnoozeOptionProvider.SNOOZE_OPTION_INSTANT;
+import static home.westering56.taskbox.SnoozeOptionProvider.SNOOZE_OPTION_DATETIME;
 import static home.westering56.taskbox.SnoozeOptionProvider.SNOOZE_OPTION_TITLE;
 import static home.westering56.taskbox.SnoozeOptionProvider.WEEKEND_ID;
 import static java.time.DayOfWeek.MONDAY;
@@ -60,15 +60,5 @@ public class SnoozeOptionsAdapterTest {
         for (int i = 0; i < expected.size(); i++) {
             assertThat(adapter.getItem(i), is(equalTo(expected.get(i))));
         }
-    }
-
-    private void assertEqual(Map<String, Object> adapterItem, SnoozeOption snoozeOption) {
-        assertThat(adapterItem.get(SNOOZE_OPTION_TITLE), is(equalTo(snoozeOption.label)));
-        assertThat(adapterItem.get(SNOOZE_OPTION_ICON), is(snoozeOption.drawableId));
-        assertThat(adapterItem.get(SNOOZE_OPTION_INSTANT), is(equalTo(InstantOf(snoozeOption.dateTime))));
-    }
-
-    private static Instant InstantOf(LocalDateTime localDateTime) {
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 }
