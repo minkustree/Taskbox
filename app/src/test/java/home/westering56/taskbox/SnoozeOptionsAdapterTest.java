@@ -47,18 +47,18 @@ public class SnoozeOptionsAdapterTest {
     public void testAdapterHasGoodValuesFor8amMonday() {
         LocalDateTime date = LocalDateTime.now().withHour(8).with(next(MONDAY));
 
-        List<SnoozeOption> expected = Arrays.asList(
-                new SnoozeOption(date.withHour(9).withMinute(0), "This Morning", MORNING_ID),
-                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID),
-                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID),
-                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID),
-                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID)
+        List<Map<String, Object>> expected = Arrays.asList(
+                new SnoozeOption(date.withHour(9).withMinute(0), "This Morning", MORNING_ID).asMap(),
+                new SnoozeOption(date.withHour(13).withMinute(0), "This Afternoon", AFTERNOON_ID).asMap(),
+                new SnoozeOption(date.withHour(18).withMinute(0), "This Evening", EVENING_ID).asMap(),
+                new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID).asMap(),
+                new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID).asMap()
         );
         SimpleAdapter adapter = SnoozeOptionProvider.newAdapter(mContext);
+
         assertThat(adapter.getCount(), is(equalTo(expected.size())));
         for (int i = 0; i < expected.size(); i++) {
-            //noinspection unchecked
-            assertEqual((Map<String, Object>) adapter.getItem(i), expected.get(i));
+            assertThat(adapter.getItem(i), is(equalTo(expected.get(i))));
         }
     }
 
