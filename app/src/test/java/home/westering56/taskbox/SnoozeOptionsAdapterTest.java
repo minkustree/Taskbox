@@ -25,7 +25,10 @@ import static home.westering56.taskbox.SnoozeOptionProvider.NEXT_WEEK_ID;
 import static home.westering56.taskbox.SnoozeOptionProvider.WEEKEND_ID;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.time.temporal.TemporalAdjusters.next;
+import static org.exparity.hamcrest.date.LocalDateTimeMatchers.within;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,8 +43,15 @@ public class SnoozeOptionsAdapterTest {
     }
 
     @Test
+    public void testPrivateConstructorSetsDefaultDateTimeIfNoneProvided() {
+        SnoozeOptionProvider provider = new SnoozeOptionProvider(null);
+        // 1 SECOND == 1000 ms should be generous enough for even the slowest of test runners?
+        assertThat(provider.getNow(), is(within(1, SECONDS, LocalDateTime.now())));
+    }
+
+    @Test
     public void testAdapterHasGoodValuesFor8amMonday() {
-        LocalDateTime date = LocalDateTime.now().withHour(8).with(next(MONDAY));
+        LocalDateTime date = LocalDateTime.now().withHour(8).with(next(MONDAY)).truncatedTo(HOURS);
 
         List<Map<String, Object>> expected = Arrays.asList(
                 new SnoozeOption(date.withHour(9).withMinute(0), "This Morning", MORNING_ID).asMap(),
@@ -50,7 +60,7 @@ public class SnoozeOptionsAdapterTest {
                 new SnoozeOption(date.with(next(SATURDAY)).withHour(9).withMinute(0), "This Weekend", WEEKEND_ID).asMap(),
                 new SnoozeOption(date.with(next(MONDAY)).withHour(9).withMinute(0), "Next Week", NEXT_WEEK_ID).asMap()
         );
-        SimpleAdapter adapter = SnoozeOptionProvider.newAdapter(mContext);
+        SimpleAdapter adapter = (new SnoozeOptionProvider(date)).getAdapter(mContext);
 
         assertThat(adapter.getCount(), is(equalTo(expected.size())));
         ArrayList<Map<String, Object>> actual = new ArrayList<>();
@@ -60,4 +70,6 @@ public class SnoozeOptionsAdapterTest {
         }
         assertThat(actual, is(equalTo(expected)));
     }
+
+    // TODO: Test for what happens as time ticks over between adapters?
 }

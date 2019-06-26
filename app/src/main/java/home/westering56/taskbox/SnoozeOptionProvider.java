@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import home.westering56.taskbox.formatter.SnoozeTimeFormatter;
@@ -50,11 +51,12 @@ public class SnoozeOptionProvider {
     @VisibleForTesting static final @DrawableRes int WEEKEND_ID = R.drawable.ic_weekend_black_24dp;
     @VisibleForTesting static final @DrawableRes int NEXT_WEEK_ID = R.drawable.ic_next_week_black_24dp;
 
-    @VisibleForTesting static final String SNOOZE_OPTION_TITLE = "option_title";
-    @VisibleForTesting static final String SNOOZE_OPTION_DATETIME = "option_datetime";
-    @VisibleForTesting static final String SNOOZE_OPTION_ICON = "option_icon";
+    private static final String SNOOZE_OPTION_TITLE = "option_title";
+    private static final String SNOOZE_OPTION_DATETIME = "option_datetime";
+    private static final String SNOOZE_OPTION_ICON = "option_icon";
 
     private final List<Map<String, Object>> snoozeOptions;
+    private final @Nullable LocalDateTime mNow;
     private SimpleAdapter mAdapter;
 
     /**
@@ -63,13 +65,20 @@ public class SnoozeOptionProvider {
      * of snooze time options.
      */
     public static SimpleAdapter newAdapter(@NonNull Context context) {
-        return new SnoozeOptionProvider().getAdapter(context);
+        return new SnoozeOptionProvider(null).getAdapter(context);
     }
 
-    private SnoozeOptionProvider() {
-        snoozeOptions = initSnoozeOptions(LocalDateTime.now());
+    @VisibleForTesting
+    SnoozeOptionProvider(@Nullable LocalDateTime now) {
+        mNow = now != null ? now : LocalDateTime.now();
+        snoozeOptions = initSnoozeOptions(mNow);
     }
 
+    @VisibleForTesting
+    @Nullable
+    LocalDateTime getNow() {
+        return mNow;
+    }
 
     private ArrayList<Map<String, Object>> initSnoozeOptions(LocalDateTime now) {
         ArrayList<Map<String, Object>> optionAsMaps = new ArrayList<>();
@@ -110,7 +119,8 @@ public class SnoozeOptionProvider {
         return optionAsMaps;
     }
 
-    private SimpleAdapter getAdapter(@NonNull Context context) {
+    @VisibleForTesting
+    SimpleAdapter getAdapter(@NonNull Context context) {
         synchronized (this) {
             if (mAdapter == null) {
                 mAdapter = new SimpleAdapter(
