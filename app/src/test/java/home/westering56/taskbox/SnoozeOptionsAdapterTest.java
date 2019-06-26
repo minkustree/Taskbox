@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +53,11 @@ public class SnoozeOptionsAdapterTest {
         SimpleAdapter adapter = SnoozeOptionProvider.newAdapter(mContext);
 
         assertThat(adapter.getCount(), is(equalTo(expected.size())));
+        ArrayList<Map<String, Object>> actual = new ArrayList<>();
         for (int i = 0; i < expected.size(); i++) {
-            assertThat(adapter.getItem(i), is(equalTo(expected.get(i))));
+            //noinspection unchecked
+            actual.add((Map<String, Object>) adapter.getItem(i));
         }
+        assertThat(actual, is(equalTo(expected)));
     }
 }
