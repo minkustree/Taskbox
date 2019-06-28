@@ -24,7 +24,14 @@ public class SnoozeTimeFormatter {
     private static final DateTimeFormatter sTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
     public static CharSequence format(final Context context, Temporal target) {
-        return formatDate(context, LocalDate.from(target)) + ", " + formatTime(LocalTime.from(target));
+        final LocalDate targetDate = LocalDate.from(target);
+        final LocalTime targetTime = LocalTime.from(target);
+        if (LocalDate.now().equals(targetDate)) {
+            // For target dates of today, only show the time - the date is implicit
+            return formatTime(targetTime);
+        } else {
+            return formatDate(context, targetDate) + ", " + formatTime(targetTime);
+        }
     }
 
     /** Converts the instant to a local date time in the default time zone, and then formats it */
