@@ -5,6 +5,7 @@
     android:layout_height="?listPreferredItemHeightLarge"
     android:gravity="center"
     android:orientation="vertical"
+    android:textAlignment="center"
     android:paddingStart="?listPreferredItemPaddingStart"
     android:paddingEnd="?listPreferredItemPaddingEnd">
 
@@ -20,14 +21,16 @@
         android:id="@+id/snooze_option_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textAlignment="inherit"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-        tools:text="Tomorrow" />
+        tools:text="Tomorrow Afternoon" />
 
     <TextView
         android:id="@+id/snooze_option_item_detail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:enabled="false"
+        android:textAlignment="inherit"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
         tools:text="Tue, 9 AM" />
 </LinearLayout>
